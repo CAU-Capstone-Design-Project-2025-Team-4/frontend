@@ -29,11 +29,12 @@ export class ElementRef {
 </script>
 
 <script setup lang="ts">
-import { instanceOfShapeRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
 import { computed } from 'vue';
 import Shape from '@/components/design/objects/Shape.vue';
 import TextBox from '@/components/design/objects/TextBox.vue';
+import Image from './objects/Image.vue';
 
 const { element, ratio } = defineProps<{
     element: ElementRef,
@@ -53,5 +54,6 @@ const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
     }">
         <Shape v-if="instanceOfShapeRef(element.objectRef)" :element="element" />
         <TextBox v-if="instanceOfTextBoxRef(element.objectRef)" :element="element" />
+        <Image v-if="instanceOfImageRef(element.objectRef)" :element="element" />
     </div>
 </template>
