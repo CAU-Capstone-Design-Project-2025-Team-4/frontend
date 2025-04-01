@@ -16,6 +16,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@iconify-json/material-symbols": "^1.2.17",
     "@iconify-json/mdi": "^1.2.3",
     "@types/node": "^22.13.16",
     "@unocss/preset-icons": "^66.1.0-beta.8",
