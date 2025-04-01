@@ -1,7 +1,8 @@
 export interface ObjectRef {}
 
 export interface ShapeRef extends ObjectRef {
-    shape: String
+    path: string,
+    color: string,
 }
 
 export interface TextBoxRef extends ObjectRef {
@@ -9,7 +10,7 @@ export interface TextBoxRef extends ObjectRef {
 }
 
 export function instanceOfShapeRef(ref: ObjectRef): ref is ShapeRef {
-    return 'shape' in ref;
+    return 'path' in ref;
 }
 
 export function instanceOfTextBoxRef(ref: ObjectRef): ref is TextBoxRef {
