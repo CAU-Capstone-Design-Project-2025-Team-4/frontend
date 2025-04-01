@@ -1,11 +1,34 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from 'vue';
+import Canvas from '@/components/design/Canvas.vue';
 
 const position = ref<Vector2>(Vector2.ZERO);
 const scale = ref<number>(1);
 const size = ref<Vector2>(new Vector2(1920, 1080));
+
+function toScreenSpace(v: Vector2): Vector2 {
+    return Vector2.Mult(v, scale.value);
+}
+
+function toCanvasSpace(v: Vector2): Vector2 {
+    return Vector2.Mult(v, 1 / scale.value);
+}
+
+function toScreenPoint(point: Vector2): Vector2 {
+    return toScreenSpace(point).add(position.value);
+}
+
+defineExpose({
+    position,
+    scale,
+    size,
+    toScreenSpace,
+    toCanvasSpace,
+    toScreenPoint
+});
+
 
 const container = useTemplateRef<HTMLElement>('container');
 let containerRect: DOMRect;
@@ -60,6 +83,8 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
     container.value?.removeEventListener('wheel', scaleByWheel);
 });
+
+provide<boolean>('handleable', true);
 </script>
 
 <template>
@@ -70,7 +95,7 @@ onBeforeUnmount(() => {
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <div class="w-full h-full bg-white"></div>
+            <Canvas />
         </div>
     </div>
 

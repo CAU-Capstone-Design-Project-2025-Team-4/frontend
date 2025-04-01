@@ -1,0 +1,54 @@
+<script lang="ts">
+export class ElementRef {
+    id: number;
+    position: Vector2;
+    rotation: number;
+    size: Vector2;
+    z: number;
+    objectRef: ObjectRef;
+
+    static tempId: number = 0;
+    constructor(position: Vector2, rotation: number, size: Vector2, z: number, objectRef: ObjectRef) {
+        this.id = ElementRef.tempId++;
+        this.position = position;
+        this.rotation = rotation;
+        this.size = size;
+        this.z = z;
+        this.objectRef = objectRef;
+    }
+
+    getBoundingRect(): { left: number, right: number, top: number, bottom: number } {
+        return {
+            left: this.position.x,
+            right: this.position.x + this.size.x,
+            top: this.position.y,
+            bottom: this.position.y + this.size.y
+        }
+    }
+}
+</script>
+
+<script setup lang="ts">
+import type { ObjectRef } from '@/types/ObjectRef';
+import Vector2 from '@/types/Vector2';
+import { computed } from 'vue';
+
+const { element, ratio } = defineProps<{
+    element: ElementRef,
+    ratio: number
+}>();
+
+const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
+</script>
+
+<template>
+    <div class="absolute" :style="{
+        transformOrigin: 'left top',
+        transform: `translate(${position.x}px, ${position.y}px) scale(${ratio})`,
+        width: `${element.size.x}px`,
+        height: `${element.size.y}px`,
+        zIndex: `${element.z}`
+    }">
+        <div class="w-full h-full bg-slate-400"></div>
+    </div>
+</template>
