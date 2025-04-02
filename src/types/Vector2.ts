@@ -63,6 +63,15 @@ export default class Vector2 {
         return Math.atan2(this.y, this.x);
     }
 
+    rotate(angle: number): Vector2 {
+        console.log(this.x, this.y)
+        const x = this.x;
+        this.x = this.x * Math.cos(angle) - this.y * Math.sin(angle);
+        console.log(x, this.x)
+        this.y = x * Math.sin(angle) + this.y * Math.cos(angle);
+        return this;
+    }
+
     apply(x: number, y: number): Vector2 {
         this.x = x;
         this.y = y;

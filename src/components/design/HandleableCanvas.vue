@@ -17,7 +17,7 @@ function toScreenSpace(v: Vector2): Vector2 {
 }
 
 function toCanvasSpace(v: Vector2): Vector2 {
-    return Vector2.Mult(v, 1 / scale.value);
+    return Vector2.Div(v, scale.value);
 }
 
 function toCanvasPoint(point: Vector2): Vector2 {
@@ -58,7 +58,7 @@ function handleResize() {
     }
 }
 
-const MAX_ZOOM = 5, MIN_ZOOM = 0.2;
+const MAX_ZOOM = 5, MIN_ZOOM = 0.25;
 function scaleByWheel(e: WheelEvent) {
     if (!e.ctrlKey) return;
     e.preventDefault();

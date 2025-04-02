@@ -18,11 +18,19 @@ export class ElementRef {
     }
 
     getBoundingRect(): { left: number, right: number, top: number, bottom: number } {
+        const { x: w, y: h } = this.size;
+        const angle = this.rotation / 180 * Math.PI;
+        const width = Math.abs(w * Math.cos(angle)) + Math.abs(h * Math.sin(angle));
+        const height = Math.abs(w * Math.sin(angle)) + Math.abs(h * Math.cos(angle));
+
+        const paddingX = (width - w) / 2;
+        const paddingY = (height - h) / 2;
+
         return {
-            left: this.position.x,
-            right: this.position.x + this.size.x,
-            top: this.position.y,
-            bottom: this.position.y + this.size.y
+            left: this.position.x - paddingX,
+            right: this.position.x - paddingX + width,
+            top: this.position.y - paddingY,
+            bottom: this.position.y - paddingY + height
         }
     }
 }
@@ -43,6 +51,7 @@ const { element, ratio } = defineProps<{
 }>();
 
 const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
+const center = computed<Vector2>(() => Vector2.Mult(element.size, -ratio / 2));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
@@ -71,10 +80,10 @@ onBeforeUnmount(() => {
 <template>
     <div ref="element" class="absolute" :style="{
         transformOrigin: 'left top',
-        transform: `translate(${position.x}px, ${position.y}px) scale(${ratio})`,
+        transform: `translate(${position.x - center.x}px, ${position.y - center.y}px) rotate(${element.rotation}deg) translate(${center.x}px, ${center.y}px)  scale(${ratio})`,
         width: `${element.size.x}px`,
         height: `${element.size.y}px`,
-        zIndex: `${element.z}`
+        zIndex: `${element.z}`,
     }">
         <Shape v-if="instanceOfShapeRef(element.objectRef)" :element="element" />
         <TextBox v-if="instanceOfTextBoxRef(element.objectRef)" :element="element" />

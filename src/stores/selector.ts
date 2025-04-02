@@ -25,5 +25,5 @@ export const useSelectorStore = defineStore('selector', () => {
         selection.value.length = 0;
     }
 
-    return { selection, isSelected, isDragSelecting, select, deselect, deselectAll };
+    return { selection, idSelection, isSelected, isDragSelecting, select, deselect, deselectAll };
 })

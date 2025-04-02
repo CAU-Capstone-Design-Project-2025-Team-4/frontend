@@ -7,15 +7,18 @@ interface DraggableOptions {
     stop?: boolean
 }
 
-export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, button: number, onMove: (delta: Vector2) => void, options?: DraggableOptions) {
+let isDraggingOthers: boolean = false;
+export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, button: number, onMove: (delta: Vector2, start?: Vector2) => void, options?: DraggableOptions) {
     // const delta = ref<Vector2>(Vector2.ZERO);
     let lastPoint: Vector2 = Vector2.ZERO;
     let currentPoint: Vector2 = Vector2.ZERO;
     let isDragging = false;
     function start(e: PointerEvent) {
+        if (isDraggingOthers) return;
         if (e.buttons != button) return;
         e.preventDefault();
         if (options?.stop) e.stopPropagation();
+        isDraggingOthers = true;
 
         document.body.style.cursor = options?.cursor ?? 'auto';
 
@@ -35,7 +38,7 @@ export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, b
         document.body.style.cursor = options?.cursor ?? 'auto';
         
         currentPoint = Vector2.PointFrom(e);
-        onMove(Vector2.Sub(currentPoint, lastPoint));
+        onMove(Vector2.Sub(currentPoint, lastPoint), currentPoint);
 
         lastPoint = currentPoint;
     }
@@ -43,6 +46,7 @@ export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, b
     function end(e: PointerEvent) {
         if (!isDragging) return;
 
+        isDraggingOthers = false;
         document.body.style.cursor = 'auto';
         isDragging = false;
     }
