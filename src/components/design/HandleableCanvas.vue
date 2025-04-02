@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
+import Handler from '@/components/design/Handler.vue';
+import { useDesignStore } from '@/stores/design';
 
 const position = ref<Vector2>(Vector2.ZERO);
 const scale = ref<number>(1);
@@ -74,7 +76,7 @@ useDraggable(container, 4, (delta) => {
 }, { cursor: 'move' });
 
 onMounted(() => {
-    handleResize();
+    nextTick(() => handleResize());
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
 })
@@ -83,6 +85,8 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
     container.value?.removeEventListener('wheel', scaleByWheel);
 });
+
+const design = useDesignStore();
 
 provide<boolean>('handleable', true);
 </script>
@@ -95,7 +99,8 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas />
+            <Canvas :slide="design.currentSlide" />
+            <Handler />
         </div>
     </div>
 
