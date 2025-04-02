@@ -15,9 +15,13 @@ export const useSelectorStore = defineStore('selector', () => {
         selection.value.push(element);
     }
 
+    function setSelection(elements: ElementRef[]) {
+        selection.value = elements;
+    }
+    
     function deselectAll() {
         selection.value.length = 0;
     }
 
-    return { selection, isSelected, select, deselectAll };
+    return { selection, isSelected, select, setSelection, deselectAll };
 })

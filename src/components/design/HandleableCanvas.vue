@@ -6,6 +6,7 @@ import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
+import DragBox from '@/components/design/DragBox.vue';
 
 const position = ref<Vector2>(Vector2.ZERO);
 const scale = ref<number>(1);
@@ -19,6 +20,10 @@ function toCanvasSpace(v: Vector2): Vector2 {
     return Vector2.Mult(v, 1 / scale.value);
 }
 
+function toCanvasPoint(point: Vector2): Vector2 {
+    return toCanvasSpace(Vector2.Sub(point, position.value).sub(new Vector2(containerRect.x, containerRect.y)));
+}
+
 function toScreenPoint(point: Vector2): Vector2 {
     return toScreenSpace(point).add(position.value);
 }
@@ -29,7 +34,8 @@ defineExpose({
     size,
     toScreenSpace,
     toCanvasSpace,
-    toScreenPoint
+    toScreenPoint,
+    toCanvasPoint
 });
 
 
@@ -77,9 +83,9 @@ useDraggable(container, 4, (delta) => {
 }, { cursor: 'move' });
 
 onMounted(() => {
-    nextTick(() => handleResize());
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
+    nextTick(() => handleResize());
 })
 
 onBeforeUnmount(() => {
@@ -104,6 +110,7 @@ provide<boolean>('handleable', true);
             <Canvas :slide="design.currentSlide" @pointerdown.left="selector.deselectAll()" />
         </div>
         <Handler />
+        <DragBox :container="container" />
     </div>
 
 </template>

@@ -93,6 +93,13 @@ export default class Vector2 {
         return new Vector2(e.clientX, e.clientY);
     }
 
+    static PositionFrom(e: HTMLElement | null): Vector2 {
+        if (e == null) return Vector2.ZERO;
+        
+        const rect = e.getBoundingClientRect();
+        return new Vector2(rect.x, rect.y);
+    }
+
     static ZERO: Vector2  = new Vector2(0, 0);
     static UP: Vector2    = new Vector2(0, -1);
     static DOWN: Vector2  = new Vector2(0, 1);
