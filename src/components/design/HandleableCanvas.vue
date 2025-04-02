@@ -5,6 +5,7 @@ import { nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef } fr
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
+import { useSelectorStore } from '@/stores/selector';
 
 const position = ref<Vector2>(Vector2.ZERO);
 const scale = ref<number>(1);
@@ -87,6 +88,7 @@ onBeforeUnmount(() => {
 });
 
 const design = useDesignStore();
+const selector = useSelectorStore();
 
 provide<boolean>('handleable', true);
 </script>
@@ -99,7 +101,7 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" />
+            <Canvas :slide="design.currentSlide" @pointerdown.left="selector.deselectAll()" />
             <Handler />
         </div>
     </div>

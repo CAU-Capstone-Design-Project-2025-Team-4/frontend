@@ -31,10 +31,11 @@ export class ElementRef {
 <script setup lang="ts">
 import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
-import { computed } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import Shape from '@/components/design/objects/Shape.vue';
 import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
+import { useSelectorStore } from '@/stores/selector';
 
 const { element, ratio } = defineProps<{
     element: ElementRef,
@@ -42,10 +43,33 @@ const { element, ratio } = defineProps<{
 }>();
 
 const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
+
+const elementDiv = useTemplateRef<HTMLElement>('element');
+const handleable = inject<boolean>('handleable', false);
+
+const selector = useSelectorStore();
+function select(e: PointerEvent) {
+    e.stopPropagation();
+    if (e.button != 0) return
+
+    if (!e.ctrlKey) {
+        selector.deselectAll();
+    }
+    selector.select(element);
+}
+
+onMounted(() => {
+    if (handleable) elementDiv.value?.addEventListener('pointerdown', select);
+})
+
+onBeforeUnmount(() => {
+    if (handleable) elementDiv.value?.removeEventListener('pointerdown', select);
+})
+
 </script>
 
 <template>
-    <div class="absolute" :style="{
+    <div ref="element" class="absolute" :style="{
         transformOrigin: 'left top',
         transform: `translate(${position.x}px, ${position.y}px) scale(${ratio})`,
         width: `${element.size.x}px`,
