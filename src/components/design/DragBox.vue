@@ -15,7 +15,6 @@ const selector = useSelectorStore();
 
 const startPoint = ref<Vector2>(Vector2.ZERO);
 const endPoint = ref<Vector2>(Vector2.ZERO);
-const isDragging = ref<boolean>(false);
 
 const position = ref<Vector2>(Vector2.ZERO);
 const size = ref<Vector2>(Vector2.ZERO);
@@ -54,19 +53,20 @@ function startDrag(e: PointerEvent) {
 
     startPoint.value = Vector2.PointFrom(e);
     endPoint.value = startPoint.value;
-    isDragging.value = true;
+    selector.isDragSelecting = true;
 }
 
 function drag(e: PointerEvent) {
-    if (!isDragging.value) return;
+    if (!selector.isDragSelecting) return;
 
     endPoint.value = Vector2.PointFrom(e);
 
-    selector.setSelection(design.currentSlide.elements.filter(element => getIntersection(element)));
+    design.currentSlide.elements.filter(element => getIntersection(element)).forEach(element => selector.select(element));
+    // selector.setSelection(design.currentSlide.elements.filter(element => getIntersection(element)));
 }
 
 function endDrag(e: PointerEvent) {
-    isDragging.value = false;
+    selector.isDragSelecting = false;
     endPoint.value = Vector2.ZERO;
 }
 
@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div :class="{ 'invisible': !isDragging }" class="absolute bg-teal-400 bg-opacity-5 border border-teal-400"
+    <div :class="{ 'invisible': !selector.isDragSelecting }" class="absolute bg-teal-400 bg-opacity-5 border border-teal-400"
     :style="{
         transform: `translate(${position.x}px, ${position.y}px)`,
         width: `${size.x}px`,

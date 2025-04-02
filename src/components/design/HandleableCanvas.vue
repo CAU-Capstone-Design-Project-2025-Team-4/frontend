@@ -82,6 +82,11 @@ useDraggable(container, 4, (delta) => {
     position.value.add(delta);
 }, { cursor: 'move' });
 
+function deselectAll(e: PointerEvent) {
+    if (e.ctrlKey) return;
+    selector.deselectAll();
+}
+
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
@@ -107,7 +112,7 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" @pointerdown.left="selector.deselectAll()" />
+            <Canvas :slide="design.currentSlide" @pointerdown.left="deselectAll($event)" />
         </div>
         <Handler />
         <DragBox :container="container" />

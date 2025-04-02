@@ -3,7 +3,8 @@ import { onBeforeUnmount, onMounted, onUnmounted, ref, type ShallowRef } from "v
 
 interface DraggableOptions {
     auto?: boolean,
-    cursor?: string
+    cursor?: string,
+    stop?: boolean
 }
 
 export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, button: number, onMove: (delta: Vector2) => void, options?: DraggableOptions) {
@@ -14,6 +15,7 @@ export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, b
     function start(e: PointerEvent) {
         if (e.buttons != button) return;
         e.preventDefault();
+        if (options?.stop) e.stopPropagation();
 
         document.body.style.cursor = options?.cursor ?? 'auto';
 
