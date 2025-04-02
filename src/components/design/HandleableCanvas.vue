@@ -102,8 +102,8 @@ provide<boolean>('handleable', true);
             height: `${size.y}px`
         }">
             <Canvas :slide="design.currentSlide" @pointerdown.left="selector.deselectAll()" />
-            <Handler />
         </div>
+        <Handler />
     </div>
 
 </template>

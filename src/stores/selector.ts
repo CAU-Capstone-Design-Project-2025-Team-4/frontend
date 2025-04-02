@@ -6,8 +6,12 @@ export const useSelectorStore = defineStore('selector', () => {
     const selection = ref<ElementRef[]>([]);
     const idSelection = computed<number[]>(() => selection.value.map(element => element.id));
 
+    function isSelected(element: ElementRef) {
+        return idSelection.value.includes(element.id);
+    }
+
     function select(element: ElementRef) {
-        if (idSelection.value.includes(element.id)) return;
+        if (isSelected(element)) return;
         selection.value.push(element);
     }
 
@@ -15,5 +19,5 @@ export const useSelectorStore = defineStore('selector', () => {
         selection.value.length = 0;
     }
 
-    return { selection, select, deselectAll };
+    return { selection, isSelected, select, deselectAll };
 })
