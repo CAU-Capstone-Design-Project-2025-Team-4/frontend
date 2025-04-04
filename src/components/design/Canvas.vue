@@ -28,7 +28,7 @@ onBeforeUnmount(() => observer.disconnect());
 </script>
 
 <template>
-    <div ref="canvas" class="w-full h-full bg-white">
+    <div ref="canvas" class="absolute overflow-hidden bg-white">
         <Element v-for="element in slide.elements" :element="element" :ratio="ratio" />
     </div>
 </template>

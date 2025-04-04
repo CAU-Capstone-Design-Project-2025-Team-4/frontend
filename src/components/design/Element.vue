@@ -17,10 +17,6 @@ export class ElementRef {
         this.objectRef = objectRef;
     }
 
-    // center() {
-    //     return Vector2.Div(this.size, 2).add(this.position);
-    // }
-
     getBoundingRect(): { left: number, right: number, top: number, bottom: number } {
         const { x: w, y: h } = this.size;
         const angle = this.rotation / 180 * Math.PI;
@@ -53,6 +49,7 @@ const { element, ratio } = defineProps<{
 
 const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
 const center = computed<Vector2>(() => Vector2.Mult(element.position, ratio).add(Vector2.Mult(element.size, -ratio / 2)));
+const pos = computed<Vector2>(() => Vector2.Div(element.size, -2).add(element.position).mult(ratio));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
@@ -70,6 +67,7 @@ function select(e: PointerEvent) {
 
 onMounted(() => {
     if (handleable) elementDiv.value?.addEventListener('pointerdown', select);
+    console.log(ratio)
 })
 
 onBeforeUnmount(() => {
@@ -80,7 +78,8 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="element" class="absolute" :style="{
-        transform: `translate(${center.x}px, ${center.y}px) rotate(${element.rotation}deg) scale(${ratio})`,
+        transformOrigin: 'left top',
+        transform: `translate(${pos.x}px, ${pos.y}px) rotate(${element.rotation}deg) scale(${ratio})`,
         width: `${element.size.x}px`,
         height: `${element.size.y}px`,
         zIndex: `${element.z}`,

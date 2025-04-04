@@ -2,12 +2,15 @@ import { ElementRef } from "@/components/design/Element.vue";
 import Vector2 from "@/types/Vector2";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { useSelectorStore } from "./selector";
 
 export interface Slide {
     elements: ElementRef[]
 }
 
 export const useDesignStore = defineStore('design', () => {
+    const selector = useSelectorStore();
+
     const slides = ref<Slide[]>([
         {
             elements: [
@@ -25,5 +28,23 @@ export const useDesignStore = defineStore('design', () => {
     const selection = ref<number>(0);
     const currentSlide = computed<Slide>(() => slides.value[selection.value]);
 
-    return { slides, selection, currentSlide };
+    function selectSlide(index: number) {
+        if (index < 0 || index > slides.value.length - 1) return;
+        selection.value = index;
+        selector.deselectAll();
+    }
+
+    function newSlide() {
+        slides.value.push({ elements: [] });
+        selectSlide(slides.value.length - 1);
+    }
+
+    function removeSlide() {
+        if (selection.value < 0 || selection.value > slides.value.length - 1) return;
+        if (slides.value.length < 2) return;
+        slides.value.splice(selection.value, 1);
+        selection.value = Math.min(selection.value, slides.value.length - 1);
+    }
+
+    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide };
 })

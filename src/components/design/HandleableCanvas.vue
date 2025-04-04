@@ -112,7 +112,7 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" @pointerdown.left="deselectAll($event)" />
+            <Canvas :slide="design.currentSlide" class="w-full h-full" @pointerdown.left="deselectAll($event)" />
         </div>
         <Handler />
         <DragBox :container="container" />
