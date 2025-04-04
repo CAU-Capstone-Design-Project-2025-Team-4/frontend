@@ -13,11 +13,11 @@ const canvas = inject('canvas') as Ref<InstanceType<typeof HandleableCanvas>>;
 const design = useDesignStore();
 const selector = useSelectorStore();
 
-const startPoint = ref<Vector2>(Vector2.ZERO);
-const endPoint = ref<Vector2>(Vector2.ZERO);
+const startPoint = ref<Vector2>(Vector2.Zero());
+const endPoint = ref<Vector2>(Vector2.Zero());
 
-const position = ref<Vector2>(Vector2.ZERO);
-const size = ref<Vector2>(Vector2.ZERO);
+const position = ref<Vector2>(Vector2.Zero());
+const size = ref<Vector2>(Vector2.Zero());
 
 let _position: Vector2;
 
@@ -38,10 +38,7 @@ function getIntersection(element: ElementRef) {
     const start = canvas.value.toCanvasPoint(_position);
     const end = canvas.value.toCanvasPoint(Vector2.Add(_position, size.value));
 
-    const left: number = element.position.x;
-    const right: number = element.position.x + element.size.x;
-    const top: number = element.position.y;
-    const bottom: number = element.position.y + element.size.y;
+    const { left, right, top, bottom } = element.getBoundingRect();
 
     return left < end.x && right > start.x && top < end.y && bottom > start.y;
 }
@@ -61,13 +58,14 @@ function drag(e: PointerEvent) {
 
     endPoint.value = Vector2.PointFrom(e);
 
+    selector.deselectAll();
     design.currentSlide.elements.filter(element => getIntersection(element)).forEach(element => selector.select(element));
     // selector.setSelection(design.currentSlide.elements.filter(element => getIntersection(element)));
 }
 
 function endDrag(e: PointerEvent) {
     selector.isDragSelecting = false;
-    endPoint.value = Vector2.ZERO;
+    endPoint.value = Vector2.Zero();
 }
 
 onMounted(() => {

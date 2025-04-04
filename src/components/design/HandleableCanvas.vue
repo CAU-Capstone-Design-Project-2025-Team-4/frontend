@@ -8,7 +8,7 @@ import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
 import DragBox from '@/components/design/DragBox.vue';
 
-const position = ref<Vector2>(Vector2.ZERO);
+const position = ref<Vector2>(Vector2.Zero());
 const scale = ref<number>(1);
 const size = ref<Vector2>(new Vector2(1920, 1080));
 

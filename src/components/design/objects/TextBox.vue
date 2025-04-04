@@ -2,6 +2,7 @@
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { TextBoxRef } from '@/types/ObjectRef';
+import Vector2 from '@/types/Vector2';
 import { onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const { element } = defineProps<{
@@ -28,6 +29,13 @@ function handleBlur() {
 let observer: ResizeObserver;
 onMounted(() => {
     observer = new ResizeObserver(_ => {
+        const delta = textBox.value!.clientHeight - element.size.y;
+
+        const theta = element.rotation / 180 * Math.PI;
+        const normal = new Vector2(-Math.sin(theta), Math.cos(theta));
+        const magnitude = new Vector2(0, delta).rotate(theta).dot(normal);
+
+        element.position.add(Vector2.Mult(normal, magnitude / 2));
         element.size.y = textBox.value!.clientHeight;
     });
     observer.observe(textBox.value!);

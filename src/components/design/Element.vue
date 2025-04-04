@@ -17,20 +17,21 @@ export class ElementRef {
         this.objectRef = objectRef;
     }
 
+    // center() {
+    //     return Vector2.Div(this.size, 2).add(this.position);
+    // }
+
     getBoundingRect(): { left: number, right: number, top: number, bottom: number } {
         const { x: w, y: h } = this.size;
         const angle = this.rotation / 180 * Math.PI;
         const width = Math.abs(w * Math.cos(angle)) + Math.abs(h * Math.sin(angle));
         const height = Math.abs(w * Math.sin(angle)) + Math.abs(h * Math.cos(angle));
 
-        const paddingX = (width - w) / 2;
-        const paddingY = (height - h) / 2;
-
         return {
-            left: this.position.x - paddingX,
-            right: this.position.x - paddingX + width,
-            top: this.position.y - paddingY,
-            bottom: this.position.y - paddingY + height
+            left: this.position.x - width / 2,
+            right: this.position.x + width / 2,
+            top: this.position.y - height / 2,
+            bottom: this.position.y + height / 2
         }
     }
 }
@@ -51,7 +52,7 @@ const { element, ratio } = defineProps<{
 }>();
 
 const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
-const center = computed<Vector2>(() => Vector2.Mult(element.size, -ratio / 2));
+const center = computed<Vector2>(() => Vector2.Mult(element.position, ratio).add(Vector2.Mult(element.size, -ratio / 2)));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
@@ -79,8 +80,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="element" class="absolute" :style="{
-        transformOrigin: 'left top',
-        transform: `translate(${position.x - center.x}px, ${position.y - center.y}px) rotate(${element.rotation}deg) translate(${center.x}px, ${center.y}px)  scale(${ratio})`,
+        transform: `translate(${center.x}px, ${center.y}px) rotate(${element.rotation}deg) scale(${ratio})`,
         width: `${element.size.x}px`,
         height: `${element.size.y}px`,
         zIndex: `${element.z}`,

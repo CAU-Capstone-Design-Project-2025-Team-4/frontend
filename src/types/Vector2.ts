@@ -64,10 +64,8 @@ export default class Vector2 {
     }
 
     rotate(angle: number): Vector2 {
-        console.log(this.x, this.y)
         const x = this.x;
         this.x = this.x * Math.cos(angle) - this.y * Math.sin(angle);
-        console.log(x, this.x)
         this.y = x * Math.sin(angle) + this.y * Math.cos(angle);
         return this;
     }
@@ -103,15 +101,19 @@ export default class Vector2 {
     }
 
     static PositionFrom(e: HTMLElement | null): Vector2 {
-        if (e == null) return Vector2.ZERO;
+        if (e == null) return Vector2.Zero();
         
         const rect = e.getBoundingClientRect();
         return new Vector2(rect.x, rect.y);
     }
 
-    static ZERO: Vector2  = new Vector2(0, 0);
-    static UP: Vector2    = new Vector2(0, -1);
-    static DOWN: Vector2  = new Vector2(0, 1);
-    static LEFT: Vector2  = new Vector2(-1, 0);
-    static RIGHT: Vector2 = new Vector2(1, 0);
+    static readonly ZERO: Vector2  = new Vector2(0, 0);
+    static readonly UP: Vector2    = new Vector2(0, -1);
+    static readonly DOWN: Vector2  = new Vector2(0, 1);
+    static readonly LEFT: Vector2  = new Vector2(-1, 0);
+    static readonly RIGHT: Vector2 = new Vector2(1, 0);
+
+    static Zero(): Vector2 {
+        return this.ZERO.clone();
+    }
 }

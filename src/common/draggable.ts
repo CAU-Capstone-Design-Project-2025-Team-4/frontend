@@ -1,5 +1,5 @@
 import Vector2 from "@/types/Vector2";
-import { onBeforeUnmount, onMounted, onUnmounted, ref, type ShallowRef } from "vue";
+import { onBeforeUnmount, onMounted, type ShallowRef } from "vue";
 
 interface DraggableOptions {
     auto?: boolean,
@@ -9,9 +9,9 @@ interface DraggableOptions {
 
 let isDraggingOthers: boolean = false;
 export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, button: number, onMove: (delta: Vector2, start?: Vector2) => void, options?: DraggableOptions) {
-    // const delta = ref<Vector2>(Vector2.ZERO);
-    let lastPoint: Vector2 = Vector2.ZERO;
-    let currentPoint: Vector2 = Vector2.ZERO;
+    // const delta = ref<Vector2>(Vector2.Zero());
+    let lastPoint: Vector2 = Vector2.Zero();
+    let currentPoint: Vector2 = Vector2.Zero();
     let isDragging = false;
     function start(e: PointerEvent) {
         if (isDraggingOthers) return;
