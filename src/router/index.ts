@@ -9,6 +9,10 @@ const routes: Array<RouteRecordRaw> = [
         path: '/editor',
         component: () => import('@/views/Editor.vue')
     },
+    {
+        path: '/show',
+        component: () => import('@/views/SlideShow.vue')
+    }
 ];
 
 export default createRouter({

@@ -48,8 +48,7 @@ const { element, ratio } = defineProps<{
 }>();
 
 const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
-const center = computed<Vector2>(() => Vector2.Mult(element.position, ratio).add(Vector2.Mult(element.size, -ratio / 2)));
-const pos = computed<Vector2>(() => Vector2.Div(element.size, -2).add(element.position).mult(ratio));
+const size = computed<Vector2>(() => Vector2.Mult(element.size, ratio));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
@@ -67,7 +66,6 @@ function select(e: PointerEvent) {
 
 onMounted(() => {
     if (handleable) elementDiv.value?.addEventListener('pointerdown', select);
-    console.log(ratio)
 })
 
 onBeforeUnmount(() => {
@@ -79,7 +77,7 @@ onBeforeUnmount(() => {
 <template>
     <div ref="element" class="absolute" :style="{
         transformOrigin: 'left top',
-        transform: `translate(${pos.x}px, ${pos.y}px) rotate(${element.rotation}deg) scale(${ratio})`,
+        transform: `translate(${position.x}px, ${position.y}px) rotate(${element.rotation}deg) translate(${-size.x / 2}px, ${-size.y / 2}px) scale(${ratio})`,
         width: `${element.size.x}px`,
         height: `${element.size.y}px`,
         zIndex: `${element.z}`,
