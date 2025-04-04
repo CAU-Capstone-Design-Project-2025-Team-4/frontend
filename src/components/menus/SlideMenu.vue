@@ -32,7 +32,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-    <div ref="container" class="pt-1">
+    <div ref="container">
         <draggable v-model="design.slides" item-key="'index'" animation="150" ghost-class="ghost" forceFallback="true" @end="onEnd($event)">
             <template #item="{ element: slide, index }">
                 <div class="relative flex justify-between w-full mb-2 p-1 aspect-[17.5/9]"

@@ -28,6 +28,10 @@ function toScreenPoint(point: Vector2): Vector2 {
     return toScreenSpace(point).add(position.value);
 }
 
+function containPoint(point: Vector2): boolean {
+    return 0 <= point.x && point.x <= size.value.x && 0 <= point.y && point.y < size.value.y;
+}
+
 defineExpose({
     position,
     scale,
@@ -35,7 +39,8 @@ defineExpose({
     toScreenSpace,
     toCanvasSpace,
     toScreenPoint,
-    toCanvasPoint
+    toCanvasPoint,
+    containPoint
 });
 
 
@@ -112,7 +117,7 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" class="w-full h-full" @pointerdown.left="deselectAll($event)" />
+            <Canvas :slide="design.currentSlide" class="w-full h-full" @pointerdown.left="deselectAll($event)"@dragover.prevent="" />
         </div>
         <Handler />
         <DragBox :container="container" />

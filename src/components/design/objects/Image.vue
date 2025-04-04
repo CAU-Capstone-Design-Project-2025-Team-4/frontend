@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { ImageRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
 }>();
-const imageRef = ref<ImageRef>(element.objectRef as ImageRef);
+const imageRef = computed<ImageRef>(() => element.objectRef as ImageRef);
 </script>
 
 <template>

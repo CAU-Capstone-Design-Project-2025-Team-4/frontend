@@ -46,5 +46,9 @@ export const useDesignStore = defineStore('design', () => {
         selection.value = Math.min(selection.value, slides.value.length - 1);
     }
 
-    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide };
+    function addElement(element: ElementRef) {
+        currentSlide.value.elements.push(element);
+    }
+
+    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide, addElement };
 })

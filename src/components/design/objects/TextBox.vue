@@ -3,12 +3,12 @@ import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { TextBoxRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
-import { onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
 }>();
-const textBoxRef = ref<TextBoxRef>(element.objectRef as TextBoxRef);
+const textBoxRef = computed<TextBoxRef>(() => element.objectRef as TextBoxRef);
 const textBox = useTemplateRef<HTMLElement>('text-box');
 
 const selector = useSelectorStore();

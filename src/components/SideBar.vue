@@ -45,7 +45,7 @@ const menuList: Menu[] = [
     },
 ];
 
-const selection = ref<number>(0);
+const selection = ref<number>(2);
 const select = (index: number) => selection.value = index;
 const isSelected = (index: number) => selection.value === index;
 
@@ -63,7 +63,7 @@ const isSelected = (index: number) => selection.value === index;
                 </div>
             </div>
         </div>
-        <div class="w-full p-2 overflow-auto [scrollbar-gutter:stable]">
+        <div class="w-full px-2 py-4 overflow-auto [scrollbar-gutter:stable]">
             <component :is="menuList[selection].component.value" />
 
         </div>

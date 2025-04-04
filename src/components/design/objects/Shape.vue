@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { ShapeRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
 }>();
-const shapeRef = ref<ShapeRef>(element.objectRef as ShapeRef);
+const shapeRef = computed<ShapeRef>(() => element.objectRef as ShapeRef);
 </script>
 
 <template>
