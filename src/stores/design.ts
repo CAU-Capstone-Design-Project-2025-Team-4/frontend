@@ -14,8 +14,8 @@ export const useDesignStore = defineStore('design', () => {
     const slides = ref<Slide[]>([
         {
             elements: [
-                new ElementRef(new Vector2(600, 200), 0, new Vector2(200, 200), 0, { path: 'M 50 0 A 50 50 0 1 1 49.9 0', color: 'oklch(0.91 0.096 180.426)' }),
-                new ElementRef(new Vector2(100, 100), 0, new Vector2(200, 200), 0, { path: 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0', color: 'oklch(0.704 0.04 256.788)' }),
+                new ElementRef(new Vector2(600, 200), 0, new Vector2(200, 200), 0, { path: 'M 50 0 A 50 50 0 1 1 49.9 0', color: 'rgb(124, 23, 13)', border: false, borderColor: '#000000', borderThickness: 13 }),
+                new ElementRef(new Vector2(100, 100), 0, new Vector2(200, 200), 0, { path: 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0', color: 'rgb(12, 23, 123)', border: false, borderColor: '#000000', borderThickness: 1 }),
                 new ElementRef(new Vector2(300, 300), 0, new Vector2(200, 200), 0, { text: '제목을 입력하세요.' }),
                 new ElementRef(new Vector2(1000, 500), 0, new Vector2(400, 200), 0, { url: 'src/assets/dog.jpg' })
             ]

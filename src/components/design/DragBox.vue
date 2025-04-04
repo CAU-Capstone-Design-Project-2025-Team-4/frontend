@@ -43,6 +43,11 @@ function getIntersection(element: ElementRef) {
     return left < end.x && right > start.x && top < end.y && bottom > start.y;
 }
 
+function getDiffSet(minuend: ElementRef[], subtrahend: ElementRef[]) {
+    const sub = subtrahend.map(e => e.id);
+    return minuend.filter(e => !sub.includes(e.id));
+}
+
 
 function startDrag(e: PointerEvent) {
     if (e.button != 0) return;
@@ -58,8 +63,11 @@ function drag(e: PointerEvent) {
 
     endPoint.value = Vector2.PointFrom(e);
 
-    selector.deselectAll();
-    design.currentSlide.elements.filter(element => getIntersection(element)).forEach(element => selector.select(element));
+    const intersected = design.currentSlide.elements.filter(element => getIntersection(element));
+    getDiffSet(intersected, selector.selection).forEach(element => selector.select(element));
+    getDiffSet(selector.selection, intersected).forEach(element => selector.deselect(element));
+    // selector.deselectAll();
+    // design.currentSlide.elements.filter(element => getIntersection(element)).forEach(element => selector.select(element));
     // selector.setSelection(design.currentSlide.elements.filter(element => getIntersection(element)));
 }
 

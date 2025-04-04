@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import './style.css'
 import 'virtual:uno.css'
+import 'vue-color/style.css'
+import 'vue-slider-component/theme/default.css'
 import App from '@/App.vue'
 import axios from 'axios'
 import router from '@/router'

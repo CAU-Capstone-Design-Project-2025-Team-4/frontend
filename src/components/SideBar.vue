@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, shallowRef, type Component, type ShallowRef } from 'vue';
+import { computed, ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
 import SlideMenu from '@/components/menus/SlideMenu.vue';
 import TemplateMenu from '@/components/menus/TemplateMenu.vue';
 import ShapeMenu from '@/components/menus/ShapeMenu.vue';
 import ImageMenu from '@/components/menus/ImageMenu.vue';
 import TextMenu from '@/components/menus/TextMenu.vue';
 import SpatialMenu from '@/components/menus/SpatialMenu.vue';
+import { useSelectorStore } from '@/stores/selector';
+import MultiElementEditMenu from './menus/edit/MultiElementEditMenu.vue';
+import { instanceOfShapeRef } from '@/types/ObjectRef';
+import ShapeEditMenu from './menus/edit/ShapeEditMenu.vue';
 
 interface Menu {
     name: string,
@@ -45,10 +49,32 @@ const menuList: Menu[] = [
     },
 ];
 
+const selector = useSelectorStore();
+
 const selection = ref<number>(2);
-const select = (index: number) => selection.value = index;
+const select = (index: number) => {
+    selection.value = index;
+    currentMenu.value = menuList[selection.value].component;
+}
 const isSelected = (index: number) => selection.value === index;
 
+const currentMenu = ref<ShallowRef<Component>>();
+currentMenu.value = menuList[selection.value].component;
+watch(() => selector.idSelection, () => {
+    if (selector.idSelection.length == 0) {
+        currentMenu.value = menuList[selection.value].component;
+    } else if (selector.idSelection.length == 1) {
+        const objectRef = selector.selection[0].objectRef;
+
+        let objectEditMenu;
+        if (instanceOfShapeRef(objectRef)) objectEditMenu = shallowRef(ShapeEditMenu);
+        else objectEditMenu = shallowRef(ShapeEditMenu);
+
+        currentMenu.value = objectEditMenu;
+    } else {
+        currentMenu.value = shallowRef(MultiElementEditMenu);
+    }
+}, { deep: true })
 </script>
 
 
@@ -64,8 +90,7 @@ const isSelected = (index: number) => selection.value === index;
             </div>
         </div>
         <div class="w-full px-2 py-4 overflow-auto [scrollbar-gutter:stable]">
-            <component :is="menuList[selection].component.value" />
-
+            <component :is="currentMenu!.value" />
         </div>
     </div>
 </template>

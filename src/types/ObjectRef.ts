@@ -3,6 +3,9 @@ export interface ObjectRef {}
 export interface ShapeRef extends ObjectRef {
     path: string,
     color: string,
+    border: boolean,
+    borderColor: string,
+    borderThickness: number
 }
 
 export interface TextBoxRef extends ObjectRef {

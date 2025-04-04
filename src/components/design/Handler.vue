@@ -16,12 +16,12 @@ enum HandlerType {
 
     OBJECT       = MOVE | RESIZE | ROTATE,
     TEXTBOX      = 1 << 4 | ROTATE,
-    MULTIOBJECT  = MOVE | ROTATE
+    MULTIELEMENT  = MOVE | ROTATE
 }
 
 const type = computed<HandlerType>(() => {
     if (selection.value.length <= 0) return HandlerType.NONE;
-    if (selection.value.length > 1) return HandlerType.MULTIOBJECT;
+    if (selection.value.length > 1) return HandlerType.MULTIELEMENT;
     if (instanceOfTextBoxRef(selection.value[0].objectRef)) return HandlerType.TEXTBOX;
     return HandlerType.OBJECT;
 });
@@ -109,6 +109,9 @@ useDraggable(useTemplateRef<HTMLElement>('rotate-handler'), 1, (delta, start) =>
 
         element.position = v.rotate(angle).add(center);
         element.rotation += angle * 180 / Math.PI;    
+
+        element.rotation %= 360;
+        if (element.rotation < 0) element.rotation += 360;
     });
 }, { stop: true });
 
@@ -192,7 +195,7 @@ function resize(dir: string, delta: Vector2) {
         height: `${size.y}px`
     }">
         <!-- temp -->
-        <div :class="{ 'invisible': !isHandlerMatch(HandlerType.MULTIOBJECT, true) }" v-for="element in selectionRect" class="absolute  pointer-events-none outline-2 outline-solid outline-teal-400" :style="{
+        <div :class="{ 'invisible': !isHandlerMatch(HandlerType.MULTIELEMENT, true) }" v-for="element in selectionRect" class="absolute  pointer-events-none outline-2 outline-solid outline-teal-400" :style="{
             transform: `translate(${element.position.x}px, ${element.position.y}px) rotate(${element.rotation})`,
             width: `${element.size.x}px`,
             height: `${element.size.y}px`

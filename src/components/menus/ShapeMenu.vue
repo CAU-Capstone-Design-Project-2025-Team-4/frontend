@@ -35,21 +35,11 @@ const groups: ShapeGroup[] = [
 
 const design = useDesignStore();
 const canvas = inject('canvas') as Ref<InstanceType<typeof HandleableCanvas>>;
-
-function handleDrag(e: DragEvent) {
-    console.log('handling')
-    const point = Vector2.PointFrom(e);
-    if (canvas.value.containPoint(canvas.value.toCanvasPoint(point))) {
-        document.body.style.cursor = 'copy'
-    } else {
-        document.body.style.cursor = 'grabbing'
-    }
-}
     
 function addElement(shape: Shape, point?: Vector2) {
     const position = point !== undefined ? canvas.value.toCanvasPoint(point) : new Vector2(960, 540);
     if (canvas.value.containPoint(position)) {
-        design.addElement(new ElementRef(position, 0, shape.size.clone(), 0, { path: shape.path, color: 'oklch(70.4% 0.04 256.788)' }));
+        design.addElement(new ElementRef(position, 0, shape.size.clone(), 0, { path: shape.path, color: 'rgb(200, 200, 200)', border: false, borderColor: 'rgb(0, 0, 0)', borderThickness: 1 }));
     }
 }
 
