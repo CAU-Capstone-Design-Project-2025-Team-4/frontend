@@ -8,8 +8,9 @@ import TextMenu from '@/components/menus/TextMenu.vue';
 import SpatialMenu from '@/components/menus/SpatialMenu.vue';
 import { useSelectorStore } from '@/stores/selector';
 import MultiElementEditMenu from './menus/edit/MultiElementEditMenu.vue';
-import { instanceOfShapeRef } from '@/types/ObjectRef';
+import { instanceOfImageRef, instanceOfShapeRef } from '@/types/ObjectRef';
 import ShapeEditMenu from './menus/edit/ShapeEditMenu.vue';
+import ImageEditMenu from './menus/edit/ImageEditMenu.vue';
 
 interface Menu {
     name: string,
@@ -51,7 +52,7 @@ const menuList: Menu[] = [
 
 const selector = useSelectorStore();
 
-const selection = ref<number>(2);
+const selection = ref<number>(3);
 const select = (index: number) => {
     selection.value = index;
     currentMenu.value = menuList[selection.value].component;
@@ -67,9 +68,16 @@ watch(() => selector.idSelection, () => {
         const objectRef = selector.selection[0].objectRef;
 
         let objectEditMenu;
-        if (instanceOfShapeRef(objectRef)) objectEditMenu = shallowRef(ShapeEditMenu);
-        else objectEditMenu = shallowRef(ShapeEditMenu);
-
+        switch(true) {
+            case instanceOfShapeRef(objectRef):
+                objectEditMenu = shallowRef(ShapeEditMenu);
+                break;
+            case instanceOfImageRef(objectRef):
+                objectEditMenu = shallowRef(ImageEditMenu);
+                break;
+            default:
+                objectEditMenu = shallowRef(MultiElementEditMenu);
+        };
         currentMenu.value = objectEditMenu;
     } else {
         currentMenu.value = shallowRef(MultiElementEditMenu);

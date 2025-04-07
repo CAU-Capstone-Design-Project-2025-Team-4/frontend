@@ -22,7 +22,7 @@ const height = computed<number>(() => {
 <template>
     <svg :width="width" :height="height" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
-	        <path :id="`path-${element.id}`" :d="shapeRef.path" />
+	        <path :id="`path-${element.id}`" :d="shapeRef.path" vector-effect="non-scaling-stroke" />
 	        <clipPath :id="`clip-${element.id}`">
 		        <use :xlink:href="`#path-${element.id}`"/>
 	        </clipPath>

@@ -236,7 +236,7 @@ function resize(dir: string, delta: Vector2) {
 
         <div class="relative flex justify-center top-[100%] p-4">
             <div ref="rotate-handler" :class="{ 'invisible': !isHandlerMatch(HandlerType.ROTATE) }" 
-            class="flex justify-center items-center pointer-events-auto rounded-full bg-slate-200 shadow-slate-700 shadow-xs" :style="{ width: `${24 + 8 / scale }px`, height: `${24 + 8 / scale }px` }">
+            class="flex justify-center items-center pointer-events-auto rounded-full bg-slate-50 shadow-slate-700 shadow-xs" :style="{ width: `${24 + 8 / scale }px`, height: `${24 + 8 / scale }px` }">
                 <div class="i-mdi:rotate-right text-[500%]" />
             </div>
         </div>

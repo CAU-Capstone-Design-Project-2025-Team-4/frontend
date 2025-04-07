@@ -110,14 +110,14 @@ provide<boolean>('handleable', true);
 </script>
 
 <template>
-    <div ref="container" class="relative flex-5/6 overflow-hidden bg-gray-100">
+    <div ref="container" class="relative flex-5/6 overflow-hidden bg-gray-100" @pointerdown.left="deselectAll($event)">
         <div class="absolute shadow-lg" :style="{
             transformOrigin: `left top`,
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" class="w-full h-full" @pointerdown.left="deselectAll($event)"@dragover.prevent="" />
+            <Canvas :slide="design.currentSlide" class="w-full h-full" @dragover.prevent="" />
         </div>
         <Handler />
         <DragBox :container="container" />

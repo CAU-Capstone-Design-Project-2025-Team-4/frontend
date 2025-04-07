@@ -12,7 +12,7 @@ provide('canvas', canvas);
     <div class="flex flex-col w-screen h-screen overflow-auto select-none">
         <PageHeader class="max-h-14 border-b border-gray-200" />
         <div class="flex flex-row min-h-64 flex-auto">
-            <SideBar class="flex-1/6 min-w-84 border-r border-gray-200" />
+            <SideBar class="flex-1/6 min-w-100 border-r border-gray-200" />
             <HandleableCanvas ref="canvas" />
         </div>
     </div>

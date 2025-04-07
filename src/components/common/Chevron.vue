@@ -10,7 +10,7 @@ const opened = ref<boolean>(false);
 
 <template>
     <div>
-        <div class="flex items-center justify-between w-full h-10 p-3 rounded-md hover:bg-slate-50" @pointerdown="opened = !opened">
+        <div class="flex items-center justify-between w-full h-10 py-3 rounded-md hover:bg-slate-50" @pointerdown="opened = !opened">
             <p class="text-left">{{ title }}</p>
             <div :class="[ opened ? 'i-mdi:chevron-up' : 'i-mdi:chevron-down' ]" />
         </div>
