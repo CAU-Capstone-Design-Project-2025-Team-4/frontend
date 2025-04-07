@@ -49,6 +49,10 @@ onBeforeUnmount(() => {
 <template>
     <div ref="text-box" class="p-1 break-words break-all" 
     :contenteditable="editable" spellcheck="false" v-html="textBoxRef.text"
-    :style="{ outline: 'none', fontSize: `60px`, textAlign: `left` }" 
-    @blur="handleBlur()" />
+    :style="{
+         outline: 'none', 
+         fontSize: `${textBoxRef.size}px`, 
+         fontWeight: `${textBoxRef.weight}`,
+         textAlign: `left` 
+         }" @blur="handleBlur()" />
 </template>

@@ -47,7 +47,7 @@ function addElement(shape: Shape, point?: Vector2) {
 <!-- <path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2L9.19 8.62L2 9.24l5.45 4.73L5.82 21z"/></svg> -->
 <template>
     <div>
-        <div v-for="group in groups" class="mb-4 px-3">
+        <div v-for="group in groups" class="mb-4 pl-3">
             <p class="text-left mb-2">{{ group.name }}</p>
             <div class="w-full h-full grid grid-cols-[repeat(5,_20%)] p-2 bg-slate-100 rounded-xl">
                 <div v-for="shape in group.shapes" draggable="true" class="group w-full aspect-square bg-slate-100 flex items-center justify-center"

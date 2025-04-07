@@ -9,7 +9,9 @@ export interface ShapeRef extends ObjectRef {
 }
 
 export interface TextBoxRef extends ObjectRef {
-    text: String
+    text: String,
+    size: number,
+    weight: number
 }
 
 export interface ImageRef extends ObjectRef {

@@ -52,7 +52,7 @@ const menuList: Menu[] = [
 
 const selector = useSelectorStore();
 
-const selection = ref<number>(3);
+const selection = ref<number>(4);
 const select = (index: number) => {
     selection.value = index;
     currentMenu.value = menuList[selection.value].component;
