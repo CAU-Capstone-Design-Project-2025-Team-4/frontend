@@ -4,6 +4,9 @@ import { useSelectorStore } from '@/stores/selector';
 import { ref, watchEffect } from 'vue';
 import type { ElementRef } from '../design/Element.vue';
 
+const props = defineProps<{
+    disableY?: boolean
+}>();
 const selector = useSelectorStore();
 
 const element = ref<ElementRef>(selector.selection[0]);
@@ -33,7 +36,7 @@ function toggleLock() {
 
 function resizeWidth() {
     if (element.value.size.x.toString() === '') element.value.size.x = 0;
-    if (sizeLock.value) element.value.size.y = element.value.size.x / ratio;
+    if (sizeLock.value || props.disableY === false) element.value.size.y = element.value.size.x / ratio;
 }
 
 function resizeHeight() {
@@ -70,8 +73,8 @@ function resizeHeight() {
                     <input v-model.number="element.size.x" @input="resizeWidth()" class="block w-full h-10 pr-7 px-2 text-sm border border-slate-400 rounded-md" />
                     <p class="absolute right-2 bottom-2">px</p>   
                 </form>
-                <form @submit.prevent="" class="col-span-2 relative">
-                    <input v-model.number="element.size.y" @input="resizeHeight()" class="block w-full h-10 pr-7 px-2 text-sm border border-slate-400 rounded-md" />
+                <form @submit.prevent="" class="col-span-2 relative" :class="{ 'bg-slate-100' : disableY }">
+                    <input :disabled="disableY" v-model.number="element.size.y" @input="resizeHeight()" class="block w-full h-10 pr-7 px-2 text-sm border border-slate-400 rounded-md" />
                     <p class="absolute right-2 bottom-2">px</p>   
                 </form>
                 <div class="h-10 w-10 col-span-1 justify-self-end p-2 rounded-md bg-gray-200 hover:bg-gray-300" @pointerdown="toggleLock()">

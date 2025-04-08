@@ -11,8 +11,6 @@ const imageRef = ref<ImageRef>(selector.selection[0].objectRef as ImageRef);
 watchEffect(() => {
     imageRef.value = selector.selection[0].objectRef as ImageRef;
 })
-
-
 </script>
 
 <template>

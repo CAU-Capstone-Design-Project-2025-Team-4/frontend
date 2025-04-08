@@ -8,9 +8,10 @@ import TextMenu from '@/components/menus/TextMenu.vue';
 import SpatialMenu from '@/components/menus/SpatialMenu.vue';
 import { useSelectorStore } from '@/stores/selector';
 import MultiElementEditMenu from './menus/edit/MultiElementEditMenu.vue';
-import { instanceOfImageRef, instanceOfShapeRef } from '@/types/ObjectRef';
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
 import ShapeEditMenu from './menus/edit/ShapeEditMenu.vue';
 import ImageEditMenu from './menus/edit/ImageEditMenu.vue';
+import TextEditMenu from './menus/edit/TextEditMenu.vue';
 
 interface Menu {
     name: string,
@@ -74,6 +75,9 @@ watch(() => selector.idSelection, () => {
                 break;
             case instanceOfImageRef(objectRef):
                 objectEditMenu = shallowRef(ImageEditMenu);
+                break;
+            case instanceOfTextBoxRef(objectRef):
+                objectEditMenu = shallowRef(TextEditMenu);
                 break;
             default:
                 objectEditMenu = shallowRef(MultiElementEditMenu);
