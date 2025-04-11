@@ -21,7 +21,8 @@ const templates: TextBox[] = [
         ref: {
             text: "제목을 입력하세요.",
             size: 72,
-            weight: 800
+            weight: 800,
+            align: 'center'
         }
         
     },
@@ -31,16 +32,18 @@ const templates: TextBox[] = [
         ref: {
             text: "부제목을 입력하세요.",
             size: 48,
-            weight: 700
+            weight: 700,
+            align: 'center'
         }
     },
     {
         size: 16,
         weight: 400,
         ref: {
-            text: "텍스트를 입력하세요.",
+            text: "내용을 입력하세요.",
             size: 16,
-            weight: 400
+            weight: 400,
+            align: 'center'
         }
     },
 ];

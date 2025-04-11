@@ -1,20 +1,28 @@
 <script setup lang="ts">
-import UnityWebgl from 'unity-webgl';
-import UnityVue from 'unity-webgl/vue';
 
-const unity = new UnityWebgl({
-    loaderUrl: "unity.loader.js",
-    dataUrl: "unity.data.br",
-    frameworkUrl: "unity.framework.js.br",
-    codeUrl: "unity.wasm.br",
-})
+import { UnityInstance } from 'unity-webgl';
+import { onMounted } from 'vue';
 
-const unity2 = new UnityWebgl({
-    loaderUrl: "unity.loader.js",
-    dataUrl: "unity.data.br",
-    frameworkUrl: "unity.framework.js.br",
-    codeUrl: "unity.wasm.br",
-})
+
+onMounted(() => {
+  loadUnity();
+});
+
+function loadUnity() {
+  const unityContainer = document.getElementById('unity-container');
+  createUnity
+  UnityLoader.instantiate(
+    'unity-container',
+    '/unity/Build/Build.json', // WebGL 빌드 JSON 경로
+    { 
+      onProgress: (unityInstance, progress) => {
+        console.log('Unity Loading Progress:', progress);
+      }
+    }
+  );
+
+  createUnity
+}
 </script>
 
 
@@ -22,7 +30,7 @@ const unity2 = new UnityWebgl({
     <router-link to='/editor'>
         Hello World!
     </router-link>
-    <UnityVue :unity="unity" />
-    <UnityVue :unity="unity2" />
+    <div id="unity-container"></div>
+
 
 </template>

@@ -11,11 +11,17 @@ export interface ShapeRef extends ObjectRef {
 export interface TextBoxRef extends ObjectRef {
     text: String,
     size: number,
-    weight: number
+    weight: number,
+    align: string,
 }
 
 export interface ImageRef extends ObjectRef {
     url: string
+}
+
+export interface SpatialRef extends ObjectRef {
+    model: string,
+    backgroundColor: string
 }
 
 export function instanceOfShapeRef(ref: ObjectRef): ref is ShapeRef {
@@ -28,4 +34,8 @@ export function instanceOfTextBoxRef(ref: ObjectRef): ref is TextBoxRef {
 
 export function instanceOfImageRef(ref: ObjectRef): ref is ImageRef {
     return 'url' in ref;
+}
+
+export function instanceOfSpatialRef(ref: ObjectRef): ref is SpatialRef {
+    return 'model' in ref;
 }

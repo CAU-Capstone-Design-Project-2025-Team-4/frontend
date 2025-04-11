@@ -34,13 +34,14 @@ export class ElementRef {
 </script>
 
 <script setup lang="ts">
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
 import { computed, inject, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import Shape from '@/components/design/objects/Shape.vue';
 import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
 import { useSelectorStore } from '@/stores/selector';
+import Spatial from './objects/Spatial.vue';
 
 const { element, ratio } = defineProps<{
     element: ElementRef,
@@ -85,5 +86,6 @@ onBeforeUnmount(() => {
         <Shape v-if="instanceOfShapeRef(element.objectRef)" :element="element" />
         <TextBox v-if="instanceOfTextBoxRef(element.objectRef)" :element="element" />
         <Image v-if="instanceOfImageRef(element.objectRef)" :element="element" />
+        <Spatial v-if="instanceOfSpatialRef(element.objectRef)" :element="element" />
     </div>
 </template>

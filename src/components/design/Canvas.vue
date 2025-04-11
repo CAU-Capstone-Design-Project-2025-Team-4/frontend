@@ -3,12 +3,18 @@ import { computed, inject, onBeforeUnmount, onMounted, ref, useTemplateRef } fro
 import Element from './Element.vue';
 import type { Slide } from '@/stores/design';
 
+import * as htmlToImage from 'html-to-image';
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
+
+
 const { slide } = defineProps<{
     slide: Slide
 }>();
 
 const canvas = useTemplateRef<HTMLElement>('canvas');
 const handleable = inject<boolean>('handleable', false);
+
+
 
 let _width = ref<number>(0);
 const ratio = computed<number>(() => {

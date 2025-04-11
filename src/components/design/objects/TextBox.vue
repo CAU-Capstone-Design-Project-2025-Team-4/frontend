@@ -15,6 +15,7 @@ const selector = useSelectorStore();
 
 const editable = ref<boolean>(false);
 watch(() => selector.isSelected(element), () => {
+    if (!selector.isSelected(element)) window.getSelection()?.removeAllRanges();
     setTimeout(() => {
         const isSelected = selector.isSelected(element);
         editable.value = isSelected;
@@ -22,7 +23,6 @@ watch(() => selector.isSelected(element), () => {
 });
 
 function handleBlur() {
-    window.getSelection()?.removeAllRanges();
     textBoxRef.value.text = textBox.value!.innerHTML;
 }
 
@@ -48,11 +48,11 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="text-box" class="p-1 break-words break-all" 
-    :contenteditable="editable" spellcheck="false" v-html="textBoxRef.text"
+    :contenteditable="editable" spellcheck="false"  v-html="textBoxRef.text"
     :style="{
          outline: 'none', 
          fontSize: `${textBoxRef.size}px`, 
          fontWeight: `${textBoxRef.weight}`,
-         textAlign: `left` 
+         textAlign: `${textBoxRef.align}`,
          }" @blur="handleBlur()" />
 </template>

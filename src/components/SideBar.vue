@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
+import { ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
 import SlideMenu from '@/components/menus/SlideMenu.vue';
 import TemplateMenu from '@/components/menus/TemplateMenu.vue';
 import ShapeMenu from '@/components/menus/ShapeMenu.vue';
 import ImageMenu from '@/components/menus/ImageMenu.vue';
-import TextMenu from '@/components/menus/TextMenu.vue';
+import TextMenu from '@/components/menus/TextBoxMenu.vue';
 import SpatialMenu from '@/components/menus/SpatialMenu.vue';
 import { useSelectorStore } from '@/stores/selector';
 import MultiElementEditMenu from './menus/edit/MultiElementEditMenu.vue';
 import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
 import ShapeEditMenu from './menus/edit/ShapeEditMenu.vue';
 import ImageEditMenu from './menus/edit/ImageEditMenu.vue';
-import TextEditMenu from './menus/edit/TextEditMenu.vue';
+import TextEditMenu from './menus/edit/TextBoxEditMenu.vue';
 
 interface Menu {
     name: string,
