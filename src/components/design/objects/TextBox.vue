@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
-import type { TextBoxRef } from '@/types/ObjectRef';
+import type { BorderRef, TextBoxRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
@@ -9,7 +9,10 @@ const { element } = defineProps<{
     element: ElementRef
 }>();
 const textBoxRef = computed<TextBoxRef>(() => element.objectRef as TextBoxRef);
+const borderRef = computed<BorderRef>(() => textBoxRef.value.borderRef);
+
 const textBox = useTemplateRef<HTMLElement>('text-box');
+
 
 const selector = useSelectorStore();
 
@@ -39,6 +42,7 @@ onMounted(() => {
         element.size.y = textBox.value!.clientHeight;
     });
     observer.observe(textBox.value!);
+    //textShadow: `-${borderRef.thickness}px 0px ${borderRef.color} ${borderRef.thickness}px 0px ${borderRef.color} 0px -${borderRef.thickness}px ${borderRef.color} 0px -${borderRef.thickness}px ${borderRef.color}`
 });
 
 onBeforeUnmount(() => {
@@ -48,11 +52,10 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="text-box" class="p-1 break-words break-all" 
-    :contenteditable="editable" spellcheck="false"  v-html="textBoxRef.text"
-    :style="{
-         outline: 'none', 
-         fontSize: `${textBoxRef.size}px`, 
-         fontWeight: `${textBoxRef.weight}`,
-         textAlign: `${textBoxRef.align}`,
-         }" @blur="handleBlur()" />
+    :contenteditable="editable" spellcheck="false" v-html="textBoxRef.text" :style="{
+        outline: 'none',
+        fontSize: `${textBoxRef.size}px`,
+        fontWeight: `${textBoxRef.weight}`,
+        textAlign: `${textBoxRef.align}`     
+    }" @blur="handleBlur()" />
 </template>

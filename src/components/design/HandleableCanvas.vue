@@ -40,7 +40,8 @@ defineExpose({
     toCanvasSpace,
     toScreenPoint,
     toCanvasPoint,
-    containPoint
+    containPoint,
+    handleResize
 });
 
 
@@ -95,7 +96,7 @@ function deselectAll(e: PointerEvent) {
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
-    nextTick(() => handleResize());
+    // nextTick(() => handleResize());
 })
 
 onBeforeUnmount(() => {
@@ -110,7 +111,7 @@ provide<boolean>('handleable', true);
 </script>
 
 <template>
-    <div ref="container" class="relative flex-5/6 overflow-hidden bg-gray-100" @pointerdown.left="deselectAll($event)">
+    <div ref="container" class="relative w-full h-full overflow-hidden bg-gray-100" @pointerdown.left="deselectAll($event)">
         <div class="absolute shadow-lg" :style="{
             transformOrigin: `left top`,
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,

@@ -5,7 +5,11 @@ import { useSelectorStore } from '@/stores/selector';
 const selector = useSelectorStore();
 function enterSlideShow() {
     selector.deselectAll();
-    router.push('/show')
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    }
+    setTimeout(() => router.push('/show'), 10);
+    
 }
 </script>
 

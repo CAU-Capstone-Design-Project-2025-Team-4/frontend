@@ -7,11 +7,11 @@ import ImageMenu from '@/components/menus/ImageMenu.vue';
 import TextMenu from '@/components/menus/TextBoxMenu.vue';
 import SpatialMenu from '@/components/menus/SpatialMenu.vue';
 import { useSelectorStore } from '@/stores/selector';
-import MultiElementEditMenu from './menus/edit/MultiElementEditMenu.vue';
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
 import ShapeEditMenu from './menus/edit/ShapeEditMenu.vue';
 import ImageEditMenu from './menus/edit/ImageEditMenu.vue';
 import TextEditMenu from './menus/edit/TextBoxEditMenu.vue';
+import SpatialEditMenu from './menus/edit/SpatialEditMenu.vue';
 
 interface Menu {
     name: string,
@@ -53,7 +53,7 @@ const menuList: Menu[] = [
 
 const selector = useSelectorStore();
 
-const selection = ref<number>(4);
+const selection = ref<number>(0);
 const select = (index: number) => {
     selection.value = index;
     currentMenu.value = menuList[selection.value].component;
@@ -79,12 +79,13 @@ watch(() => selector.idSelection, () => {
             case instanceOfTextBoxRef(objectRef):
                 objectEditMenu = shallowRef(TextEditMenu);
                 break;
-            default:
-                objectEditMenu = shallowRef(MultiElementEditMenu);
+            case instanceOfSpatialRef(objectRef):
+                objectEditMenu = shallowRef(SpatialEditMenu);
+                break;
         };
         currentMenu.value = objectEditMenu;
     } else {
-        currentMenu.value = shallowRef(MultiElementEditMenu);
+        currentMenu.value = menuList[selection.value].component;
     }
 }, { deep: true })
 </script>

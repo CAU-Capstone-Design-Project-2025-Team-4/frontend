@@ -1,27 +1,36 @@
-export interface ObjectRef {}
+export interface ObjectRef {
+    borderRef: BorderRef
+}
 
+export interface BorderRef {
+    type: 'none' | 'solid',
+    color: string,
+    thickness: number
+}
 export interface ShapeRef extends ObjectRef {
     path: string,
     color: string,
-    border: boolean,
-    borderColor: string,
-    borderThickness: number
 }
 
 export interface TextBoxRef extends ObjectRef {
     text: String,
     size: number,
     weight: number,
-    align: string,
+    align: 'left' | 'center' | 'right' | 'justify'
 }
 
 export interface ImageRef extends ObjectRef {
-    url: string
+    url: string,
 }
 
 export interface SpatialRef extends ObjectRef {
-    model: string,
-    backgroundColor: string
+    cameraMode: 'free' | 'orbit',
+    cameraTransform: {
+        position: { x: number, y: number, z: number },
+        rotation: { x: number, y: number, z: number }
+    }  
+    model: string | null,
+    backgroundColor: 'default' | string,
 }
 
 export function instanceOfShapeRef(ref: ObjectRef): ref is ShapeRef {

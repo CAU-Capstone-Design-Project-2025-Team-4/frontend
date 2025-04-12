@@ -1,47 +1,40 @@
 <script setup lang="ts">
 import Chevron from '@/components/common/Chevron.vue';
-import { useSelectorStore } from '@/stores/selector';
-import { ref, watchEffect } from 'vue';
+import { ref } from 'vue';
 import type { ElementRef } from '../design/Element.vue';
 
-const props = defineProps<{
+const { element, disableY } = defineProps<{
+    element: ElementRef
     disableY?: boolean
 }>();
-const selector = useSelectorStore();
-
-const element = ref<ElementRef>(selector.selection[0]);
 
 const sizeLock = ref<boolean>(true);
-let ratio: number = element.value.size.x / element.value.size.y;
-
-watchEffect(() => {
-    element.value = selector.selection[0];
-})
+let ratio: number = element.size.x / element.size.y;
 
 function move() {
-    if (element.value.position.x.toString() === '') element.value.position.x = 0;
-    if (element.value.position.y.toString() === '') element.value.position.y = 0;
+    if (element.position.x.toString() === '') element.position.x = 0;
+    if (element.position.y.toString() === '') element.position.y = 0;
 }
 
 function restricRotation() {
-    if (element.value.rotation.toString() === '') element.value.rotation = 0;
-    element.value.rotation = element.value.rotation % 360;
-    if (element.value.rotation < 0) element.value.rotation + 360;
+    if (element.rotation.toString() === '') element.rotation = 0;
+    element.rotation = element.rotation % 360;
+    if (element.rotation < 0) element.rotation + 360;
 }
 
 function toggleLock() {
     sizeLock.value = !sizeLock.value;
-    if (sizeLock) ratio = element.value.size.x / element.value.size.y;
+    if (sizeLock) ratio = element.size.x / element.size.y;
 }
 
 function resizeWidth() {
-    if (element.value.size.x.toString() === '') element.value.size.x = 0;
-    if (sizeLock.value || props.disableY === false) element.value.size.y = element.value.size.x / ratio;
+    if (element.size.x.toString() === '') element.size.x = 0;
+    if (sizeLock.value || disableY === false) element.size.y = element.size.x / ratio;
 }
 
 function resizeHeight() {
-    if (element.value.size.y.toString() === '') element.value.size.y = 0;
-    if (sizeLock.value) element.value.size.x = element.value.size.y * ratio;
+    if (element.size.y.toString() === '') element.size.y = 0;
+    if (sizeLock.value) element.size.x = element.size.y * ratio;
 }
 </script>
 

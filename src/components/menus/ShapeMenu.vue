@@ -4,6 +4,7 @@ import HandleableCanvas from '../design/HandleableCanvas.vue';
 import Vector2 from '@/types/Vector2';
 import { useDesignStore } from '@/stores/design';
 import { ElementRef } from '../design/Element.vue';
+import type { ShapeRef } from '@/types/ObjectRef';
 
 interface Shape {
     path: string, 
@@ -39,7 +40,16 @@ const canvas = inject('canvas') as Ref<InstanceType<typeof HandleableCanvas>>;
 function addElement(shape: Shape, point?: Vector2) {
     const position = point !== undefined ? canvas.value.toCanvasPoint(point) : new Vector2(960, 540);
     if (canvas.value.containPoint(position)) {
-        design.addElement(new ElementRef(position, 0, shape.size.clone(), 0, { path: shape.path, color: 'rgb(200, 200, 200)', border: false, borderColor: 'rgb(0, 0, 0)', borderThickness: 1 }));
+        design.addElement(new ElementRef(position, 0, shape.size.clone(), 0, 
+        { 
+            path: shape.path, 
+            color: 'rgb(200, 200, 200)', 
+            borderRef: {
+                type: 'none',
+                color: '#000000',
+                thickness: 1
+            }
+        } as ShapeRef));
     }
 }
 </script>

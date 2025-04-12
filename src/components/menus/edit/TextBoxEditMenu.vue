@@ -2,18 +2,19 @@
 import TransformChevron from '@/components/common/TransformChevron.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { TextBoxRef } from '@/types/ObjectRef';
-import { onMounted, ref, watch, watchEffect } from 'vue';
+import { onMounted, ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
-import Chevron from '@/components/common/Chevron.vue';
+import { ElementRef } from '@/components/design/Element.vue';
 
 
 const selector = useSelectorStore();
 
-const textRef = ref<TextBoxRef>(selector.selection[0].objectRef as TextBoxRef);
+const elementRef = ref<ElementRef>(selector.selection[0]);
+const textRef = ref<TextBoxRef>(elementRef.value.objectRef as TextBoxRef);
 const color = ref<string>("rbg(0, 0, 0)");
-watchEffect(() => {
-    textRef.value = selector.selection[0].objectRef as TextBoxRef;
-})
+// watchEffect(() => {
+//     textRef.value = selector.selection[0].objectRef as TextBoxRef;
+// })
 
 const style = ref<{ [key: string]: boolean }>({
     b: false,
@@ -173,15 +174,7 @@ function handleFontSize() {
             <ColorPicker v-model="color" class="w-8 h-8" />
         </div>
 
-        <Chevron :title="'테두리'" class="my-2">
-            <div>
-
-                </div>
-        </Chevron>
-
-
-        
-
-        <TransformChevron :disable-y="true" />
+        <!-- <BorderChevron :border="textRef.borderRef" class="my-2" /> -->
+        <TransformChevron :element="elementRef" :disable-y="true" />
     </div>
 </template>

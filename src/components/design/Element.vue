@@ -79,8 +79,8 @@ onBeforeUnmount(() => {
     <div ref="element" class="absolute" :style="{
         transformOrigin: 'left top',
         transform: `translate(${position.x}px, ${position.y}px) rotate(${element.rotation}deg) translate(${-size.x / 2}px, ${-size.y / 2}px) scale(${ratio})`,
-        width: `${element.size.x}px`,
-        height: `${element.size.y}px`,
+        width: `${Math.round(element.size.x)}px`,
+        height: `${Math.round(element.size.y)}px`,
         zIndex: `${element.z}`,
     }">
         <Shape v-if="instanceOfShapeRef(element.objectRef)" :element="element" />

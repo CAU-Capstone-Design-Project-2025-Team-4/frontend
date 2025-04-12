@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { ShapeRef } from '@/types/ObjectRef';
+import { type BorderRef, type ShapeRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
 }>();
 const shapeRef = computed<ShapeRef>(() => element.objectRef as ShapeRef);
+const borderRef = computed<BorderRef>(() => shapeRef.value.borderRef);
 
 const width = computed<number>(() => {
     if (element.size.x.toString() === '') return 0;
@@ -28,7 +29,11 @@ const height = computed<number>(() => {
 	        </clipPath>
         </defs>
         <g>
-	        <use :xlink:href="`#path-${element.id}`" :stroke-width="shapeRef.border ? shapeRef.borderThickness : 0" :stroke="shapeRef.borderColor" :fill="shapeRef.color" :clip-path="`url(#clip-${element.id})`"/>
+	        <use :xlink:href="`#path-${element.id}`" 
+            :stroke-width="borderRef.type === 'none' ? 0 : borderRef.thickness" 
+            :stroke="borderRef.color" 
+            :fill="shapeRef.color" 
+            :clip-path="`url(#clip-${element.id})`"/>
         </g>
     </svg>
 </template>
