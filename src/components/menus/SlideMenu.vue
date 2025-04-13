@@ -2,8 +2,7 @@
 import { useDesignStore } from '@/stores/design';
 import draggable from 'vuedraggable';
 import Canvas from '@/components/design/Canvas.vue';
-import { nextTick, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
-import Vector2 from '@/types/Vector2';
+import { nextTick, ref, useTemplateRef } from 'vue';
 import ContextMenu from '../common/ContextMenu.vue';
 
 const container = useTemplateRef<HTMLElement>('container');

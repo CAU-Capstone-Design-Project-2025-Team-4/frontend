@@ -159,36 +159,44 @@ export const useDesignStore = defineStore('design', () => {
         currentSlide.value.elements.splice(index, 1);
     }
 
-    function bringForward(element: ElementRef) {
-        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-        if (index + 1 > currentSlide.value.elements.length) return;
-
-        [currentSlide.value.elements[index].z, currentSlide.value.elements[index + 1].z] = [currentSlide.value.elements[index + 1].z, currentSlide.value.elements[index].z];
-        [currentSlide.value.elements[index], currentSlide.value.elements[index + 1]] = [currentSlide.value.elements[index + 1], currentSlide.value.elements[index]]
+    function bringForward(elements: ElementRef[]) {
+        elements.sort((e, f) => f.id - e.id).forEach(element => {
+            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+            if (index + 1 > currentSlide.value.elements.length) return;
+    
+            [currentSlide.value.elements[index].z, currentSlide.value.elements[index + 1].z] = [currentSlide.value.elements[index + 1].z, currentSlide.value.elements[index].z];
+            [currentSlide.value.elements[index], currentSlide.value.elements[index + 1]] = [currentSlide.value.elements[index + 1], currentSlide.value.elements[index]];
+        });
     }
 
-    function bringFront(element: ElementRef) {
-        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-        element.z = maxZ.value + 1;
+    function bringFront(elements: ElementRef[]) {
+        elements.sort((e, f) => e.id - f.id).forEach(element => {
+            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+            element.z = maxZ.value + 1;
 
-        currentSlide.value.elements.splice(index, 1);
-        currentSlide.value.elements.push(element);  
+            currentSlide.value.elements.splice(index, 1);
+            currentSlide.value.elements.push(element);  
+        });
     }
 
-    function sendBackward(element: ElementRef) {
-        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-        if (index - 1 < 0) return;
+    function sendBackward(elements: ElementRef[]) {
+        elements.sort((e, f) => e.id - f.id).forEach(element => {
+            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+            if (index - 1 < 0) return;
 
-        [currentSlide.value.elements[index].z, currentSlide.value.elements[index - 1].z] = [currentSlide.value.elements[index - 1].z, currentSlide.value.elements[index].z];
-        [currentSlide.value.elements[index], currentSlide.value.elements[index - 1]] = [currentSlide.value.elements[index - 1], currentSlide.value.elements[index]];
+            [currentSlide.value.elements[index].z, currentSlide.value.elements[index - 1].z] = [currentSlide.value.elements[index - 1].z, currentSlide.value.elements[index].z];
+            [currentSlide.value.elements[index], currentSlide.value.elements[index - 1]] = [currentSlide.value.elements[index - 1], currentSlide.value.elements[index]];
+        });
     }
 
-    function sendBack(element: ElementRef) {
-        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-        element.z = minZ.value - 1;
+    function sendBack(elements: ElementRef[]) {
+        elements.sort((e, f) => f.id - e.id).forEach(element => {
+            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+            element.z = minZ.value - 1;
 
-        currentSlide.value.elements.splice(index, 1);
-        currentSlide.value.elements.splice(0, 0, element);
+            currentSlide.value.elements.splice(index, 1);
+            currentSlide.value.elements.splice(0, 0, element);
+        });
     }
 
     return { 

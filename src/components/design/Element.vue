@@ -42,7 +42,6 @@ import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
 import { useSelectorStore } from '@/stores/selector';
 import Spatial from './objects/Spatial.vue';
-import ContextMenu from '../common/ContextMenu.vue';
 
 const { element, ratio } = defineProps<{
     element: ElementRef,
@@ -54,18 +53,6 @@ const size = computed<Vector2>(() => Vector2.Mult(element.size, ratio));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
-
-// const menu = useTemplateRef<InstanceType<typeof ContextMenu>>('context-menu');
-function openMenu(e: MouseEvent) {
-    e.preventDefault();
-
-    if (!e.ctrlKey) {
-        selector.deselectAll();
-    }
-    selector.select(element);
-
-    // menu.value?.open(e);
-}
 
 const selector = useSelectorStore();
 function select(e: PointerEvent) {
