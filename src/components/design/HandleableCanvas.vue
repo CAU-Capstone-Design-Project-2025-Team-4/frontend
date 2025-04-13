@@ -96,13 +96,24 @@ function deselectAll(e: PointerEvent) {
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
+    document.addEventListener('keyup', deleteElement);
     // nextTick(() => handleResize());
 })
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
     container.value?.removeEventListener('wheel', scaleByWheel);
+    document.removeEventListener('keyup', deleteElement);
 });
+
+function deleteElement(e: KeyboardEvent) {
+    const target = e.target as HTMLElement;
+    if (target.tagName !== 'BODY') return;
+    if (e.key !== 'Delete') return;
+
+    selector.idSelection.forEach(id => design.removeElement(id));
+    selector.deselectAll();
+}
 
 const design = useDesignStore();
 const selector = useSelectorStore();

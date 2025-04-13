@@ -110,11 +110,30 @@ export const useDesignStore = defineStore('design', () => {
         selectSlide(slides.value.length - 1);
     }
 
-    function removeSlide() {
-        if (selection.value < 0 || selection.value > slides.value.length - 1) return;
-        if (slides.value.length < 2) return;
-        slides.value.splice(selection.value, 1);
-        selection.value = Math.min(selection.value, slides.value.length - 1);
+    function insertSlide(index: number) {
+        if (index < 0 || index > slides.value.length - 1) return;
+
+        slides.value.splice(index + 1, 0, { elements: [] });
+        selectSlide(index + 1);
+    }
+
+    function duplicateSlide(index: number) {
+        if (index < 0 || index > slides.value.length - 1) return;
+
+        const duplicated = JSON.parse(JSON.stringify(slides.value[index]));
+        slides.value.splice(index, 0, duplicated);
+        selectSlide(index + 1);
+    }
+
+    function removeSlide(index: number) {
+        if (index < 0 || index > slides.value.length - 1) return;
+        if (slides.value.length < 2) {
+            window.alert('최소 1개의 슬라이드는 존재해야 합니다.')
+            return;
+        }
+
+        slides.value.splice(index, 1);
+        selection.value = Math.min(index, slides.value.length - 1);
     }
 
     function addElement(element: ElementRef) {
@@ -128,5 +147,6 @@ export const useDesignStore = defineStore('design', () => {
         currentSlide.value.elements.splice(index, 1);
     }
 
-    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide, addElement, removeElement };
+    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
+        addElement, removeElement };
 })
