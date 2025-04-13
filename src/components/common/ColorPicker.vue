@@ -27,7 +27,7 @@ function close(e: PointerEvent) {
 </script>
 <template>
     <div class="rounded-lg border border-slate-400" :style="{ backgroundColor: color }" @pointerdown="open()">
-        <div ref="color-picker" v-show="opened" class="absolute z-1000 mx-16">
+        <div ref="color-picker" v-show="opened" class="absolute z-10000 mx-16">
             <SketchPicker v-model="color" @pointerdown.stop="" />
         </div>
     </div>

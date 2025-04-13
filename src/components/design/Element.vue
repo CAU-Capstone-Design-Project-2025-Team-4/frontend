@@ -42,6 +42,7 @@ import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
 import { useSelectorStore } from '@/stores/selector';
 import Spatial from './objects/Spatial.vue';
+import ContextMenu from '../common/ContextMenu.vue';
 
 const { element, ratio } = defineProps<{
     element: ElementRef,
@@ -53,6 +54,18 @@ const size = computed<Vector2>(() => Vector2.Mult(element.size, ratio));
 
 const elementDiv = useTemplateRef<HTMLElement>('element');
 const handleable = inject<boolean>('handleable', false);
+
+// const menu = useTemplateRef<InstanceType<typeof ContextMenu>>('context-menu');
+function openMenu(e: MouseEvent) {
+    e.preventDefault();
+
+    if (!e.ctrlKey) {
+        selector.deselectAll();
+    }
+    selector.select(element);
+
+    // menu.value?.open(e);
+}
 
 const selector = useSelectorStore();
 function select(e: PointerEvent) {
@@ -66,11 +79,17 @@ function select(e: PointerEvent) {
 }
 
 onMounted(() => {
-    if (handleable) elementDiv.value?.addEventListener('pointerdown', select);
+    if (handleable) {
+        elementDiv.value?.addEventListener('pointerdown', select);
+        // elementDiv.value?.addEventListener('contextmenu', openMenu);
+    }
 })
 
 onBeforeUnmount(() => {
-    if (handleable) elementDiv.value?.removeEventListener('pointerdown', select);
+    if (handleable) {
+        elementDiv.value?.removeEventListener('pointerdown', select);
+        // elementDiv.value?.removeEventListener('contextmenu', openMenu);
+    }
 })
 
 </script>
@@ -81,7 +100,7 @@ onBeforeUnmount(() => {
         transform: `translate(${position.x}px, ${position.y}px) rotate(${element.rotation}deg) translate(${-size.x / 2}px, ${-size.y / 2}px) scale(${ratio})`,
         width: `${Math.round(element.size.x)}px`,
         height: `${Math.round(element.size.y)}px`,
-        zIndex: `${element.z}`,
+        zIndex: `${element.z + 1000}`,
     }">
         <Shape v-if="instanceOfShapeRef(element.objectRef)" :element="element" />
         <TextBox v-if="instanceOfTextBoxRef(element.objectRef)" :element="element" />

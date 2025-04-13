@@ -6,7 +6,7 @@ import { useSelectorStore } from "./selector";
 import type { ImageRef, ShapeRef, SpatialRef, TextBoxRef } from "@/types/ObjectRef";
 
 export interface Slide {
-    elements: ElementRef[]
+    elements: ElementRef[] // must be sorted by z-index
 }
 
 export const useDesignStore = defineStore('design', () => {
@@ -26,7 +26,7 @@ export const useDesignStore = defineStore('design', () => {
                     } 
                 } as ShapeRef),
 
-                new ElementRef(new Vector2(100, 100), 0, new Vector2(200, 200), 0, 
+                new ElementRef(new Vector2(100, 100), 0, new Vector2(200, 200), 1, 
                 { 
                     path: 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0', 
                     color: 'rgb(12, 23, 123)', 
@@ -37,7 +37,7 @@ export const useDesignStore = defineStore('design', () => {
                     } 
                 } as ShapeRef),
 
-                new ElementRef(new Vector2(600, 300), 0, new Vector2(800, 200), 0, 
+                new ElementRef(new Vector2(600, 300), 0, new Vector2(800, 200), 2, 
                 { 
                     text: '제목을 입력하세요.', 
                     size: 72, 
@@ -50,7 +50,7 @@ export const useDesignStore = defineStore('design', () => {
                     } 
                 } as TextBoxRef),
 
-                new ElementRef(new Vector2(1000, 500), 0, new Vector2(400, 200), 0, 
+                new ElementRef(new Vector2(1000, 500), 0, new Vector2(400, 200), 3, 
                 { 
                     url: 'src/assets/dog.jpg',
                     borderRef: {
@@ -60,7 +60,8 @@ export const useDesignStore = defineStore('design', () => {
                     } 
                 } as ImageRef),
 
-                new ElementRef(new Vector2(500, 700), 0, new Vector2(400, 400), 0, { 
+                new ElementRef(new Vector2(500, 700), 0, new Vector2(400, 400), 4, 
+                { 
                     cameraMode: 'free',
                     cameraTransform: {
                         position: { x: 0, y: 0, z: -10 },
@@ -98,6 +99,16 @@ export const useDesignStore = defineStore('design', () => {
 
     const selection = ref<number>(0);
     const currentSlide = computed<Slide>(() => slides.value[selection.value]);
+
+    const minZ = computed<number>(() => {
+        if (currentSlide.value.elements.length === 0) return 0;
+        return currentSlide.value.elements[0].z;
+    });
+    const maxZ = computed<number>(() => {
+        if (currentSlide.value.elements.length === 0) return 0;
+        return currentSlide.value.elements[currentSlide.value.elements.length - 1].z;
+    })
+
 
     function selectSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
@@ -137,6 +148,7 @@ export const useDesignStore = defineStore('design', () => {
     }
 
     function addElement(element: ElementRef) {
+        element.z = maxZ.value + 1;
         currentSlide.value.elements.push(element);
     }
 
@@ -147,6 +159,42 @@ export const useDesignStore = defineStore('design', () => {
         currentSlide.value.elements.splice(index, 1);
     }
 
-    return { slides, selection, currentSlide, selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
-        addElement, removeElement };
+    function bringForward(element: ElementRef) {
+        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+        if (index + 1 > currentSlide.value.elements.length) return;
+
+        [currentSlide.value.elements[index].z, currentSlide.value.elements[index + 1].z] = [currentSlide.value.elements[index + 1].z, currentSlide.value.elements[index].z];
+        [currentSlide.value.elements[index], currentSlide.value.elements[index + 1]] = [currentSlide.value.elements[index + 1], currentSlide.value.elements[index]]
+    }
+
+    function bringFront(element: ElementRef) {
+        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+        element.z = maxZ.value + 1;
+
+        currentSlide.value.elements.splice(index, 1);
+        currentSlide.value.elements.push(element);  
+    }
+
+    function sendBackward(element: ElementRef) {
+        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+        if (index - 1 < 0) return;
+
+        [currentSlide.value.elements[index].z, currentSlide.value.elements[index - 1].z] = [currentSlide.value.elements[index - 1].z, currentSlide.value.elements[index].z];
+        [currentSlide.value.elements[index], currentSlide.value.elements[index - 1]] = [currentSlide.value.elements[index - 1], currentSlide.value.elements[index]];
+    }
+
+    function sendBack(element: ElementRef) {
+        const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
+        element.z = minZ.value - 1;
+
+        currentSlide.value.elements.splice(index, 1);
+        currentSlide.value.elements.splice(0, 0, element);
+    }
+
+    return { 
+        slides, selection, currentSlide, 
+        selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
+        bringForward, bringFront, sendBackward, sendBack,
+        addElement, removeElement 
+    };
 })

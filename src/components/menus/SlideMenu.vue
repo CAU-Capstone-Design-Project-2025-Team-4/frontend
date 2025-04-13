@@ -4,6 +4,7 @@ import draggable from 'vuedraggable';
 import Canvas from '@/components/design/Canvas.vue';
 import { nextTick, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
 import Vector2 from '@/types/Vector2';
+import ContextMenu from '../common/ContextMenu.vue';
 
 const container = useTemplateRef<HTMLElement>('container');
 
@@ -32,23 +33,9 @@ function addSlide() {
 //     window.removeEventListener('keyup', deleteSlide);
 // });
 
-const menu = useTemplateRef<HTMLElement>('context-menu')
-const showMenu = ref<boolean>(false);
-const menuPosition = ref<Vector2>(Vector2.Zero());
+
+const menu = useTemplateRef<InstanceType<typeof ContextMenu>>('context-menu');
 const slideSelection = ref<number>(-1);
-
-function openMenu(e: MouseEvent, index: number) {
-    showMenu.value = true;
-    menuPosition.value = Vector2.PointFrom(e);
-    slideSelection.value = index;
-    document.addEventListener('pointerdown', closeMenu, { once: true, capture: true });
-}
-
-function closeMenu(e: PointerEvent) {
-    if (!menu.value?.contains(e.target as Node))
-        e.stopPropagation();
-    showMenu.value = false;
-}
 
 </script>
 <template>
@@ -56,12 +43,15 @@ function closeMenu(e: PointerEvent) {
         <draggable v-model="design.slides" item-key="'index'" animation="150" ghost-class="ghost" forceFallback="true" @end="onEnd($event)">
             <template #item="{ element: slide, index }">
                 <div class="relative flex justify-between w-full mb-2 p-1 aspect-[17.5/9]"
-                @pointerdown="design.selectSlide(index)" @contextmenu.prevent="openMenu($event, index)">
+                @pointerdown="design.selectSlide(index)" @contextmenu.prevent="menu?.open($event); slideSelection = index;">
                     <p :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
-                    <div class="relative h-full aspect-video">
-                        <Canvas :slide="slide" class="h-full aspect-video rounded-md border border-gray-400 hover:outline-2 hover:outline-solid hover:outline-teal-600"
-                        :class="{ 'outline-2 outline-solid outline-teal-700 hover:outline-teal-700': isSelected(index) }" />
-                        <!-- <div class="absolute top-2 right-2 w-8 h-6 rounded-md border border-gray-400 shadow-sm leading-3.5">...</div> -->
+                    <div class="h-full aspect-video">
+                        <div class="h-full aspect-video p-1 rounded-md border border-gray-400 hover:outline-2 hover:outline-solid hover:outline-teal-600"
+                        :class="{ 'outline-2 outline-solid outline-teal-700 hover:outline-teal-700': isSelected(index) }">
+                            <div class="relative w-full h-full">
+                                <Canvas class="" :slide="slide" />
+                            </div>  
+                        </div>
                     </div>
                 </div>
             </template>
@@ -72,25 +62,20 @@ function closeMenu(e: PointerEvent) {
         </div>
     </div>
 
-    <div ref="context-menu" v-if="showMenu" :style="{
-        left: `${menuPosition.x}px`,
-        top: `${menuPosition.y}px`
-    }" class="absolute w-fit h-fit z-900 rounded-xl border border-gray-100 bg-white shadow-lg">
-        <ul class="p-3">
-            <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.insertSlide(slideSelection)">
-                <div class="i-mdi-plus w-6 h-10 font-light" />
-                <p class="leading-10 px-2">슬라이드 추가</p>
-            </li>
-            <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.duplicateSlide(slideSelection)">
-                <div class="i-mdi:plus-box-multiple-outline w-6 h-10 font-light" />
-                <p class="leading-10 px-2">슬라이드 복제</p>
-            </li>
-            <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.removeSlide(slideSelection)">
-                <div class="i-material-symbols:delete-outline-rounded w-6 h-10 font-light" />
-                <p class="leading-10 px-2">슬라이드 삭제</p>
-            </li>
-        </ul>
-    </div>
+    <ContextMenu ref="context-menu">
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.insertSlide(slideSelection)">
+            <div class="i-mdi-plus w-6 h-10 font-light" />
+            <p class="leading-10 px-2">슬라이드 추가</p>
+        </li>
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.duplicateSlide(slideSelection)">
+            <div class="i-mdi:plus-box-multiple-outline w-6 h-10 font-light" />
+            <p class="leading-10 px-2">슬라이드 복제</p>
+        </li>
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.removeSlide(slideSelection)">
+            <div class="i-material-symbols:delete-outline-rounded w-6 h-10 font-light" />
+            <p class="leading-10 px-2">슬라이드 삭제</p>
+        </li>
+    </ContextMenu>
 </template>
 
 <style lang="css">

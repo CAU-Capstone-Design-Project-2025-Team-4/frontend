@@ -84,7 +84,7 @@ watch(() => spatialRef.value.backgroundColor, () => {
         </div>
 
         <div class="relative">
-            <div ref="dropdown" v-if="showDropdown" class="absolute w-full h-fit z-100 my-1 py-1 rounded-lg bg-white shadow-lg">
+            <div ref="dropdown" v-if="showDropdown" class="absolute w-full h-fit z-10000 my-1 py-1 rounded-lg bg-white shadow-lg">
                 <div v-for="(value, mode) in cameraModeList" class="flex items-center w-full h-10 p-2 hover:bg-gray-100" 
                 :class="{ 'bg-gray-100': spatialRef.cameraMode === mode }" @pointerdown="selectMode(mode)">
                     <div class="mr-2" :class="value.icon" />
