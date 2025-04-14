@@ -27,7 +27,8 @@ const { border } = defineProps<{
             <div v-if="border.type === 'solid'" class="mt-2 border-t border-slate-200">
                 <div class="flex items-center justify-between w-full h-8 mt-2">
                     <p class="text-left">색</p>
-                    <ColorPicker v-model="border.color" class="w-8 h-8 mr-1" />
+                    <ColorPicker v-model="border.color" class="w-8 h-8 mr-1 rounded-lg border border-slate-400"
+                    :style="{ backgroundColor: border.color }" />
                 </div>
                 <div class="flex items-center justify-between w-full h-8 mt-2">
                     <p class="text-left">두께</p>

@@ -5,16 +5,12 @@ import TransformChevron from '@/components/common/TransformChevron.vue';
 import { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { ShapeRef } from '@/types/ObjectRef';
-import { ref, watchEffect } from 'vue';
+import { computed } from 'vue';
 
 const selector = useSelectorStore();
 
-const elementRef = ref<ElementRef>(selector.selection[0]);
-const shapeRef = ref<ShapeRef>(elementRef.value.objectRef as ShapeRef);
-
-watchEffect(() => {
-    shapeRef.value = selector.selection[0].objectRef as ShapeRef;
-})
+const elementRef = computed<ElementRef>(() => selector.selection[0]);
+const shapeRef = computed<ShapeRef>(() => elementRef.value.objectRef as ShapeRef);
 </script>
 
 <template>
@@ -24,9 +20,10 @@ watchEffect(() => {
         <div class="px-3">
             <div class="flex items-center justify-between w-full h-16 mb-2">
                 <p class="text-left">채우기</p>
-                <ColorPicker v-model="shapeRef.color" class="w-12 h-12" />
+                <ColorPicker v-model="shapeRef.color" class="w-12 h-12 rounded-lg border border-slate-400" 
+                :style="{ backgroundColor: shapeRef.color }" />
             </div>
-            <BorderChevron :border="elementRef.objectRef.borderRef" class="my-2" />
+            <BorderChevron :border="shapeRef.borderRef" class="my-2" />
             <TransformChevron :element="elementRef" class="my-2" />
         </div>
         

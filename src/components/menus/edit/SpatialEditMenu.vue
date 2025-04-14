@@ -19,7 +19,7 @@ import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import { useUnityStore } from '@/stores/unity';
 import type { SpatialRef } from '@/types/ObjectRef';
-import { ref, useTemplateRef, watch } from 'vue';
+import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import BorderChevron from '@/components/common/BorderChevron.vue';
 
@@ -28,8 +28,8 @@ const unity = useUnityStore();
 const showDropdown = ref<boolean>(false);
 const selector = useSelectorStore();
 
-const elementRef = ref<ElementRef>(selector.selection[0]);
-const spatialRef = ref<SpatialRef>(elementRef.value.objectRef as SpatialRef);
+const elementRef = computed<ElementRef>(() => selector.selection[0]);
+const spatialRef = computed<SpatialRef>(() => elementRef.value.objectRef as SpatialRef);
 
 function selectMode(mode: 'free' | 'orbit') {
     spatialRef.value.cameraMode = mode;
@@ -174,7 +174,8 @@ watch(() => spatialRef.value.backgroundColor, () => {
                 <div v-if="spatialRef.backgroundColor !== 'default'" class="mt-2 border-t border-slate-200">
                     <div class="flex items-center justify-between w-full h-8 mt-2">
                         <p class="text-left">색</p>
-                        <ColorPicker v-model="spatialRef.backgroundColor" class="w-8 h-8 mr-1" />
+                        <ColorPicker v-model="spatialRef.backgroundColor" class="w-8 h-8 mr-1 rounded-lg border border-slate-400"
+                        :style="{ backgroundColor: spatialRef.backgroundColor }" />
                     </div>
                 </div>
             </div>

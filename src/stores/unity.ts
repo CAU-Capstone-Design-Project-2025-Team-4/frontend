@@ -36,7 +36,8 @@ export const useUnityStore = defineStore('unity', () => {
 
         sendMessage('LoadModel', spatialRef.model);
         sendMessage('SetCameraMode', spatialRef.cameraMode);
-        sendMessage('SetCameraTransform', JSON.stringify(spatialRef.cameraTransform))
+        sendMessage('SetCameraTransform', JSON.stringify(spatialRef.cameraTransform));
+        sendMessage('SetBackgroundColor', spatialRef.backgroundColor);
 
         instance.className = 'w-full h-full';
         parent.appendChild(instance);

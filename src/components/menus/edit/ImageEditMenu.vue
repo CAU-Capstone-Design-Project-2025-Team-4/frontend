@@ -4,16 +4,12 @@ import TransformChevron from '@/components/common/TransformChevron.vue';
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { ImageRef } from '@/types/ObjectRef';
-import { ref, watchEffect } from 'vue';
+import { computed } from 'vue';
 
 const selector = useSelectorStore();
 
-const elementRef = ref<ElementRef>(selector.selection[0]);
-const imageRef = ref<ImageRef>(elementRef.value.objectRef as ImageRef);
-
-watchEffect(() => {
-    imageRef.value = selector.selection[0].objectRef as ImageRef;
-})
+const elementRef = computed<ElementRef>(() => selector.selection[0]);
+const imageRef = computed<ImageRef>(() => elementRef.value.objectRef as ImageRef);
 </script>
 
 <template>
