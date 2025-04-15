@@ -12,12 +12,18 @@ const borderRef = computed<BorderRef>(() => spatialRef.value.borderRef);
 
 
 const unity = useUnityStore();
-
 const body = useTemplateRef<HTMLElement>('body');
 
 onMounted(() => {
     if (handleable || slideShow) {
-        unity.render(body.value!, spatialRef.value)
+        if (unity.hasInstance) {
+            unity.render(body.value!, spatialRef.value)
+        } else {
+            unity.addInstantiatedListener(() => {
+                unity.render(body.value!, spatialRef.value);
+            })
+        }
+        // unity.render(body.value!, spatialRef.value)
     }
 })
 

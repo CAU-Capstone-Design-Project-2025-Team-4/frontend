@@ -13,6 +13,8 @@ unity.sendMessage('SetPlayMode', 'show');
 
 function handleFullscreen() {
     if (document.fullscreenElement) return;
+    unity.sendMessage('EnableInput', 'false');
+    // unity.sendMessage('SetPlayMode',)
     router.back();
 }
 

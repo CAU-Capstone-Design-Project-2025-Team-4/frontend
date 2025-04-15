@@ -56,7 +56,7 @@ function uploadModel(e: Event) {
     fileReader.readAsDataURL(input.files![0]);
 
     fileReader.onload = () => {
-        spatialRef.value.model = "http://localhost:5173/model.fbx";
+        spatialRef.value.model = "http://localhost:5173/UFO_Empty.glb";
         unity.sendMessage('LoadModel', spatialRef.value.model);
         console.log(fileReader.result)
     }
@@ -64,12 +64,16 @@ function uploadModel(e: Event) {
 
 function changeTransform() {
     // debounce?
-    unity.sendMessage('SetCameraTransform', spatialRef.value.cameraTransform);
+    unity.sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.value.cameraTransform));
 }
 
 watch(() => spatialRef.value.backgroundColor, () => {
     // debounce?
-    unity.sendMessage('SetBackgroundColor', spatialRef.value.backgroundColor);
+    const cameraBackgroudMode = spatialRef.value.backgroundColor === 'skybox' ? 'skybox' : 'solid';
+    unity.sendMessage('SetCameraBackgroundMode', cameraBackgroudMode);
+    if (cameraBackgroudMode === 'solid') {
+        unity.sendMessage('SetCameraBackgroundColor', spatialRef.value.backgroundColor);
+    }
 })
 </script>
 
@@ -161,17 +165,17 @@ watch(() => spatialRef.value.backgroundColor, () => {
         </Chevron>
         <Chevron :title="'배경 색'" class="my-2">
             <div>
-                <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef.backgroundColor = 'default'">
+                <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef.backgroundColor = 'skybox'">
                     <div class="w-4 h-4 mr-2 rounded-full border border-slate-400"
-                    :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor === 'default' }"></div>
+                    :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor === 'skybox' }"></div>
                     <p>기본</p>
                 </div>
                 <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef.backgroundColor = '#000000'">
                     <div class="w-4 h-4 mr-2 rounded-full border border-slate-400"
-                    :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor !== 'default' }"></div>
+                    :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor !== 'skybox' }"></div>
                     <p>단색</p>
                 </div>
-                <div v-if="spatialRef.backgroundColor !== 'default'" class="mt-2 border-t border-slate-200">
+                <div v-if="spatialRef.backgroundColor !== 'skybox'" class="mt-2 border-t border-slate-200">
                     <div class="flex items-center justify-between w-full h-8 mt-2">
                         <p class="text-left">색</p>
                         <ColorPicker v-model="spatialRef.backgroundColor" class="w-8 h-8 mr-1 rounded-lg border border-slate-400"

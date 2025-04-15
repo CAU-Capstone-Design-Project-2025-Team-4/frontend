@@ -3,18 +3,21 @@ import HandleableCanvas from '@/components/design/HandleableCanvas.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import SideBar from '@/components/SideBar.vue';
 import { useUnityStore } from '@/stores/unity';
-import { nextTick, provide, useTemplateRef } from 'vue';
+import { nextTick, provide, ref, useTemplateRef, watch } from 'vue';
 
 const canvas = useTemplateRef<InstanceType<typeof HandleableCanvas>>('canvas');
 provide('canvas', canvas);
 
 // if using 3d object...
 const unity = useUnityStore();
-unity.instantiate()
-    .then(() => {
-        canvas.value?.handleResize();
-        unity.sendMessage('SetPlayMode', 'edit');
-    });
+// unity.addInstantiatedListener(() => {
+//     nextTick(() => canvas.value?.handleResize());
+//     unity.sendMessage('SetPlayMode', 'edit');
+// });
+unity.instantiate().then(() => {
+    nextTick(() => canvas.value?.handleResize());
+    unity.sendMessage('SetPlayMode', 'edit');
+})
 </script>
 
 <template>

@@ -97,7 +97,7 @@ onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
     document.addEventListener('keyup', deleteElement);
-    // nextTick(() => handleResize());
+    nextTick(() => handleResize());
 })
 
 onBeforeUnmount(() => {

@@ -68,7 +68,7 @@ export const useDesignStore = defineStore('design', () => {
                         rotation: { x: 0, y: 0, z: 0 }
                     },
                     model: null,
-                    backgroundColor: 'default',
+                    backgroundColor: 'skybox',
                     borderRef: {
                         type: 'none',
                         color: '#000000',
@@ -86,7 +86,7 @@ export const useDesignStore = defineStore('design', () => {
                         rotation: { x: 0, y: 0, z: 0 }
                     },
                     model: null,
-                    backgroundColor: 'default',
+                    backgroundColor: 'skybox',
                     borderRef: {
                         type: 'none',
                         color: '#000000',

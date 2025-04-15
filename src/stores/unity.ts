@@ -5,10 +5,10 @@ import { ref } from "vue";
 
 export const useUnityStore = defineStore('unity', () => {
     const context = new UnityWebgl({
-        loaderUrl: "unity.loader.js",
-        dataUrl: "unity.data.br",
-        frameworkUrl: "unity.framework.js.br",
-        codeUrl: "unity.wasm.br",
+        loaderUrl: "unity/Build.loader.js",
+        dataUrl: "unity/Build.data.br",
+        frameworkUrl: "unity/Build.framework.js.br",
+        codeUrl: "unity/Build.wasm.br",
     });
 
     const hasInstance = ref<boolean>(false);
@@ -26,32 +26,49 @@ export const useUnityStore = defineStore('unity', () => {
 
         await new Promise(resolve => setTimeout(resolve, 2500));
         hasInstance.value = true;
+
+        callbacks.forEach(callback => callback());
     }
 
-    function render(parent: HTMLElement, spatialRef: SpatialRef) {
-        if (instance === null) {
-            console.error('Unity context must be instantiated before rendering.')
-            return;
+    const callbacks: (() => void)[] = [];
+    function addInstantiatedListener(listener: () => void) {
+        callbacks.push(listener);
+    }
+
+    async function render(parent: HTMLElement, spatialRef: SpatialRef) {
+        if (!hasInstance.value) {
+            console.log('insta')
+            await instantiate();
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (spatialRef.model !== null) {
+            sendMessage('LoadModel', spatialRef.model ?? 'null');
+        }
+        sendMessage('SetCameraMode', spatialRef.cameraMode);
+        sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.cameraTransform));
+
+        const cameraBackgroundMode = spatialRef.backgroundColor === 'skybox' ? 'skybox' : 'solid';
+        console.log(cameraBackgroundMode);
+        sendMessage('SetCameraBackgroundMode', cameraBackgroundMode);
+        if (cameraBackgroundMode === 'solid') {
+            console.log('hi?')
+            sendMessage('SetCameraBackgroundColor', spatialRef.backgroundColor);
         }
 
-        sendMessage('LoadModel', spatialRef.model);
-        sendMessage('SetCameraMode', spatialRef.cameraMode);
-        sendMessage('SetCameraTransform', JSON.stringify(spatialRef.cameraTransform));
-        sendMessage('SetBackgroundColor', spatialRef.backgroundColor);
-
-        instance.className = 'w-full h-full';
-        parent.appendChild(instance);
+        instance!.className = 'w-full h-full';
+        parent.appendChild(instance!);
     }
 
-    type Method = 'LoadModel' | 'SetCameraMode' | 'SetPlayMode' | 'EnableInput' | 'SetCameraTransform' | 'SetBackgroundColor';
+    type Method = 'LoadModel' | 'SetCameraMode' | 'SetPlayMode' | 'EnableInput' | 'SetCameraPositionAndRotation' | 'SetCameraBackgroundMode' | 'SetCameraBackgroundColor';
     function sendMessage(method: Method, params: any) {
-        if (instance === null) {
-            console.error('Unity context must be instantiated before send message.')
+        if (!hasInstance.value) {
+            console.error('Unity context must be instantiated before send message.');
             return;
         }
 
         context.sendMessage('Web Message Handler', method, params);
     }
 
-    return { instantiate, hasInstance, render, sendMessage }
+    return { instantiate, hasInstance, addInstantiatedListener, render, sendMessage }
 })

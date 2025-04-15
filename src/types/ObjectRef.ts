@@ -30,7 +30,7 @@ export interface SpatialRef extends ObjectRef {
         rotation: { x: number, y: number, z: number }
     }  
     model: string | null,
-    backgroundColor: 'default' | string,
+    backgroundColor: 'skybox' | string,
 }
 
 export function instanceOfShapeRef(ref: ObjectRef): ref is ShapeRef {
