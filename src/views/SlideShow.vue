@@ -1,32 +1,37 @@
 <script setup lang="ts">
 import { useDesignStore } from '@/stores/design';
 import Canvas from '@/components/design/Canvas.vue';
-import { onMounted, onUnmounted, provide, ref } from 'vue';
+import { inject, onMounted, onUnmounted, provide, ref, type Ref } from 'vue';
 import router from '@/router';
-import { useUnityStore } from '@/stores/unity';
+import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 
 const design = useDesignStore();
 const current = ref<number>(0);
 
-const unity = useUnityStore();
-unity.sendMessage('SetPlayMode', 'show');
+const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
+
+unity.value.sendMessage('SetPlayMode', 'show');
 
 function handleFullscreen() {
     if (document.fullscreenElement) return;
-    unity.sendMessage('EnableInput', 'false');
+    unity.value.sendMessage('EnableInput', 'false');
     // unity.sendMessage('SetPlayMode',)
     router.back();
 }
 
 
 let focusUnity: boolean =  false;
+let target: HTMLElement | null;
 function nextSlide(e: PointerEvent) {
     if (focusUnity) return;
 
-    const target = e.target as HTMLElement;
+    target = e.target as HTMLElement;
     if (target.id === 'unity-canvas') {
         focusUnity = true;
-        unity.sendMessage('EnableInput', 'true');
+
+        unity.value.requestPointerLock();
+        unity.value.sendMessage('EnableInput', 'true');
+
         document.addEventListener('keydown', removeFocus);
         return;
     }
@@ -43,7 +48,11 @@ function removeFocus(e: KeyboardEvent) {
         e.preventDefault();
 
         focusUnity = false;
-        unity.sendMessage('EnableInput', 'false');
+        target = null;
+
+        document.exitPointerLock();
+        unity.value.sendMessage('EnableInput', 'false');
+
         document.removeEventListener('keydown', removeFocus);
     }
 }

@@ -17,13 +17,13 @@ import Chevron from '@/components/common/Chevron.vue';
 import TransformChevron from '@/components/common/TransformChevron.vue';
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
-import { useUnityStore } from '@/stores/unity';
 import type { SpatialRef } from '@/types/ObjectRef';
-import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, inject, ref, useTemplateRef, watch, type Ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import BorderChevron from '@/components/common/BorderChevron.vue';
+import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 
-const unity = useUnityStore();
+const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
 const showDropdown = ref<boolean>(false);
 const selector = useSelectorStore();
@@ -33,7 +33,7 @@ const spatialRef = computed<SpatialRef>(() => elementRef.value.objectRef as Spat
 
 function selectMode(mode: 'free' | 'orbit') {
     spatialRef.value.cameraMode = mode;
-    unity.sendMessage('SetCameraMode', mode);
+    unity.value.sendMessage('SetCameraMode', mode);
     showDropdown.value = false;
 }
 
@@ -57,22 +57,22 @@ function uploadModel(e: Event) {
 
     fileReader.onload = () => {
         spatialRef.value.model = "http://localhost:5173/UFO_Empty.glb";
-        unity.sendMessage('LoadModel', spatialRef.value.model);
+        unity.value.sendMessage('LoadModel', spatialRef.value.model);
         console.log(fileReader.result)
     }
 }
 
 function changeTransform() {
     // debounce?
-    unity.sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.value.cameraTransform));
+    unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.value.cameraTransform));
 }
 
 watch(() => spatialRef.value.backgroundColor, () => {
     // debounce?
     const cameraBackgroudMode = spatialRef.value.backgroundColor === 'skybox' ? 'skybox' : 'solid';
-    unity.sendMessage('SetCameraBackgroundMode', cameraBackgroudMode);
+    unity.value.sendMessage('SetCameraBackgroundMode', cameraBackgroudMode);
     if (cameraBackgroudMode === 'solid') {
-        unity.sendMessage('SetCameraBackgroundColor', spatialRef.value.backgroundColor);
+        unity.value.sendMessage('SetCameraBackgroundColor', spatialRef.value.backgroundColor);
     }
 })
 </script>
