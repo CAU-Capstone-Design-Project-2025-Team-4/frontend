@@ -22,7 +22,12 @@ const templates: TextBox[] = [
             text: "제목을 입력하세요.",
             size: 72,
             weight: 800,
-            align: 'center'
+            align: 'center',
+            borderRef: {
+                type: 'none',
+                color: '#000000',
+                thickness: 1
+            } 
         }
         
     },
@@ -33,7 +38,12 @@ const templates: TextBox[] = [
             text: "부제목을 입력하세요.",
             size: 48,
             weight: 700,
-            align: 'center'
+            align: 'center',
+            borderRef: {
+                type: 'none',
+                color: '#000000',
+                thickness: 1
+            } 
         }
     },
     {
@@ -43,7 +53,12 @@ const templates: TextBox[] = [
             text: "내용을 입력하세요.",
             size: 16,
             weight: 400,
-            align: 'center'
+            align: 'center',
+            borderRef: {
+                type: 'none',
+                color: '#000000',
+                thickness: 1
+            } 
         }
     },
 ];
@@ -51,7 +66,7 @@ const templates: TextBox[] = [
 const design = useDesignStore();
 const selector = useSelectorStore();
 function addElement(template: TextBox) {
-    const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(template.ref.text.length * template.ref.size + 100, 200), 0, { text: template.ref.text, size: template.ref.size, weight: template.ref.weight });
+    const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(template.ref.text.length * template.ref.size + 100, 200), 0, template.ref);
     design.addElement(element);
 
     selector.deselectAll();

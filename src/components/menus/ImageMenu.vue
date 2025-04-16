@@ -2,6 +2,7 @@
 import { useDesignStore } from '@/stores/design';
 import { ElementRef } from '../design/Element.vue';
 import Vector2 from '@/types/Vector2';
+import type { ImageRef } from '@/types/ObjectRef';
 
 const design = useDesignStore();
 
@@ -16,7 +17,14 @@ function addImage(e: Event) {
         image.src = fileReader.result as string;
 
         image.onload = () => {
-            const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(image.width, image.height), 0, { url: fileReader.result });
+            const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(image.width, image.height), 0, { 
+                url: fileReader.result,
+                borderRef: {
+                    type: 'none',
+                    color: '#000000',
+                    thickness: 1
+                } 
+            } as ImageRef);
             design.addElement(element);
         }
     }
