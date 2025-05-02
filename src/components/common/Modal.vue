@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core';
+import { onClickOutside, useEventListener } from '@vueuse/core';
 import { ref, useTemplateRef } from 'vue';
 
 defineExpose({ open, close });
@@ -22,6 +22,13 @@ function close() {
     emit('closed');
 }
 
+useEventListener(document, 'keydown', (e) => {
+    if (show.value) {
+        if (e.key == "Escape") {
+            close();
+        }
+    }
+})
 </script>
 
 <template>
