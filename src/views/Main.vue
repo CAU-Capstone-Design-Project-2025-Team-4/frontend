@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import Modal from '@/components/common/Modal.vue';
+import Profile from '@/components/Profile.vue';
+import router from '@/router';
+import { useAuthStore } from '@/stores/auth';
 import type { LoginResponseDTO } from '@/types/DTO';
 import axios from 'axios';
 import { computed, ref, useTemplateRef } from 'vue';
+
+const auth = useAuthStore();
 
 const loginModal = useTemplateRef<InstanceType<typeof Modal>>('login-modal');
 const registerModal = useTemplateRef<InstanceType<typeof Modal>>('register-modal');
@@ -64,7 +69,8 @@ async function tryLogin() {
         password: password.value
     }).then(res => {
         const loginResponse: LoginResponseDTO = res.data.data;
-        localStorage.setItem('jwtToken', loginResponse.jwtToken);
+        auth.login(loginResponse);
+
         console.log('login success.', loginResponse);
 
         loginModal.value?.close();
@@ -132,20 +138,35 @@ function resetRegisterModal() {
     passwordWarning.value = "";
     viewPassword.value = false;
 }
+
+function toEditorView() {
+    router.push('/editor').then(() => location.reload());
+}
 </script>
 
 
 <template>
     <div>
-        <button @click="loginModal?.open()" class="btn border-0">Login</button>
-        <button @click="registerModal?.open()" class="btn border-0">Register</button>
+        <div v-if="!auth.isAuthenticated()" class="flex justify-center w-screen h-16 p-2">
+            <button @click="loginModal?.open()" class="w-20 h-12 p-2 mr-2 rounded-md border-0 hover:bg-gray-200" :style="{ outline: 'none' }">로그인</button>
+            <button @click="registerModal?.open()" class="w-40 h-12 p-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
+                <p class="text-white">회원 가입</p>
+            </button>
+        </div>
+
+        <div v-else class="flex justify-center  w-screen h-16 p-2">
+            <button @click="toEditorView()" class="w-40 h-12 p-2 mr-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
+                <p class="text-white">디자인 만들기</p>
+            </button>
+            <Profile :name="auth.name!"></Profile>
+        </div>
         
         <Modal ref="login-modal" @closed="resetLoginModal()">
-            <p class="font-bold text-xl mb-8">PRISM 로그인</p>
+            <p class="font-bold text-xl mb-8 select-none">PRISM 로그인</p>
 
             <form @submit.prevent="tryLogin()">
                 <div class="relative w-80 mb-4">
-                    <p class="mb-1">이메일</p>
+                    <p class="mb-1 select-none">이메일</p>
                     <input v-model="email" @input="handleEmailInput()" placeholder="ID@example.com" 
                     class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300"
                     :class="emailWarning.length > 0 ? 'outline-red-700 border-red-700 hover:border-red-700' : 'outline-teal-500 hover:border-teal-500'" />
@@ -153,7 +174,7 @@ function resetRegisterModal() {
                 </div>
 
                 <div class="relative w-80 mb-6">
-                    <p class="mb-1">비밀번호</p>
+                    <p class="mb-1 select-none">비밀번호</p>
                     <input v-model="password" @input="handlePasswordInput()" :type="viewPassword ? '' : 'password'" placeholder="비밀번호를 입력해주세요."
                     class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300"
                     :class="passwordWarning.length > 0 ? 'outline-red-700 border-red-700 hover:border-red-700' : 'outline-teal-500 hover:border-teal-500'" />
@@ -163,24 +184,24 @@ function resetRegisterModal() {
                     <p v-show="passwordWarning.length > 0" class="text-sm text-red-700 mt-1">{{ passwordWarning }}</p>
                 </div>
 
-                <button type="submit" class="btn w-80 h-10 p-0 mb-4 rounded-md border-0 bg-teal-500 focus:brightness-110" :style="{ outline: 'none' }">
+                <button type="submit" class="btn w-80 h-10 p-0 mb-4 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
                     <p class="text-sm text-white font-bold leading-10">로그인</p>
                 </button>
             </form>       
             
             <div class="flex justify-center">
-                <p class="text-gray-500 mr-2">아직 회원이 아니신가요?</p>
-                <button class="p-0 border-0 font-bold text-teal-500" :style="{ outline: 'none' }"
+                <p class="text-gray-500 mr-2 select-none">아직 회원이 아니신가요?</p>
+                <button class="p-0 border-0 font-bold text-teal-500 select-none" :style="{ outline: 'none' }"
                 @pointerup="loginModal?.close(); registerModal?.open()">회원 가입</button>
             </div>
         </Modal>
 
         <Modal ref="register-modal" @closed="resetRegisterModal()">
-            <p class="font-bold text-xl mb-8">PRISM 가입</p>
+            <p class="font-bold text-xl mb-8 select-none">PRISM 가입</p>
 
             <form @submit.prevent="tryRegister()">
                 <div class="relative w-80 mb-4">
-                    <p class="mb-1">이름</p>
+                    <p class="mb-1 select-none">이름</p>
                     <input v-model="name" @input="handleNameInput()" placeholder="이름을 입력해주세요." 
                     class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300"
                     :class="nameWarning.length > 0 ? 'outline-red-700 border-red-700 hover:border-red-700' : 'outline-teal-500 hover:border-teal-500'" />
@@ -188,7 +209,7 @@ function resetRegisterModal() {
                 </div>
 
                 <div class="relative w-80 mb-4">
-                    <p class="mb-1">이메일</p>
+                    <p class="mb-1 select-none">이메일</p>
                     <input v-model="email" @input="handleEmailInput()" placeholder="ID@example.com" 
                     class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300"
                     :class="emailWarning.length > 0 ? 'outline-red-700 border-red-700 hover:border-red-700' : 'outline-teal-500 hover:border-teal-500'" />
@@ -196,7 +217,7 @@ function resetRegisterModal() {
                 </div>
 
                 <div class="relative w-80 mb-6">
-                    <p class="mb-1">비밀번호</p>
+                    <p class="mb-1 select-none">비밀번호</p>
                     <input v-model="password" @input="handlePasswordInput()" :type="viewPassword ? '' : 'password'" placeholder="비밀번호를 입력해주세요."
                     class="block w-full h-10 px-2 mb-2 text-sm rounded-md border border-gray-300"
                     :class="passwordWarning.length > 0 ? 'outline-red-700 border-red-700 hover:border-red-700' : 'outline-teal-500 hover:border-teal-500'" />
@@ -215,13 +236,13 @@ function resetRegisterModal() {
                 </div>
 
                 <button type="submit" :disabled="registerDisabled" class="btn w-80 h-10 p-0 mb-4 rounded-md border-0 bg-teal-500 
-                focus:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed" :style="{ outline: 'none' }">
+                focus:brightness-110 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed" :style="{ outline: 'none' }">
                     <p class="text-sm text-white font-bold leading-10">가입하기</p>
                 </button>
 
                 <div class="flex justify-center">
-                    <p class="text-gray-500 mr-2">이미 회원이신가요?</p>
-                    <button class="p-0 border-0 font-bold text-teal-500" :style="{ outline: 'none' }"
+                    <p class="text-gray-500 mr-2 select-none">이미 회원이신가요?</p>
+                    <button class="p-0 border-0 font-bold text-teal-500 select-none" :style="{ outline: 'none' }"
                     @pointerup="registerModal?.close(); loginModal?.open()">로그인</button>
                 </div>
             </form>       
