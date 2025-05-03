@@ -31,7 +31,7 @@ onMounted(() => {
 })
 
 function toWorkspaceView() {
-    router.push('/workspace').then(() => location.reload());
+    router.push('/workspace');
 }
 </script>
 

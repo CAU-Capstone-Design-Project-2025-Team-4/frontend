@@ -3,7 +3,7 @@ import Vector2 from "@/types/Vector2";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useSelectorStore } from "./selector";
-import type { ImageRef, ShapeRef, SpatialRef, TextBoxRef } from "@/types/ObjectRef";
+import { instanceOfSpatialRef, type ImageRef, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
 
 export interface Slide {
     elements: ElementRef[] // must be sorted by z-index

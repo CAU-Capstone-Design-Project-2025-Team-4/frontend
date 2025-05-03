@@ -140,7 +140,7 @@ function resetRegisterModal() {
 }
 
 function toEditorView() {
-    router.push('/editor').then(() => location.reload());
+    router.push('/editor');
 }
 </script>
 

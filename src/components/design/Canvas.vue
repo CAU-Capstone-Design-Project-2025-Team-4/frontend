@@ -48,8 +48,8 @@ function openMenu(e: MouseEvent, element: ElementRef) {
 </script>
 
 <template>
-    <div class="">
-        <div ref="canvas" class="absolute w-full h-full overflow-hidden " :style="{backgroundColor: 'white'}">
+    <div>
+        <div ref="canvas" class="absolute w-full h-full overflow-hidden" :style="{backgroundColor: 'white'}">
             <Element v-for="element in slide.elements" :element="element" :ratio="ratio" @contextmenu="openMenu($event, element)" />
         </div>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SpatialRef } from '@/types/ObjectRef';
 import UnityWebgl from 'unity-webgl';
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 
 const context = new UnityWebgl({
     loaderUrl: "unity/Build.loader.js",
@@ -10,7 +10,10 @@ const context = new UnityWebgl({
     codeUrl: "unity/Build.wasm.br",
     companyName: 'CAU Capsotne',
     productName: 'PRISM',
-    productVersion: 'v0.1.0-alpha'
+    productVersion: 'v0.1.0-alpha',
+    webglContextAttributes: {
+        preserveDrawingBuffer: true,
+    }
 });
 
 const BASE_CONTAINER = 'body';
@@ -20,6 +23,10 @@ const canvas = useTemplateRef<HTMLElement>('unity-canvas');
 const instanceManager = createInstanceManager();
 const isCreatingInstance = ref<boolean>(false);
 
+let instantiatedCallback: () => void;
+function setInstantiatedListener(callback: () => void) {
+    instantiatedCallback = callback;
+}
 
 function createInstanceManager() {
     let instancePromise: Promise<void> | null = null;
@@ -30,8 +37,11 @@ function createInstanceManager() {
 
         instancePromise = new Promise<void>(async resolve => {
             await context.render(canvas.value as HTMLCanvasElement);
-            await new Promise(resolve => setTimeout(resolve, 100));
+
             resolve();
+
+            await new Promise(resolve => setTimeout(resolve, 1));
+            instantiatedCallback();
 
             console.log('[UnityCanvas] Instantiate finished.');
         });
@@ -84,7 +94,8 @@ defineExpose({
     isCreatingInstance,
     render, unmount,
     sendMessage,
-    requestPointerLock
+    requestPointerLock,
+    setInstantiatedListener
 })
 
 </script>

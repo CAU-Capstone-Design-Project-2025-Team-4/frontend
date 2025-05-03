@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, type Ref } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
 import DragBox from '@/components/design/DragBox.vue';
+import { toPng } from 'html-to-image';
+import type UnityCanvas from './objects/UnityCanvas.vue';
 
 const position = ref<Vector2>(Vector2.Zero());
 const scale = ref<number>(1);
@@ -32,6 +34,17 @@ function containPoint(point: Vector2): boolean {
     return 0 <= point.x && point.x <= size.value.x && 0 <= point.y && point.y < size.value.y;
 }
 
+const canvas = useTemplateRef<HTMLElement>('canvas');
+function capture(): HTMLImageElement | null {
+    toPng(canvas.value!).then(url => {
+        const image = new Image();
+        image.src = url;
+
+        return image;
+    });
+    return null;
+}
+
 defineExpose({
     position,
     scale,
@@ -41,7 +54,8 @@ defineExpose({
     toScreenPoint,
     toCanvasPoint,
     containPoint,
-    handleResize
+    handleResize,
+    capture
 });
 
 
@@ -119,6 +133,10 @@ const design = useDesignStore();
 const selector = useSelectorStore();
 
 provide<boolean>('handleable', true);
+
+const refresh = ref<number>(0);
+const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
+unity.value.setInstantiatedListener(() => refresh.value++);
 </script>
 
 <template>
@@ -129,7 +147,9 @@ provide<boolean>('handleable', true);
             width: `${size.x}px`,
             height: `${size.y}px`
         }">
-            <Canvas :slide="design.currentSlide" class="w-full h-full" @dragover.prevent="" />
+            <div ref="canvas" class="w-full h-full">
+                <Canvas :slide="design.currentSlide" class="w-full h-full" @dragover.prevent="" :key="refresh" />
+            </div>
         </div>
         <Handler />
         <DragBox :container="container" />
