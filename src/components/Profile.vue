@@ -43,7 +43,7 @@ function logout() {
 
 <template>
     <div class="relative">
-        <button @pointerup="dropdown?.open()" class="w-12 h-12 p-1 overflow-hidden rounded-md border-0 hover:brightness-90" 
+        <button @pointerup.left="dropdown?.open()" class="w-12 h-12 p-1 overflow-hidden rounded-md border-0 hover:brightness-90" 
         :style="{ outline: 'none', backgroundColor: color }">
             <p class="text-white text-sm w-full h-full leading-10">{{ name }}</p>
         </button>
@@ -59,11 +59,11 @@ function logout() {
                     <p class="text-left text-xs text-gray-500">{{ email }}</p>
                 </div>
             </div>
-            <button @pointerup="toWorkspaceView()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
+            <button @pointerup.left="toWorkspaceView()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
                 <div class="w-6 h-6 mr-2 i-mdi:folder-edit-outline" />
                 <p class="leading-6.5">워크스페이스</p>
             </button>
-            <button @pointerup="logout()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
+            <button @pointerup.left="logout()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
                 <div class="w-6 h-6 mr-2 i-mdi:logout" />
                 <p class="leading-6">로그아웃</p>
             </button>

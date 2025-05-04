@@ -29,14 +29,12 @@ function enterSlideShow() {
 
 onMounted(() => {
     const route = useRoute();
-    console.log(route)
     if (!route.params.id) {
-        console.error('no id');
+        router.replace('/');
         return;
     }
 
     const design = useDesignStore();
-    console.log(Number(route.params.id))
     design.loadFromServer(Number(route.params.id));
 })
 

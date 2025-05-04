@@ -8,7 +8,7 @@ import { instanceOfTextBoxRef } from '@/types/ObjectRef';
 import { useDraggable } from '@/common/draggable';
 import type { ElementRef } from './Element.vue';
 import ContextMenu from '../common/ContextMenu.vue';
-import { useDesignStore } from '@/stores/design';
+import ObjectContext from './common/ObjectContext.vue';
 
 enum HandlerType {
     NONE         = 1 << 0,
@@ -188,11 +188,8 @@ function resize(dir: string, delta: Vector2) {
     element.position.add(Vector2.Mult(normal, magnitude / 2));
 }
 
-const design = useDesignStore();
 const menu = useTemplateRef<InstanceType<typeof ContextMenu>>('context-menu');
 function openMenu(e: MouseEvent) {
-    e.preventDefault();
-
     menu.value?.open(e);
 }
 
@@ -210,7 +207,7 @@ function openMenu(e: MouseEvent) {
             height: `${element.size.y}px`
         }" />
         
-        <div ref="move-handler" :class="{ 'invisible': !isHandlerMatch(HandlerType.MOVE) }" class="absolute w-full h-full pointer-events-auto" @contextmenu="openMenu($event)"/>
+        <div ref="move-handler" :class="{ 'invisible': !isHandlerMatch(HandlerType.MOVE) }" class="absolute w-full h-full pointer-events-auto" @contextmenu.prevent="openMenu($event)"/>
 
         <div :class="{ 'invisible': !isHandlerMatch(HandlerType.RESIZE) }" class="absolute w-full h-full pointer-events-none ">
             <div ref="resize-n" class="absolute top-0 w-full h-8 -my-4 pointer-events-auto cursor-n-resize" />
@@ -252,21 +249,6 @@ function openMenu(e: MouseEvent) {
     </div>
 
     <ContextMenu ref="context-menu">
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.bringFront(selection)">
-            <div class="i-mdi:arrange-bring-to-front w-6 h-10 font-light" />
-            <p class="leading-10 px-2">맨 앞으로 가져오기</p>
-        </li>
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.bringForward(selection)">
-            <div class="i-mdi:arrange-bring-forward w-6 h-10 font-light" />
-            <p class="leading-10 px-2">앞으로 가져오기</p>
-        </li>
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.sendBackward(selection)">
-            <div class="i-mdi:arrange-send-backward w-6 h-10 font-light" />
-            <p class="leading-10 px-2">뒤로 보내기</p>
-        </li>
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.sendBack(selection)">
-            <div class="i-mdi:arrange-send-to-back w-6 h-10 font-light" />
-            <p class="leading-10 px-2">맨 뒤로 보내기</p>
-        </li>
+        <ObjectContext />
     </ContextMenu>
 </template>

@@ -62,7 +62,7 @@ export const useDesignStore = defineStore('design', () => {
     function removeSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
         if (slides.value.length < 2) {
-            window.alert('최소 1개의 슬라이드는 존재해야 합니다.')
+            window.alert('최소 1 개의 슬라이드는 존재해야 합니다.')
             return;
         }
 
@@ -82,51 +82,10 @@ export const useDesignStore = defineStore('design', () => {
         currentSlide.value.elements.splice(index, 1);
     }
 
-    function bringForward(elements: ElementRef[]) {
-        elements.sort((e, f) => f.id - e.id).forEach(element => {
-            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-            if (index + 1 > currentSlide.value.elements.length) return;
-    
-            [currentSlide.value.elements[index].z, currentSlide.value.elements[index + 1].z] = [currentSlide.value.elements[index + 1].z, currentSlide.value.elements[index].z];
-            [currentSlide.value.elements[index], currentSlide.value.elements[index + 1]] = [currentSlide.value.elements[index + 1], currentSlide.value.elements[index]];
-        });
-    }
-
-    function bringFront(elements: ElementRef[]) {
-        elements.sort((e, f) => e.id - f.id).forEach(element => {
-            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-            element.z = maxZ.value + 1;
-
-            currentSlide.value.elements.splice(index, 1);
-            currentSlide.value.elements.push(element);  
-        });
-    }
-
-    function sendBackward(elements: ElementRef[]) {
-        elements.sort((e, f) => e.id - f.id).forEach(element => {
-            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-            if (index - 1 < 0) return;
-
-            [currentSlide.value.elements[index].z, currentSlide.value.elements[index - 1].z] = [currentSlide.value.elements[index - 1].z, currentSlide.value.elements[index].z];
-            [currentSlide.value.elements[index], currentSlide.value.elements[index - 1]] = [currentSlide.value.elements[index - 1], currentSlide.value.elements[index]];
-        });
-    }
-
-    function sendBack(elements: ElementRef[]) {
-        elements.sort((e, f) => f.id - e.id).forEach(element => {
-            const index = currentSlide.value.elements.findIndex(_element => _element.id === element.id);
-            element.z = minZ.value - 1;
-
-            currentSlide.value.elements.splice(index, 1);
-            currentSlide.value.elements.splice(0, 0, element);
-        });
-    }
-
     return { 
         loadFromServer,
         slides, selection, currentSlide, 
         selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
-        bringForward, bringFront, sendBackward, sendBack,
         addElement, removeElement 
     };
 })

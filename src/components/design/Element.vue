@@ -68,14 +68,12 @@ function select(e: PointerEvent) {
 onMounted(() => {
     if (handleable) {
         elementDiv.value?.addEventListener('pointerdown', select);
-        // elementDiv.value?.addEventListener('contextmenu', openMenu);
     }
 })
 
 onBeforeUnmount(() => {
     if (handleable) {
         elementDiv.value?.removeEventListener('pointerdown', select);
-        // elementDiv.value?.removeEventListener('contextmenu', openMenu);
     }
 })
 

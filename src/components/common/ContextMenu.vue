@@ -4,19 +4,17 @@ import { ref, useTemplateRef } from 'vue';
 
 defineExpose({ open });
 
-const menu = useTemplateRef<HTMLElement>('context-menu')
+// const menu = useTemplateRef<HTMLElement>('context-menu')
 const show = ref<boolean>(false);
 const position = ref<Vector2>(Vector2.Zero());
 
 function open(e: MouseEvent) {
     show.value = true;
     position.value = Vector2.PointFrom(e);
-    document.addEventListener('pointerdown', close, { once: true, capture: true });
+    document.addEventListener('pointerup', close, { once: true, capture: true });
 }
 
 function close(e: PointerEvent) {
-    if (!menu.value?.contains(e.target as Node))
-        e.stopPropagation();
     show.value = false;
 }
 </script>

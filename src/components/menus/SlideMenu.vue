@@ -19,20 +19,6 @@ function addSlide() {
     nextTick(() => container.value?.scrollTo(0, container.value.scrollHeight));
 }
 
-// function deleteSlide(e: KeyboardEvent) {
-//     if (e.key != 'Delete') return;
-//     design.removeSlide();
-// }
-
-// onMounted(() => {
-//     window.addEventListener('keyup', deleteSlide);
-// });
-
-// onUnmounted(() => {
-//     window.removeEventListener('keyup', deleteSlide);
-// });
-
-
 const menu = useTemplateRef<InstanceType<typeof ContextMenu>>('context-menu');
 const slideSelection = ref<number>(-1);
 
@@ -41,15 +27,13 @@ const slideSelection = ref<number>(-1);
     <div ref="container">
         <draggable v-model="design.slides" item-key="'index'" animation="150" ghost-class="ghost" forceFallback="true" @end="onEnd($event)">
             <template #item="{ element: slide, index }">
-                <div class="relative flex justify-between w-full mb-2 p-1 aspect-[17.5/9]"
-                @pointerdown="design.selectSlide(index)" @contextmenu.prevent="menu?.open($event); slideSelection = index;">
-                    <p :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
-                    <div class="h-full aspect-video">
-                        <div class="h-full aspect-video p-1 rounded-md border border-gray-400 hover:outline-2 hover:outline-solid hover:outline-teal-600"
-                        :class="{ 'outline-2 outline-solid outline-teal-700 hover:outline-teal-700': isSelected(index) }">
-                            <div class="relative w-full h-full">
-                                <Canvas class="" :slide="slide" />
-                            </div>  
+                <div class="p-1">
+                    <div class="relative w-full aspect-[2] mb-2"
+                    @pointerdown="design.selectSlide(index)" @contextmenu.prevent="menu?.open($event); slideSelection = index;">
+                        <p class="absolute left-1" :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
+                        <div class="absolute right-0 h-full aspect-video rounded-md border border-gray-400 hover:border-teal-600"
+                        :class="{ 'border-3 border-teal-700 hover:border-teal-700': isSelected(index) }">
+                            <img />
                         </div>
                     </div>
                 </div>

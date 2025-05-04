@@ -29,6 +29,7 @@ function queryDesignList() {
     }).catch(err => {
         const statusCode = err.status;
         switch (statusCode) {
+            case 401:
             case 403:
                 console.error("JwtToken expired.");
                 break;
@@ -50,11 +51,11 @@ function createNewDesign() {
             Authorization: `Bearer ${auth.jwtToken}`
         }
     }).then(res => {
-
-        router.push({ name: 'Editor', params: { id: res.data.data.id } });
+        toEditorView(res.data.data.id);
     }).catch(err => {
         const statusCode = err.status;
         switch (statusCode) {
+            case 401:
             case 403:
                 console.error("JwtToken expired.");
                 break;
@@ -80,6 +81,10 @@ function openDesignDropdown(e: PointerEvent, _currentDesign: DesignResponseDTO) 
     designDropdownPosition.value = Vector2.PointFrom(e);
     currentDesign.value = _currentDesign;
     designDropdown.value?.open();
+}
+
+function toEditorView(designId: number) {
+    router.push({ name: 'Editor', params: { id: designId } });
 }
 
 </script>
@@ -143,9 +148,10 @@ function openDesignDropdown(e: PointerEvent, _currentDesign: DesignResponseDTO) 
                             <li class="w-10 mr-4"></li>
                         </ul>
                         <ol class="flex-1 min-h-0 text-left overflow-auto [scrollbar-gutter:stable]">
-                            <li v-for="design in designList" class="flex items-center w-full h-20 hover:bg-gray-100">
+                            <li v-for="design in designList" class="flex items-center w-full h-20 cursor-pointer hover:bg-gray-100"
+                            @pointerup="toEditorView(design.id)">
                                 <div class="grow flex items-center px-4">
-                                    <button class="i-mdi:checkbox-blank-outline w-5 h-5 p-0 mr-4" />
+                                    <!-- <button class="i-mdi:checkbox-blank-outline w-5 h-5 p-0 mr-4" /> -->
                                     <div class="h-14 aspect-video mr-4 rounded-md bg-gray-200"></div>
                                     <p>design.title</p>
                                 </div>
