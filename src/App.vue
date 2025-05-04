@@ -9,5 +9,5 @@ provide('unity', unity);
 
 <template>
   <UnityCanvas ref="unity" />
-  <router-view class="absolute left-0 top-0" />
+  <router-view class="absolute left-0 top-0" :key="$route.fullPath" />
 </template>

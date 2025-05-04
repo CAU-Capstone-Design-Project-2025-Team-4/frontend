@@ -2,8 +2,6 @@
 import { onClickOutside } from '@vueuse/core';
 import { ref, useTemplateRef } from 'vue';
 
-defineExpose({ open, close });
-
 const dropdown = useTemplateRef<HTMLElement>('dropdown');
 const show = ref<boolean>(false);
 onClickOutside(dropdown, (_e) => {
@@ -11,12 +9,15 @@ onClickOutside(dropdown, (_e) => {
 })
 
 function open() {
+    if (show.value === true) return;  
     show.value = true;
 }
 
 function close() {
     show.value = false;
 }
+
+defineExpose({ open, close, show });
 </script>
 
 <template>

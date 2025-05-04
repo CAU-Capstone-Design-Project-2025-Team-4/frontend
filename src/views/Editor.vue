@@ -2,9 +2,13 @@
 import HandleableCanvas from '@/components/design/HandleableCanvas.vue';
 import UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import Profile from '@/components/Profile.vue';
 import SideBar from '@/components/SideBar.vue';
+import router from '@/router';
+import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
-import { computed, inject, provide, useTemplateRef, type Ref } from 'vue';
+import { computed, inject, onMounted, provide, useTemplateRef, type Ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 const canvas = useTemplateRef<InstanceType<typeof HandleableCanvas>>('canvas');
 provide('canvas', canvas);
@@ -14,13 +18,46 @@ selector.deselectAll();
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 const isLoading = computed<boolean>(() => unity.value.isCreatingInstance);
-// setInterval(() => console.log(isLoading.value), 500);
+
+function enterSlideShow() {
+    selector.deselectAll();
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    }
+    router.push('/show');
+}
+
+onMounted(() => {
+    const route = useRoute();
+    console.log(route)
+    if (!route.params.id) {
+        console.error('no id');
+        return;
+    }
+
+    const design = useDesignStore();
+    console.log(Number(route.params.id))
+    design.loadFromServer(Number(route.params.id));
+})
 
 </script>
 
 <template>
     <div id="editor" class="flex flex-col w-screen h-screen overflow-auto select-none">
-        <PageHeader class="max-h-14 border-b border-gray-200" />
+        <PageHeader>
+            <div class="flex mr-4 p-2 items-center justify-center rounded-md bg-gray-200 hover:brightness-95">
+                <div class="i-material-symbols:share-outline mr-2 text-xl" />
+                <p class="text-sm">공유</p>
+            </div>
+
+            <div class="flex mr-4 p-2 items-center justify-center rounded-md bg-teal-500 hover:brightness-110" @click="enterSlideShow()">
+                <div class="i-mdi:presentation-play mr-2 text-xl text-white" />
+                <p class="text-sm text-white">슬라이드 쇼</p>
+            </div>
+
+            <Profile />
+        </PageHeader>
+
         <div class="flex flex-row min-h-64 flex-auto">
             <SideBar class="flex-1/6 min-w-100 border-r border-gray-200" />
             

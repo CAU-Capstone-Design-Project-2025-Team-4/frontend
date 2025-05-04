@@ -33,6 +33,11 @@ onMounted(() => {
 function toWorkspaceView() {
     router.push('/workspace');
 }
+
+function logout() {
+    auth.logout();
+    router.push('/');
+}
 </script>
 
 
@@ -58,7 +63,7 @@ function toWorkspaceView() {
                 <div class="w-6 h-6 mr-2 i-mdi:folder-edit-outline" />
                 <p class="leading-6.5">워크스페이스</p>
             </button>
-            <button @pointerup="auth.logout()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
+            <button @pointerup="logout()" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
                 <div class="w-6 h-6 mr-2 i-mdi:logout" />
                 <p class="leading-6">로그아웃</p>
             </button>

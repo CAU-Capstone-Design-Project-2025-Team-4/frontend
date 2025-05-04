@@ -50,7 +50,7 @@ function openMenu(e: MouseEvent, element: ElementRef) {
 <template>
     <div>
         <div ref="canvas" class="absolute w-full h-full overflow-hidden" :style="{backgroundColor: 'white'}">
-            <Element v-for="element in slide.elements" :element="element" :ratio="ratio" @contextmenu="openMenu($event, element)" />
+            <Element v-for="element in slide?.elements" :element="element" :ratio="ratio" @contextmenu="openMenu($event, element)" />
         </div>
 
         <ContextMenu v-if="handleable" ref="context-menu">

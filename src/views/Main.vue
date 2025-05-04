@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Modal from '@/components/common/Modal.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import Profile from '@/components/Profile.vue';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
@@ -140,26 +141,29 @@ function resetRegisterModal() {
 }
 
 function toEditorView() {
-    router.push('/editor');
+    // router.push('/editor');
 }
 </script>
 
 
 <template>
     <div>
-        <div v-if="!auth.isAuthenticated()" class="flex justify-center w-screen h-16 p-2">
-            <button @click="loginModal?.open()" class="w-20 h-12 p-2 mr-2 rounded-md border-0 hover:bg-gray-200" :style="{ outline: 'none' }">로그인</button>
-            <button @click="registerModal?.open()" class="w-40 h-12 p-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
-                <p class="text-white">회원 가입</p>
-            </button>
-        </div>
+        <PageHeader>
+            <div v-if="!auth.isAuthenticated()" class="flex">
+                <button @click="loginModal?.open()" class="w-20 h-12 p-2 mr-2 rounded-md border-0 hover:bg-gray-200" :style="{ outline: 'none' }">로그인</button>
+                <button @click="registerModal?.open()" class="w-40 h-12 p-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
+                    <p class="text-white">회원 가입</p>
+                </button>
+            </div>
 
-        <div v-else class="flex justify-center  w-screen h-16 p-2">
-            <button @click="toEditorView()" class="w-40 h-12 p-2 mr-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
-                <p class="text-white">디자인 만들기</p>
-            </button>
-            <Profile :name="auth.name!"></Profile>
-        </div>
+            <div v-else class="flex">
+                <button @click="toEditorView()" class="w-40 h-12 p-2 mr-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
+                    <p class="text-white">디자인 만들기</p>
+                </button>
+                <Profile />
+            </div>
+        </PageHeader>
+        
         
         <Modal ref="login-modal" @closed="resetLoginModal()">
             <p class="font-bold text-xl mb-8 select-none">PRISM 로그인</p>
@@ -247,10 +251,5 @@ function toEditorView() {
                 </div>
             </form>       
         </Modal>
-
-
-        <router-link to='/editor'>
-            Hello World!
-        </router-link>
     </div>
 </template>

@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useSelectorStore } from "./selector";
 import { instanceOfSpatialRef, type ImageRef, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import axios from "axios";
 
 export interface Slide {
     elements: ElementRef[] // must be sorted by z-index
@@ -12,90 +13,9 @@ export interface Slide {
 export const useDesignStore = defineStore('design', () => {
     const selector = useSelectorStore();
 
-    const slides = ref<Slide[]>([
-        {
-            elements: [
-                new ElementRef(new Vector2(600, 200), 0, new Vector2(200, 200), 0, 
-                { 
-                    path: 'M 50 0 A 50 50 0 1 1 49.9 0', 
-                    color: 'rgb(124, 23, 13)', 
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                } as ShapeRef),
-
-                new ElementRef(new Vector2(100, 100), 0, new Vector2(200, 200), 1, 
-                { 
-                    path: 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0', 
-                    color: 'rgb(12, 23, 123)', 
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                } as ShapeRef),
-
-                new ElementRef(new Vector2(600, 300), 0, new Vector2(800, 200), 2, 
-                { 
-                    text: '제목을 입력하세요.', 
-                    size: 72, 
-                    weight: 800, 
-                    align: 'center', 
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                } as TextBoxRef),
-
-                new ElementRef(new Vector2(1000, 500), 0, new Vector2(400, 200), 3, 
-                { 
-                    url: 'src/assets/dog.jpg',
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                } as ImageRef),
-
-                new ElementRef(new Vector2(500, 700), 0, new Vector2(400, 400), 4, 
-                { 
-                    cameraMode: 'free',
-                    cameraTransform: {
-                        position: { x: 0, y: 0, z: -10 },
-                        rotation: { x: 0, y: 0, z: 0 }
-                    },
-                    model: null,
-                    backgroundColor: 'skybox',
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                 } as SpatialRef),
-            ]
-        },
-        {
-            elements: [
-                new ElementRef(new Vector2(500, 700), 0, new Vector2(400, 400), 0, { 
-                    cameraMode: 'free',
-                    cameraTransform: {
-                        position: { x: 0, y: 0, z: -10 },
-                        rotation: { x: 0, y: 0, z: 0 }
-                    },
-                    model: null,
-                    backgroundColor: 'skybox',
-                    borderRef: {
-                        type: 'none',
-                        color: '#000000',
-                        thickness: 1
-                    } 
-                 } as SpatialRef),
-            ]
-        }
-    ]);
+    const slides = ref<Slide[]>([{
+        elements: []
+    }]);
 
     const selection = ref<number>(0);
     const currentSlide = computed<Slide>(() => slides.value[selection.value]);
@@ -107,8 +27,11 @@ export const useDesignStore = defineStore('design', () => {
     const maxZ = computed<number>(() => {
         if (currentSlide.value.elements.length === 0) return 0;
         return currentSlide.value.elements[currentSlide.value.elements.length - 1].z;
-    })
+    });
 
+    function loadFromServer(id: number) {
+        axios.get
+    }
 
     function selectSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
@@ -200,6 +123,7 @@ export const useDesignStore = defineStore('design', () => {
     }
 
     return { 
+        loadFromServer,
         slides, selection, currentSlide, 
         selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
         bringForward, bringFront, sendBackward, sendBack,

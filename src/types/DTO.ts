@@ -4,3 +4,9 @@ export interface LoginResponseDTO {
     name: string,
     email: string
 }
+
+export interface DesignResponseDTO {
+    id: number,
+    shared: boolean,
+    createdAt: string
+}
