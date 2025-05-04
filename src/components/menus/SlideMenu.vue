@@ -31,9 +31,9 @@ const slideSelection = ref<number>(-1);
                     <div class="relative w-full aspect-[2] mb-2"
                     @pointerdown="design.selectSlide(index)" @contextmenu.prevent="menu?.open($event); slideSelection = index;">
                         <p class="absolute left-1" :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
-                        <div class="absolute right-0 h-full aspect-video rounded-md border border-gray-400 hover:border-teal-600"
-                        :class="{ 'border-3 border-teal-700 hover:border-teal-700': isSelected(index) }">
-                            <img :src="slide.thumbnail" />
+                        <div class="absolute right-0 h-full aspect-video rounded-md outline-1 outline-solid outline-gray-400 hover:outline-teal-600"
+                        :class="{ 'outline-3 outline-teal-700 hover:outline-teal-700': isSelected(index) }">
+                            <img :src="slide.thumbnail" class="w-full h-full object-fill" />
                         </div>
                     </div>
                 </div>

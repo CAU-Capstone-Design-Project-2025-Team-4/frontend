@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, type Ref } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch, type Ref } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
 import DragBox from '@/components/design/DragBox.vue';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 import type UnityCanvas from './objects/UnityCanvas.vue';
 
 const position = ref<Vector2>(Vector2.Zero());
@@ -35,14 +35,12 @@ function containPoint(point: Vector2): boolean {
 }
 
 const canvas = useTemplateRef<HTMLElement>('canvas');
-function capture(): HTMLImageElement | null {
-    toPng(canvas.value!).then(url => {
-        const image = new Image();
-        image.src = url;
-
-        return image;
+async function capture(): Promise<string> {
+    return toJpeg(canvas.value!, { pixelRatio: 0.2 }).then(url => url)
+    .catch(err => {
+        console.error("Error occured while capturing slide: ", err);
+        return ''
     });
-    return null;
 }
 
 defineExpose({
@@ -107,17 +105,27 @@ function deselectAll(e: PointerEvent) {
     selector.deselectAll();
 }
 
+function onChange() {
+    capture().then(url => {
+        design.currentSlide.thumbnail = url;
+    });
+}
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
     document.addEventListener('keyup', deleteElement);
     nextTick(() => handleResize());
+
+    design.addChangeListener(onChange);
 })
+
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
     container.value?.removeEventListener('wheel', scaleByWheel);
     document.removeEventListener('keyup', deleteElement);
+
+    design.removeChangeListener(onChange);
 });
 
 function deleteElement(e: KeyboardEvent) {
@@ -131,6 +139,16 @@ function deleteElement(e: KeyboardEvent) {
 
 const design = useDesignStore();
 const selector = useSelectorStore();
+
+// temp
+watch(() => design.currentSlide, () => {
+    if (design.currentSlide.thumbnail) return;
+    setTimeout(() => {
+        capture().then(url => {
+            design.currentSlide.thumbnail = url;
+        })
+    }, 50)
+})
 
 provide<boolean>('handleable', true);
 

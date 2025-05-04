@@ -185,8 +185,6 @@ export const useDesignStore = defineStore('design', () => {
 
     function updateElement(element: ElementRef) {
         if (!auth.isAuthenticated) return;
-        const err = new Error();
-  console.log(err.stack);
 
         axios.patch('/api/element', {
             userId: auth.id,
@@ -203,6 +201,8 @@ export const useDesignStore = defineStore('design', () => {
         }, auth.config).then(res => {
             console.log(res);
         }).catch(err => auth.handleCommonError(err, () => updateElement(element)));
+
+        notifyChangeListeners();
     }
 
     function updateObject(element: ElementRef) {
@@ -217,6 +217,8 @@ export const useDesignStore = defineStore('design', () => {
                 console.log(res)
             }).catch(err => auth.handleCommonError(err, () => updateObject(element)));
         }
+
+        notifyChangeListeners();
     }
 
     // TODO
@@ -235,10 +237,23 @@ export const useDesignStore = defineStore('design', () => {
         flushUpdateObject();
     })
 
+
+    let listeners: (() => void)[] = [];
+    function addChangeListener(listener: () => void) {
+        listeners.push(listener)
+    }
+    function removeChangeListener(listener: () => void) {
+        listeners = listeners.filter(_listener => _listener !== listener);
+    }
+    function notifyChangeListeners() {
+        listeners.forEach(listener => listener());
+    }
+
     return { 
         load,
         slides, selection, currentSlide, 
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
-        addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject
+        addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject,
+        addChangeListener, removeChangeListener
     };
 })
