@@ -1,53 +1,132 @@
 import { ElementRef } from "@/components/design/Element.vue";
-import Vector2 from "@/types/Vector2";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
-import { instanceOfSpatialRef, type ImageRef, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
 import axios from "axios";
+import { useAuthStore } from "./auth";
+import { instanceOfShapeRef, type BorderRef, type ObjectRef, type ShapeRef } from "@/types/ObjectRef";
+import type { ElementResponseDTO } from "@/types/DTO";
+import Vector2 from "@/types/Vector2";
+import { useDebounceFnFlushable } from "@/common/debounce";
 
 export interface Slide {
+    id: number,
+    hasLoaded: boolean,
+    thumbnail?: string,
     elements: ElementRef[] // must be sorted by z-index
+}
+
+function _newSlide(_id?: number): Slide {
+    return { id: _id ?? 0, hasLoaded: false, thumbnail: '', elements: [] };
 }
 
 export const useDesignStore = defineStore('design', () => {
     const selector = useSelectorStore();
+    const auth = useAuthStore();
 
-    const slides = ref<Slide[]>([{
-        elements: []
-    }]);
+    const slides = ref<Slide[]>([]);
 
     const selection = ref<number>(0);
     const currentSlide = computed<Slide>(() => slides.value[selection.value]);
 
-    const minZ = computed<number>(() => {
-        if (currentSlide.value.elements.length === 0) return 0;
-        return currentSlide.value.elements[0].z;
-    });
     const maxZ = computed<number>(() => {
         if (currentSlide.value.elements.length === 0) return 0;
         return currentSlide.value.elements[currentSlide.value.elements.length - 1].z;
     });
 
-    function loadFromServer(id: number) {
-        axios.get
+    function $reset() {
+        slides.value.length = 0;
+        selection.value = 0;
     }
+
+    async function load(designId: number) {
+        if (!auth.isAuthenticated) throw new Error('먼저 로그인해주세요.');
+
+        $reset();
+        
+
+        slides.value.push(_newSlide(1));
+        slides.value.push(_newSlide(2));
+        slides.value.push(_newSlide(3));
+
+        selectSlide(0);
+
+        // axios.get('/api')
+        // throw new Error('허용되지 않은 접근입니다.');
+    }
+
+    function loadSlide(slide: Slide) {
+        if (slide.hasLoaded) return;
+        if (!auth.isAuthenticated) return;
+         
+        axios.get('/api/element', {
+            params: {
+                userId: auth.id,
+                slideId: slide.id
+            },
+            ...auth.config
+        }).then(res => {
+            const elements: ElementResponseDTO[] = res.data.data;
+            elements.forEach(elementDto => {
+                console.log(elementDto)
+                const element = parseElement(elementDto);
+                if (element) {
+                    currentSlide.value.elements.push(element);
+                }
+            });
+            slide.hasLoaded = true;
+        }).catch(err => auth.handleCommonError(err, () => loadSlide(slide)));
+    }
+
+    function parseElement(dto: ElementResponseDTO): ElementRef | null {
+        const borderRef: BorderRef = {
+            type: dto.borderRef.borderType.toLowerCase() as 'none' | 'solid',
+            color: dto.borderRef.color,
+            thickness: dto.borderRef.thickness
+        };
+
+        let objectRef: ObjectRef;
+        switch (dto.type) {
+            case "SHAPE":
+                objectRef = { 
+                    path: dto.path!, 
+                    color: dto.color!, 
+                    borderRef: borderRef 
+                } as ShapeRef;
+                break;
+            default:
+                console.error("Unknown type while parsing element: ", dto.type);
+                return null;
+        }
+
+        return new ElementRef(
+            dto.id,
+            new Vector2(dto.x, dto.y),
+            dto.angle,
+            new Vector2(dto.width, dto.height),
+            dto.z,
+            objectRef
+        );
+    }
+
 
     function selectSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
         selection.value = index;
+
+        loadSlide(currentSlide.value);
         selector.deselectAll();
     }
 
-    function newSlide() {
-        slides.value.push({ elements: [] });
+    function addSlide() {
+        slides.value.push(_newSlide());
         selectSlide(slides.value.length - 1);
     }
 
     function insertSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
 
-        slides.value.splice(index + 1, 0, { elements: [] });
+        slides.value.splice(index + 1, 0, _newSlide());
         selectSlide(index + 1);
     }
 
@@ -70,11 +149,77 @@ export const useDesignStore = defineStore('design', () => {
         selection.value = Math.min(index, slides.value.length - 1);
     }
 
+
     function addElement(element: ElementRef) {
+        if (!auth.isAuthenticated) return;
+        
         element.z = maxZ.value + 1;
-        currentSlide.value.elements.push(element);
+
+        const objectRef = element.objectRef;
+        if (instanceOfShapeRef(objectRef)) {
+            axios.post('/api/element/shape', {
+                userId: auth.id,
+                slideId: currentSlide.value.id,
+            
+                borderType: objectRef.borderRef.type.toUpperCase(),
+                borderColor: objectRef.borderRef.color,
+                borderThickness: objectRef.borderRef.thickness,
+                
+                x: element.position.x,
+                y: element.position.y,
+                z: element.z,
+                
+                angle: element.rotation,
+                width: element.size.x,
+                height: element.size.y,
+                
+                path: objectRef.path,
+                color: objectRef.color
+            }, auth.config).then(res => {
+                const id = res.data.data.id;
+                element.id = id;
+                currentSlide.value.elements.push(element);
+            }).catch(err => auth.handleCommonError(err, () => addElement(element)));
+        }
     }
 
+    function updateElement(element: ElementRef) {
+        if (!auth.isAuthenticated) return;
+        const err = new Error();
+  console.log(err.stack);
+
+        axios.patch('/api/element', {
+            userId: auth.id,
+            elementId: element.id,
+            x: element.position.x,
+            y: element.position.y,
+            angle: element.rotation,
+            width: element.size.x,
+            height: element.size.y,
+            z: element.z,
+            borderType: element.objectRef.borderRef.type.toUpperCase(),
+            borderColor: element.objectRef.borderRef.color,
+            borderThickness: element.objectRef.borderRef.thickness
+        }, auth.config).then(res => {
+            console.log(res);
+        }).catch(err => auth.handleCommonError(err, () => updateElement(element)));
+    }
+
+    function updateObject(element: ElementRef) {
+        const objectRef = element.objectRef;
+        if (instanceOfShapeRef(objectRef)) {
+            axios.patch('/api/element/shape', {
+                userId: auth.id,
+                elementId: element.id,
+                path: objectRef.path,
+                color: objectRef.color
+            }, auth.config).then(res => {
+                console.log(res)
+            }).catch(err => auth.handleCommonError(err, () => updateObject(element)));
+        }
+    }
+
+    // TODO
     function removeElement(id: number) {
         const index = currentSlide.value.elements.findIndex(element => element.id === id);
         if (index === -1) return;
@@ -82,10 +227,18 @@ export const useDesignStore = defineStore('design', () => {
         currentSlide.value.elements.splice(index, 1);
     }
 
+    const { debounced: debouncedUpdateElement, flush: flushUpdateElement } = useDebounceFnFlushable((element) => updateElement(element), 1000);
+    const { debounced: debouncedUpdateObject, flush: flushUpdateObject } = useDebounceFnFlushable((element) => updateObject(element), 1000);
+
+    watch(() => selector.idSelection, () => {
+        flushUpdateElement();
+        flushUpdateObject();
+    })
+
     return { 
-        loadFromServer,
+        load,
         slides, selection, currentSlide, 
-        selectSlide, newSlide, removeSlide, insertSlide, duplicateSlide, 
-        addElement, removeElement 
+        selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
+        addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject
     };
 })

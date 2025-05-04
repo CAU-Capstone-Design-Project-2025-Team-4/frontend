@@ -14,6 +14,7 @@ export const useSelectorStore = defineStore('selector', () => {
     function select(element: ElementRef) {
         if (isSelected(element)) return;
         selection.value.push(element);
+
     }
 
     function deselect(element: ElementRef) {

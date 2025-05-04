@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import TransformChevron from '@/components/common/TransformChevron.vue';
+import TransformChevron from '@/components/design/common/TransformChevron.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { TextBoxRef } from '@/types/ObjectRef';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import { ElementRef } from '@/components/design/Element.vue';
 

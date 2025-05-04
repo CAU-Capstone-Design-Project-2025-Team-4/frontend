@@ -149,7 +149,7 @@ function toEditorView() {
 <template>
     <div>
         <PageHeader>
-            <div v-if="!auth.isAuthenticated()" class="flex">
+            <div v-if="!auth.isAuthenticated" class="flex">
                 <button @click="loginModal?.open()" class="w-20 h-12 p-2 mr-2 rounded-md border-0 hover:bg-gray-200" :style="{ outline: 'none' }">로그인</button>
                 <button @click="registerModal?.open()" class="w-40 h-12 p-2 rounded-md border-0 bg-teal-500 focus:brightness-110 hover:brightness-110" :style="{ outline: 'none' }">
                     <p class="text-white">회원 가입</p>

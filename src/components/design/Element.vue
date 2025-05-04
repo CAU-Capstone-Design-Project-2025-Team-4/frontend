@@ -7,9 +7,8 @@ export class ElementRef {
     z: number;
     objectRef: ObjectRef;
 
-    static tempId: number = 0;
-    constructor(position: Vector2, rotation: number, size: Vector2, z: number, objectRef: ObjectRef) {
-        this.id = ElementRef.tempId++;
+    constructor(id: number, position: Vector2, rotation: number, size: Vector2, z: number, objectRef: ObjectRef) {
+        this.id = id;
         this.position = position;
         this.rotation = rotation;
         this.size = size;

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Chevron from '@/components/common/Chevron.vue';
 import { ref } from 'vue';
-import type { ElementRef } from '../design/Element.vue';
+import type { ElementRef } from "@/components/design/Element.vue";
+import { useDesignStore } from '@/stores/design';
 
 const { element, disableY } = defineProps<{
     element: ElementRef
@@ -14,12 +15,16 @@ let ratio: number = element.size.x / element.size.y;
 function move() {
     if (element.position.x.toString() === '') element.position.x = 0;
     if (element.position.y.toString() === '') element.position.y = 0;
+
+    design.debouncedUpdateElement(element);
 }
 
 function restricRotation() {
     if (element.rotation.toString() === '') element.rotation = 0;
     element.rotation = element.rotation % 360;
     if (element.rotation < 0) element.rotation + 360;
+
+    design.debouncedUpdateElement(element);
 }
 
 function toggleLock() {
@@ -30,12 +35,18 @@ function toggleLock() {
 function resizeWidth() {
     if (element.size.x.toString() === '') element.size.x = 0;
     if (sizeLock.value || disableY === false) element.size.y = element.size.x / ratio;
+
+    design.debouncedUpdateElement(element);
 }
 
 function resizeHeight() {
     if (element.size.y.toString() === '') element.size.y = 0;
     if (sizeLock.value) element.size.x = element.size.y * ratio;
+
+    design.debouncedUpdateElement(element);
 }
+
+const design = useDesignStore();
 </script>
 
 <template>

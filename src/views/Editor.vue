@@ -7,7 +7,7 @@ import SideBar from '@/components/SideBar.vue';
 import router from '@/router';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
-import { computed, inject, onMounted, provide, useTemplateRef, type Ref } from 'vue';
+import { computed, inject, onMounted, provide, ref, useTemplateRef, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const canvas = useTemplateRef<InstanceType<typeof HandleableCanvas>>('canvas');
@@ -27,17 +27,22 @@ function enterSlideShow() {
     router.push('/show');
 }
 
-onMounted(() => {
+const design = useDesignStore();
+const isLoadingDesign = ref<boolean>(false);
+onMounted(async () => {
     const route = useRoute();
-    if (!route.params.id) {
-        router.replace('/');
-        return;
-    }
+    const designId = Number(route.params.id);
 
-    const design = useDesignStore();
-    design.loadFromServer(Number(route.params.id));
+    isLoadingDesign.value = true;
+    design.load(designId).then(_ => {
+
+    }).catch(err => {
+        window.alert(err.message);
+        router.push('/');
+    });
 })
 
+// TODO beforeunload
 </script>
 
 <template>

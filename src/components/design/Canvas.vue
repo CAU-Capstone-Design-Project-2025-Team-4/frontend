@@ -8,7 +8,7 @@ import ObjectContext from './common/ObjectContext.vue';
 
 
 const { slide } = defineProps<{
-    slide: Slide
+    slide: Slide | undefined
 }>();
 
 const canvas = useTemplateRef<HTMLElement>('canvas');

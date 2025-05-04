@@ -15,7 +15,7 @@ function onEnd(e: any) {
 }
 
 function addSlide() {
-    design.newSlide();
+    design.addSlide();
     nextTick(() => container.value?.scrollTo(0, container.value.scrollHeight));
 }
 
@@ -33,7 +33,7 @@ const slideSelection = ref<number>(-1);
                         <p class="absolute left-1" :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
                         <div class="absolute right-0 h-full aspect-video rounded-md border border-gray-400 hover:border-teal-600"
                         :class="{ 'border-3 border-teal-700 hover:border-teal-700': isSelected(index) }">
-                            <img />
+                            <img :src="slide.thumbnail" />
                         </div>
                     </div>
                 </div>

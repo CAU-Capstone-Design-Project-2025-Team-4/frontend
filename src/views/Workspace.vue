@@ -15,15 +15,13 @@ onMounted(() => {
 })
 
 function queryDesignList() {
-    if (!auth.isAuthenticated()) return;
+    if (!auth.isAuthenticated) return;
 
     axios.get('/api/design', {
         params: {
             userId: auth.id,
         },
-        headers: {
-            Authorization: `Bearer ${auth.jwtToken}`
-        }
+        ...auth.config
     }).then(res => {
         designList.value = res.data.data;
     }).catch(err => {
@@ -31,7 +29,9 @@ function queryDesignList() {
         switch (statusCode) {
             case 401:
             case 403:
-                console.error("JwtToken expired.");
+                if (auth.handleTokenExpired()) {
+                    queryDesignList();
+                }
                 break;
             default:
                 console.error("Unhandled error status:", statusCode);
@@ -39,25 +39,36 @@ function queryDesignList() {
     })
 }
 
+function temp(id: number) {
+    for (const i in [0, 1, 2]) {
+        axios.post('/api/slide', {
+            userId: auth.id,
+            designId: id,
+            order: i
+        }, auth.config).then(res => {
+
+        })
+    }
+}
+
 function createNewDesign() {
-    if (!auth.isAuthenticated()) return;
+    if (!auth.isAuthenticated) return;
 
     axios.post('/api/design', {
         userId: auth.id,
         sourceId: null,
         isShared: false,
-    }, {
-        headers: {
-            Authorization: `Bearer ${auth.jwtToken}`
-        }
-    }).then(res => {
+    }, auth.config).then(res => {
+        temp(res.data.data.id);
         toEditorView(res.data.data.id);
     }).catch(err => {
         const statusCode = err.status;
         switch (statusCode) {
             case 401:
             case 403:
-                console.error("JwtToken expired.");
+                if (auth.handleTokenExpired()) {
+                    createNewDesign();
+                }
                 break;
             default:
                 console.error("Unhandled error status:", statusCode);

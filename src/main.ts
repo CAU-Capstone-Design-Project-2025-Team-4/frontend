@@ -22,7 +22,7 @@ app.use(router).use(pinia).mount('#app')
 
 const auth = useAuthStore();
 router.beforeEach((to, from) => {
-    if (!auth.isAuthenticated() && to.name !== 'Main') {
+    if (!auth.isAuthenticated && to.name !== 'Main') {
         return { name: 'Main' }
     }
 })

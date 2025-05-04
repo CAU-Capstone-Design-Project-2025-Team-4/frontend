@@ -40,7 +40,7 @@ const canvas = inject('canvas') as Ref<InstanceType<typeof HandleableCanvas>>;
 function addElement(shape: Shape, point?: Vector2) {
     const position = point !== undefined ? canvas.value.toCanvasPoint(point) : new Vector2(960, 540);
     if (canvas.value.containPoint(position)) {
-        design.addElement(new ElementRef(position, 0, shape.size.clone(), 0, 
+        design.addElement(new ElementRef(-1, position, 0, shape.size.clone(), 0, 
         { 
             path: shape.path, 
             color: 'rgb(200, 200, 200)', 

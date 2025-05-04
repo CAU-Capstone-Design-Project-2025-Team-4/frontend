@@ -9,6 +9,7 @@ import { useDraggable } from '@/common/draggable';
 import type { ElementRef } from './Element.vue';
 import ContextMenu from '../common/ContextMenu.vue';
 import ObjectContext from './common/ObjectContext.vue';
+import { useDesignStore } from '@/stores/design';
 
 enum HandlerType {
     NONE         = 1 << 0,
@@ -92,13 +93,16 @@ watch([() => canvas.value?.position], () => {
 useDraggable(useTemplateRef<HTMLElement>('move-handler'), 1, (delta) => {
     if (selector.isDragSelecting) return;
     move(delta);
-}, { auto: true, stop: true });
+}, { onEnd: () => {
+    if (selector.isDragSelecting) return;
+    updateElements();
+}, auto: true, stop: true });
 
 ['textbox-n', 'textbox-w', 'textbox-s', 'textbox-e'].forEach(ref => useDraggable(useTemplateRef<HTMLElement>(ref), 1, (delta) => {
     move(delta);
 }, { stop: true }));
 
-
+const design = useDesignStore();
 useDraggable(useTemplateRef<HTMLElement>('rotate-handler'), 1, (delta, start) => {
     const end: Vector2 = Vector2.Add(start!, delta);
 
@@ -115,23 +119,29 @@ useDraggable(useTemplateRef<HTMLElement>('rotate-handler'), 1, (delta, start) =>
         element.rotation %= 360;
         if (element.rotation < 0) element.rotation += 360;
     });
-}, { stop: true });
+}, { onEnd: updateElements, stop: true });
 
 
 ['resize-n', 'resize-s', 'resize-w', 'resize-e', 'resize-nw', 'resize-sw', 'resize-ne', 'resize-se']
 .forEach(dir => useDraggable(useTemplateRef(dir), 1, (delta) => {
     resize(dir, delta);
-}, { stop: true }));
+}, { onEnd: updateElements, stop: true }));
 
 ['resize-w', 'resize-e'].forEach(dir => useDraggable(useTemplateRef('textbox-' + dir), 1, (delta) => {
     resize(dir, delta)
-}, { stop: true }));
+}, { onEnd: updateElements, stop: true }));
 
 
 function move(delta: Vector2) {
     selection.value.forEach(obj => obj.position.add(canvas.value.toCanvasSpace(delta)));
     _position = Vector2.Add(_position, canvas.value.toCanvasSpace(delta));
     position.value.add(delta);
+}
+
+function updateElements() {
+    selection.value.forEach(element => {
+        design.updateElement(element);
+    });
 }
 
 // use cache?

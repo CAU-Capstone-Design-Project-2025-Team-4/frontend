@@ -25,7 +25,7 @@ const color = computed<string>(() => {
 
 const auth = useAuthStore();
 onMounted(() => {
-    if (!auth.isAuthenticated()) return;
+    if (!auth.isAuthenticated) return;
     name.value = auth.name!;
     email.value = auth.email!;
 })

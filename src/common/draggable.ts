@@ -2,13 +2,19 @@ import Vector2 from "@/types/Vector2";
 import { onBeforeUnmount, onMounted, type ShallowRef } from "vue";
 
 interface DraggableOptions {
+    onEnd?: () => void,
     auto?: boolean,
     cursor?: string,
     stop?: boolean
 }
 
 let isDraggingOthers: boolean = false;
-export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, button: number, onMove: (delta: Vector2, start?: Vector2) => void, options?: DraggableOptions) {
+export function useDraggable(
+    target: Readonly<ShallowRef<HTMLElement | null>>, 
+    button: number, 
+    onMove: (delta: Vector2, start?: Vector2) => void, 
+    options?: DraggableOptions
+) {
     // const delta = ref<Vector2>(Vector2.Zero());
     let lastPoint: Vector2 = Vector2.Zero();
     let currentPoint: Vector2 = Vector2.Zero();
@@ -45,6 +51,8 @@ export function useDraggable(target: Readonly<ShallowRef<HTMLElement | null>>, b
 
     function end(e: PointerEvent) {
         if (!isDragging) return;
+
+        if (options?.onEnd) options.onEnd();
 
         isDraggingOthers = false;
         document.body.style.cursor = 'auto';

@@ -14,13 +14,13 @@ export const cameraModeList = {
 <script setup lang="ts">
 import Chevron from '@/components/common/Chevron.vue';
 // import Dropdown from '@/components/common/Dropdown.vue';
-import TransformChevron from '@/components/common/TransformChevron.vue';
+import TransformChevron from '@/components/design/common/TransformChevron.vue';
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import type { SpatialRef } from '@/types/ObjectRef';
 import { computed, inject, ref, useTemplateRef, watch, type Ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
-import BorderChevron from '@/components/common/BorderChevron.vue';
+import BorderChevron from '@/components/design/common/BorderChevron.vue';
 import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
@@ -184,7 +184,7 @@ watch(() => spatialRef.value.backgroundColor, () => {
                 </div>
             </div>
         </Chevron>
-        <BorderChevron class="my-2" :border="spatialRef.borderRef" />
+        <BorderChevron class="my-2" :element="elementRef" />
         <TransformChevron :element="elementRef" />
     </div>
 </template>

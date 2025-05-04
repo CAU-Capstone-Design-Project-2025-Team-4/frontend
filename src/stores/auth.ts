@@ -1,6 +1,7 @@
 import type { LoginResponseDTO } from "@/types/DTO";
+import type { AxiosRequestConfig } from "axios";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export const useAuthStore = defineStore('auth', () => {
     const jwtToken = ref<string | null>(null);
@@ -8,9 +9,16 @@ export const useAuthStore = defineStore('auth', () => {
     const name = ref<string | null>(null);
     const email = ref<string | null>(null);
 
-    function isAuthenticated() {
-        return jwtToken.value != null;
-    }
+    const isAuthenticated = computed<boolean>(() => jwtToken.value != null);
+    // const authorization = computed<string>(() => `Bearer ${jwtToken.value}`);
+
+    const config = computed<AxiosRequestConfig>(() => {
+        return {
+            headers: {
+                Authorization: `Bearer ${jwtToken.value}`,
+            }
+        }
+    })
 
     function login(loginResponseDTO: LoginResponseDTO) {
         jwtToken.value = loginResponseDTO.jwtToken;
@@ -26,5 +34,23 @@ export const useAuthStore = defineStore('auth', () => {
         email.value = null;
     }
 
-    return { jwtToken, id, name, email, isAuthenticated, login, logout };
+    function handleTokenExpired(): boolean {
+        return false;
+    }
+
+    function handleCommonError(err: any, retry: () => void) {
+        const statusCode = err.status;
+        switch (statusCode) {
+            case 401:
+            case 403:
+                const success = handleTokenExpired()
+                if (success) retry();
+                break;
+            default:
+                console.error("Unhandled error status:", statusCode);
+                console.error(err.response.data);
+        }
+    }
+
+    return { jwtToken, id, name, email, isAuthenticated, login, logout, handleTokenExpired, handleCommonError, config };
 }, { persist: true })
