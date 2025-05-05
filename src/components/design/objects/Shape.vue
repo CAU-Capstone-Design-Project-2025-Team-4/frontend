@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type BorderRef, type ShapeRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
@@ -17,7 +17,7 @@ const width = computed<number>(() => {
 const height = computed<number>(() => {
     if (element.size.y.toString() === '') return 0;
     return element.size.y;
-})
+});
 </script>
 
 <template>

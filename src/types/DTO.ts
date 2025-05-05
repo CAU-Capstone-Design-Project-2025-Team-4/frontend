@@ -1,5 +1,3 @@
-import type { BorderRef } from "./ObjectRef"
-
 export interface LoginResponseDTO {
     jwtToken: string,
     id: number,
@@ -31,4 +29,6 @@ export interface ElementResponseDTO {
 
     path?: string,
     color?: string,
+
+    content?: string,
 }

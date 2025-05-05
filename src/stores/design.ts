@@ -4,7 +4,7 @@ import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import axios from "axios";
 import { useAuthStore } from "./auth";
-import { instanceOfShapeRef, type BorderRef, type ObjectRef, type ShapeRef } from "@/types/ObjectRef";
+import { instanceOfImageRef, instanceOfShapeRef, type BorderRef, type ImageRef, type ObjectRef, type ShapeRef } from "@/types/ObjectRef";
 import type { ElementResponseDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
@@ -68,13 +68,13 @@ export const useDesignStore = defineStore('design', () => {
         }).then(res => {
             const elements: ElementResponseDTO[] = res.data.data;
             elements.forEach(elementDto => {
-                console.log(elementDto)
                 const element = parseElement(elementDto);
                 if (element) {
                     currentSlide.value.elements.push(element);
                 }
             });
             slide.hasLoaded = true;
+            notifyChangeListeners();
         }).catch(err => auth.handleCommonError(err, () => loadSlide(slide)));
     }
 
@@ -93,6 +93,12 @@ export const useDesignStore = defineStore('design', () => {
                     color: dto.color!, 
                     borderRef: borderRef 
                 } as ShapeRef;
+                break;
+            case "IMAGE":
+                objectRef = {
+                    url: dto.content!,
+                    borderRef: borderRef
+                } as ImageRef;
                 break;
             default:
                 console.error("Unknown type while parsing element: ", dto.type);
@@ -150,37 +156,61 @@ export const useDesignStore = defineStore('design', () => {
     }
 
 
-    function addElement(element: ElementRef) {
+    function addElement(element: ElementRef, file?: File) {
         if (!auth.isAuthenticated) return;
         
         element.z = maxZ.value + 1;
 
         const objectRef = element.objectRef;
+        const common = {
+            userId: auth.id,
+            slideId: currentSlide.value.id,
+        
+            borderType: objectRef.borderRef.type.toUpperCase(),
+            borderColor: objectRef.borderRef.color,
+            borderThickness: objectRef.borderRef.thickness,
+            
+            x: element.position.x,
+            y: element.position.y,
+            z: element.z,
+            
+            angle: element.rotation,
+            width: element.size.x,
+            height: element.size.y,
+        }
+
         if (instanceOfShapeRef(objectRef)) {
             axios.post('/api/element/shape', {
-                userId: auth.id,
-                slideId: currentSlide.value.id,
-            
-                borderType: objectRef.borderRef.type.toUpperCase(),
-                borderColor: objectRef.borderRef.color,
-                borderThickness: objectRef.borderRef.thickness,
-                
-                x: element.position.x,
-                y: element.position.y,
-                z: element.z,
-                
-                angle: element.rotation,
-                width: element.size.x,
-                height: element.size.y,
-                
+                ...common,
                 path: objectRef.path,
                 color: objectRef.color
             }, auth.config).then(res => {
                 const id = res.data.data.id;
                 element.id = id;
                 currentSlide.value.elements.push(element);
+
+                notifyChangeListeners();
+
+            }).catch(err => auth.handleCommonError(err, () => addElement(element)));
+        } 
+        else if (instanceOfImageRef(objectRef)) {
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(common)) {
+                formData.append(key, value!.toString());
+            }
+            formData.append('image', file!);
+
+            axios.post('/api/element/image', formData, auth.config)
+            .then(res => {
+                const id = res.data.data.id;
+                element.id = id;
+                currentSlide.value.elements.push(element);
+
+                notifyChangeListeners();
+                
             }).catch(err => auth.handleCommonError(err, () => addElement(element)));
         }
+
     }
 
     function updateElement(element: ElementRef) {

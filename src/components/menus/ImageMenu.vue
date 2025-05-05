@@ -11,13 +11,14 @@ function addImage(e: Event) {
 
     const fileReader = new FileReader();
     fileReader.readAsDataURL(input.files![0]);
+    console.log(input.files![0]);
 
     fileReader.onload = () => {
         const image = new Image();
         image.src = fileReader.result as string;
 
         image.onload = () => {
-            const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(image.width, image.height), 0, { 
+            const element = new ElementRef(-1, new Vector2(960, 540), 0, new Vector2(image.width, image.height), 0, { 
                 url: fileReader.result,
                 borderRef: {
                     type: 'none',
@@ -25,7 +26,7 @@ function addImage(e: Event) {
                     thickness: 1
                 } 
             } as ImageRef);
-            design.addElement(element);
+            design.addElement(element, input.files![0]);
         }
     }
 }

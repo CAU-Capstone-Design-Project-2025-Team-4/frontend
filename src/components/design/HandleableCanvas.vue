@@ -140,16 +140,6 @@ function deleteElement(e: KeyboardEvent) {
 const design = useDesignStore();
 const selector = useSelectorStore();
 
-// temp
-watch(() => design.currentSlide, () => {
-    if (design.currentSlide.thumbnail) return;
-    setTimeout(() => {
-        capture().then(url => {
-            design.currentSlide.thumbnail = url;
-        })
-    }, 50)
-})
-
 provide<boolean>('handleable', true);
 
 const refresh = ref<number>(0);
