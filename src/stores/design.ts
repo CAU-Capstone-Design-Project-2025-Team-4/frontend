@@ -4,7 +4,7 @@ import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import axios from "axios";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, type BorderRef, type ImageRef, type ObjectRef, type ShapeRef } from "@/types/ObjectRef";
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type ObjectRef, type ObjectType, type ShapeRef, type TextBoxRef } from "@/types/ObjectRef";
 import type { ElementResponseDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
@@ -87,14 +87,26 @@ export const useDesignStore = defineStore('design', () => {
 
         let objectRef: ObjectRef;
         switch (dto.type) {
-            case "SHAPE":
+            case 'SHAPE':
                 objectRef = { 
                     path: dto.path!, 
                     color: dto.color!, 
                     borderRef: borderRef 
                 } as ShapeRef;
                 break;
-            case "IMAGE":
+
+            case 'TEXT_BOX':
+                objectRef = {
+                    text: dto.text!,
+                    size: dto.size!,
+                    weight: dto.weight!,
+                    fontFamily: dto.fontFamily!,
+                    align: dto.textAlign!.toLowerCase(),
+                    borderRef: borderRef
+                } as TextBoxRef
+                break;
+
+            case 'IMAGE':
                 objectRef = {
                     url: dto.content!,
                     borderRef: borderRef
@@ -156,7 +168,78 @@ export const useDesignStore = defineStore('design', () => {
     }
 
 
-    function addElement(element: ElementRef, file?: File) {
+    
+
+    function buildParamsFrom(objectRef: ObjectRef, common: object): { type: ObjectType | null, data: object | FormData | undefined } {
+        function buildFormData(dto: object): FormData {
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(dto)) {
+                formData.append(key, value);
+            }
+            return formData;
+        }
+
+        if (instanceOfShapeRef(objectRef)) {
+            return {
+                type: 'SHAPE',
+                data: {
+                    ...common,
+                    path: objectRef.path,
+                    color: objectRef.color
+                }
+            }
+        }
+            
+        if (instanceOfTextBoxRef(objectRef)) {
+            return {
+                type: 'TEXTBOX',
+                data: {
+                    ...common,
+                    ...objectRef,
+                    text: objectRef.text,
+                    size: objectRef.size,
+                    weight: objectRef.weight,
+                    fontFamily : objectRef.fontFamily,
+                    textAlign : objectRef.align.toUpperCase()
+                }
+            }
+        }
+
+        if (instanceOfImageRef(objectRef)) {
+            return {
+                type: 'IMAGE',
+                data: buildFormData({
+                    ...common,
+                    image: objectRef.imageFile,
+                })
+            }
+        } 
+        if (instanceOfSpatialRef(objectRef)) {
+            return {
+                type: 'SPATIAL',
+                data: buildFormData({
+                    ...common,
+                    file: objectRef.modelFile,
+                    cameraTransform: {
+                        positionX: objectRef.cameraTransform.position.x,
+                        positionY: objectRef.cameraTransform.position.y,
+                        positionZ: objectRef.cameraTransform.position.z,
+                        rotationX: objectRef.cameraTransform.rotation.x,
+                        rotationY: objectRef.cameraTransform.rotation.y,
+                        rotationZ: objectRef.cameraTransform.rotation.z,
+                    },
+                    backgroundColor: objectRef.backgroundColor,
+                    cameraMode: objectRef.cameraMode
+                })
+            }   
+        } 
+
+        console.error('Unexpected objectRef: ', objectRef);
+        return { type: null, data: undefined };
+    }
+
+
+    function addElement(element: ElementRef) {
         if (!auth.isAuthenticated) return;
         
         element.z = maxZ.value + 1;
@@ -179,39 +262,20 @@ export const useDesignStore = defineStore('design', () => {
             height: element.size.y,
         }
 
-        if (instanceOfShapeRef(objectRef)) {
-            axios.post('/api/element/shape', {
-                ...common,
-                path: objectRef.path,
-                color: objectRef.color
-            }, auth.config).then(res => {
-                const id = res.data.data.id;
+        const { type, data } = buildParamsFrom(objectRef, common);
+        if (!type) return;
+
+        axios.post('/api/element/' + type.toLowerCase(), data, auth.config)
+        .then(res => {
+            const id = res.data.data.id;
                 element.id = id;
                 currentSlide.value.elements.push(element);
 
                 notifyChangeListeners();
-
-            }).catch(err => auth.handleCommonError(err, () => addElement(element)));
-        } 
-        else if (instanceOfImageRef(objectRef)) {
-            const formData = new FormData();
-            for (const [key, value] of Object.entries(common)) {
-                formData.append(key, value!.toString());
-            }
-            formData.append('image', file!);
-
-            axios.post('/api/element/image', formData, auth.config)
-            .then(res => {
-                const id = res.data.data.id;
-                element.id = id;
-                currentSlide.value.elements.push(element);
-
-                notifyChangeListeners();
-                
-            }).catch(err => auth.handleCommonError(err, () => addElement(element)));
-        }
-
+        }).catch(err => auth.handleCommonError(err, () => addElement(element)));
     }
+
+    
 
     function updateElement(element: ElementRef) {
         if (!auth.isAuthenticated) return;
@@ -237,16 +301,18 @@ export const useDesignStore = defineStore('design', () => {
 
     function updateObject(element: ElementRef) {
         const objectRef = element.objectRef;
-        if (instanceOfShapeRef(objectRef)) {
-            axios.patch('/api/element/shape', {
-                userId: auth.id,
-                elementId: element.id,
-                path: objectRef.path,
-                color: objectRef.color
-            }, auth.config).then(res => {
-                console.log(res)
-            }).catch(err => auth.handleCommonError(err, () => updateObject(element)));
-        }
+        const common = {
+            userId: auth.id,
+            elementId: element.id,
+        };
+
+        const { type, data } = buildParamsFrom(objectRef, common);
+        if (!type) return;
+
+        axios.patch('/api/element/' + type?.toLowerCase(), data, auth.config)
+        .then(res => {
+            console.log(res);
+        }).catch(err => auth.handleCommonError(err, () => updateObject(element)));
 
         notifyChangeListeners();
     }

@@ -22,6 +22,7 @@ const templates: TextBox[] = [
             text: "제목을 입력하세요.",
             size: 72,
             weight: 800,
+            fontFamily: 'Pretendard',
             align: 'center',
             borderRef: {
                 type: 'none',
@@ -38,6 +39,7 @@ const templates: TextBox[] = [
             text: "부제목을 입력하세요.",
             size: 48,
             weight: 700,
+            fontFamily: 'Pretendard',
             align: 'center',
             borderRef: {
                 type: 'none',
@@ -53,6 +55,7 @@ const templates: TextBox[] = [
             text: "내용을 입력하세요.",
             size: 16,
             weight: 400,
+            fontFamily: 'Pretendard',
             align: 'center',
             borderRef: {
                 type: 'none',
@@ -66,7 +69,14 @@ const templates: TextBox[] = [
 const design = useDesignStore();
 const selector = useSelectorStore();
 function addElement(template: TextBox) {
-    const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(template.ref.text.length * template.ref.size + 100, 200), 0, template.ref);
+    const element = new ElementRef(
+        -1, 
+        new Vector2(960, 540), 
+        0, 
+        new Vector2(template.ref.text.length * template.ref.size + 100, 200), 
+        0, 
+        template.ref
+    );
     design.addElement(element);
 
     selector.deselectAll();
@@ -80,7 +90,7 @@ function addElement(template: TextBox) {
             <div class="flex w-full h-12 mb-2 p-2 rounded-xl bg-slate-100 hover:bg-slate-200" @pointerdown="addElement(template)">
                 <p class="w-full text-left leading-8" :style="{
                     fontSize: `${template.size}px`,
-                    fontWeight: `${template.weight}`
+                    fontWeight: `${template.weight}`,
                 }">Hello World!</p>
                 <p class="w-8 h-8 text-[32px] leading-7 text-slate-500">+</p>
             </div>

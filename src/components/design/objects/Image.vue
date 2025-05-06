@@ -8,7 +8,6 @@ const { element } = defineProps<{
 }>();
 const imageRef = computed<ImageRef>(() => element.objectRef as ImageRef);
 const borderRef = computed<BorderRef>(() => imageRef.value.borderRef);
-
 </script>
 
 <template>

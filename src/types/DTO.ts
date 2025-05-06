@@ -1,3 +1,5 @@
+import type { ObjectType } from "./ObjectRef"
+
 export interface LoginResponseDTO {
     jwtToken: string,
     id: number,
@@ -18,7 +20,7 @@ export interface BorderRefDTO {
 }
 export interface ElementResponseDTO {
     id: number,
-    type: string,
+    type: string
     x: number,
     y: number,
     z: number,
@@ -31,4 +33,10 @@ export interface ElementResponseDTO {
     color?: string,
 
     content?: string,
+
+    text?: string,
+    size?: number,
+    weight?: number,
+    fontFamily: string,
+    textAlign: string
 }

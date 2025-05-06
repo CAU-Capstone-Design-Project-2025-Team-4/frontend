@@ -39,6 +39,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     function handleCommonError(err: any, retry: () => void) {
+        if (!err.status) {
+            console.error(err);
+            return;
+        }
+
         const statusCode = err.status;
         switch (statusCode) {
             case 401:

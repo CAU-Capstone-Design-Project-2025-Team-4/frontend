@@ -100,7 +100,7 @@ useDraggable(useTemplateRef<HTMLElement>('move-handler'), 1, (delta) => {
 
 ['textbox-n', 'textbox-w', 'textbox-s', 'textbox-e'].forEach(ref => useDraggable(useTemplateRef<HTMLElement>(ref), 1, (delta) => {
     move(delta);
-}, { stop: true }));
+}, { onEnd: updateElements, stop: true }));
 
 const design = useDesignStore();
 useDraggable(useTemplateRef<HTMLElement>('rotate-handler'), 1, (delta, start) => {

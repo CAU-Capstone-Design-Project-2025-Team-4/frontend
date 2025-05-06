@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ElementRef } from '@/components/design/Element.vue';
+import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
 import type { BorderRef, TextBoxRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
@@ -13,7 +14,6 @@ const borderRef = computed<BorderRef>(() => textBoxRef.value.borderRef);
 
 const textBox = useTemplateRef<HTMLElement>('text-box');
 
-
 const selector = useSelectorStore();
 
 const editable = ref<boolean>(false);
@@ -25,8 +25,10 @@ watch(() => selector.isSelected(element), () => {
     }, 100);
 });
 
+const design = useDesignStore();
 function handleBlur() {
     textBoxRef.value.text = textBox.value!.innerHTML;
+    design.updateObject(element);
 }
 
 let observer: ResizeObserver;
@@ -56,6 +58,7 @@ onBeforeUnmount(() => {
         outline: 'none',
         fontSize: `${textBoxRef.size}pt`,
         fontWeight: `${textBoxRef.weight}`,
+        fontFamily: `${textBoxRef.fontFamily}`,
         textAlign: `${textBoxRef.align}`     
     }" @blur="handleBlur()" />
 </template>

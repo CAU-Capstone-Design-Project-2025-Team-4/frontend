@@ -5,6 +5,7 @@ import type { TextBoxRef } from '@/types/ObjectRef';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import { ElementRef } from '@/components/design/Element.vue';
+import { useDesignStore } from '@/stores/design';
 
 const selector = useSelectorStore();
 
@@ -54,8 +55,20 @@ function getSelectionStyles() {
     highlightColor.value = document.queryCommandValue('backColor');
 }
 
+const design = useDesignStore();
 function handleFontSize() {
     if (textRef.value.size.toString() === '') textRef.value.size = 0;
+    design.debouncedUpdateObject(elementRef.value);
+}
+
+function chnageFontSize(size: number) {
+    textRef.value.size = size;
+    design.debouncedUpdateObject(elementRef.value);
+}
+
+function applyFontAlign(align: "left" | "center" | "right" | "justify") {
+    textRef.value.align = align;
+    design.updateObject(elementRef.value);
 }
 </script>
 
@@ -69,10 +82,10 @@ function handleFontSize() {
             </div>
 
             <div class="col-span-6 flex items-center justify-between h-10 rounded-lg border border-gray-400">
-                <div class="w-8 h-full leading-9 text-2xl rounded-tl-lg rounded-bl-lg border-r border-gray-400 hover:bg-gray-100" @pointerdown="textRef.size = Math.round(textRef.size / 1.1)">-</div>
+                <div class="w-8 h-full leading-9 text-2xl rounded-tl-lg rounded-bl-lg border-r border-gray-400 hover:bg-gray-100" @pointerdown="chnageFontSize(Math.round(textRef.size / 1.1))">-</div>
                 <!-- <div class="text-sm border-gray-400 hover:border-teal-400">{{ textRef.size }}</div> -->
                 <input v-model.number="textRef.size" class="w-12 h-full text-center" :style="{ outline: 'none' }" @input="handleFontSize()">
-                <div class="w-8 h-full leading-9 text-2xl rounded-tr-lg rounded-br-lg border-l border-gray-400 hover:bg-gray-100" @pointerdown="textRef.size = Math.round(textRef.size * 1.1)">+</div>
+                <div class="w-8 h-full leading-9 text-2xl rounded-tr-lg rounded-br-lg border-l border-gray-400 hover:bg-gray-100" @pointerdown="chnageFontSize(Math.round(textRef.size * 1.1))">+</div>
             </div>
             <div class="col-span-8 flex items-center justify-between h-10 rounded-lg border border-gray-400">
                 <div class="w-1/4 h-full p-1.5 text-2xl rounded-tl-lg rounded-bl-lg hover:bg-gray-100"
@@ -94,19 +107,19 @@ function handleFontSize() {
             </div>
 
             <div class="col-span-8 flex items-center justify-between h-10 rounded-lg border border-gray-400">
-                <div class="w-1/4 h-full p-1.5 text-2xl rounded-tl-lg rounded-bl-lg hover:bg-gray-100" @pointerdown="textRef.align = 'left'"
+                <div class="w-1/4 h-full p-1.5 text-2xl rounded-tl-lg rounded-bl-lg hover:bg-gray-100" @pointerdown="applyFontAlign('left')"
                 :class="{ 'bg-gray-200 hover:bg-gray-200': textRef.align === 'left' }">
                     <div class="i-mdi:format-align-left w-full h-full text-center leading-10" />
                 </div>
-                <div class="w-1/4 h-full p-1.5 text-2xl border-x  border-gray-400 hover:bg-gray-100" @pointerdown="textRef.align = 'center'"
+                <div class="w-1/4 h-full p-1.5 text-2xl border-x  border-gray-400 hover:bg-gray-100" @pointerdown="applyFontAlign('center')"
                 :class="{ 'bg-gray-200 hover:bg-gray-200': textRef.align === 'center' }">
                     <div class="i-mdi:format-align-center w-full h-full text-center leading-10" />
                 </div>
-                <div class="w-1/4 h-full p-1.5 text-2xl border-r border-gray-400 hover:bg-gray-100" @pointerdown="textRef.align = 'right'"
+                <div class="w-1/4 h-full p-1.5 text-2xl border-r border-gray-400 hover:bg-gray-100" @pointerdown="applyFontAlign('right')"
                 :class="{ 'bg-gray-200 hover:bg-gray-200': textRef.align === 'right' }">
                     <div class="i-mdi:format-align-right w-full h-full text-center leading-10" />
                 </div>
-                <div class="w-1/4 h-full p-1.5 text-2xl rounded-tr-lg rounded-br-lg hover:bg-gray-100" @pointerdown="textRef.align = 'justify'"
+                <div class="w-1/4 h-full p-1.5 text-2xl rounded-tr-lg rounded-br-lg hover:bg-gray-100" @pointerdown="applyFontAlign('justify')"
                 :class="{ 'bg-gray-200 hover:bg-gray-200': textRef.align === 'justify' }">
                     <div class="i-mdi:format-align-justify w-full h-full text-center leading-10" />
                 </div>
@@ -125,16 +138,6 @@ function handleFontSize() {
                 </ColorPicker>
             </div>
         </div>
-
-        <!-- <div class="flex items-center justify-between w-full h-12 mb-2">
-            <p class="text-left">텍스트 색</p>
-            <ColorPicker v-model="fontColor" class="w-8 h-8" />
-        </div>
-
-        <div class="flex items-center justify-between w-full h-12 mb-4">
-            <p class="text-left">배경 색</p>
-            <ColorPicker v-model="fontColor" class="w-8 h-8" />
-        </div> -->
 
         <!-- <BorderChevron :border="textRef.borderRef" class="my-2" /> -->
         <TransformChevron :element="elementRef" :disable-y="true" />
