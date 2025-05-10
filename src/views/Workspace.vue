@@ -39,18 +39,6 @@ function queryDesignList() {
     })
 }
 
-function temp(id: number) {
-    for (const i in [0, 1, 2]) {
-        axios.post('/api/slide', {
-            userId: auth.id,
-            designId: id,
-            order: i
-        }, auth.config).then(res => {
-
-        })
-    }
-}
-
 function createNewDesign() {
     if (!auth.isAuthenticated) return;
 
@@ -59,7 +47,6 @@ function createNewDesign() {
         sourceId: null,
         isShared: false,
     }, auth.config).then(res => {
-        temp(res.data.data.id);
         toEditorView(res.data.data.id);
     }).catch(err => {
         const statusCode = err.status;

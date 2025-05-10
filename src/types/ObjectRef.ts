@@ -31,7 +31,7 @@ export interface SpatialRef extends ObjectRef {
         position: { x: number, y: number, z: number },
         rotation: { x: number, y: number, z: number }
     },
-    modelFile: File,
+    modelFile: Blob,
     model: string | null,
     backgroundColor: 'skybox' | string,
 }

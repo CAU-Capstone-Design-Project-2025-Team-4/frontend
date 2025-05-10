@@ -4,10 +4,10 @@ import UnityWebgl from 'unity-webgl';
 import { ref, useTemplateRef } from 'vue';
 
 const context = new UnityWebgl({
-    loaderUrl: "unity/Build.loader.js",
-    dataUrl: "unity/Build.data.br",
-    frameworkUrl: "unity/Build.framework.js.br",
-    codeUrl: "unity/Build.wasm.br",
+    loaderUrl: "/unity/Build.loader.js",
+    dataUrl: "/unity/Build.data.br",
+    frameworkUrl: "/unity/Build.framework.js.br",
+    codeUrl: "/unity/Build.wasm.br",
     companyName: 'CAU Capsotne',
     productName: 'PRISM',
     productVersion: 'v0.1.0-alpha',

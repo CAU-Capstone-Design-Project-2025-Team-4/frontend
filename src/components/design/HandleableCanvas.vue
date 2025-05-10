@@ -36,7 +36,7 @@ function containPoint(point: Vector2): boolean {
 
 const canvas = useTemplateRef<HTMLElement>('canvas');
 async function capture(): Promise<string> {
-    return toJpeg(canvas.value!, { pixelRatio: 0.2 }).then(url => url)
+    return toJpeg(canvas.value!, { pixelRatio: 0.5, quality: 0.5 }).then(url => url)
     .catch(err => {
         console.error("Error occured while capturing slide: ", err);
         return ''
@@ -117,6 +117,9 @@ onMounted(() => {
     nextTick(() => handleResize());
 
     design.addChangeListener(onChange);
+    watch(() => unity.value.isCreatingInstance, () => {
+        setTimeout(() => onChange(), 100);
+    })
 })
 
 

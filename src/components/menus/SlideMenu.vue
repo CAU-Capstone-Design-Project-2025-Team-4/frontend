@@ -33,7 +33,7 @@ const slideSelection = ref<number>(-1);
                         <p class="absolute left-1" :class="{ 'text-teal-800 font-bold': isSelected(index) }">{{ index + 1 }}</p>
                         <div class="absolute right-0 h-full aspect-video rounded-md outline-1 outline-solid outline-gray-400 hover:outline-teal-600"
                         :class="{ 'outline-3 outline-teal-700 hover:outline-teal-700': isSelected(index) }">
-                            <img :src="slide.thumbnail" class="w-full h-full object-fill" />
+                            <img :src="slide.thumbnail" :class="{ 'w-full h-full object-fill' : slide.thumbnail }" />
                         </div>
                     </div>
                 </div>

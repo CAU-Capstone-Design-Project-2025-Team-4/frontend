@@ -16,24 +16,35 @@ function addElement(mode: string) {
         return;
     }
 
-    const element = new ElementRef(new Vector2(960, 540), 0, new Vector2(968, 541), 0, {
-        cameraMode: mode,
-        cameraTransform: {
-            position: { x: 0, y: 0, z: -10 },
-            rotation: { x: 0, y: 0, z: 0 }
-        }, 
-        model: null,
-        backgroundColor: 'skybox',
-        borderRef: {
-            type: 'none',
-            color: '#000000',
-            thickness: 1
-        }
-    } as SpatialRef);
-    design.addElement(element);
+    fetch('/model.fbx')
+    .then(res => {
+        console.log(res)
+        return res.blob()
+    })
+    .then(blob => {
+        console.log(blob)
+        const element = new ElementRef(-1, new Vector2(960, 540), 0, new Vector2(968, 541), 0, {
+            cameraMode: mode,
+            cameraTransform: {
+                position: { x: 0, y: 0, z: -10 },
+                rotation: { x: 0, y: 0, z: 0 }
+            }, 
+            modelFile: blob,
+            model: null,
+            backgroundColor: 'skybox',
+            borderRef: {
+                type: 'none',
+                color: '#000000',
+                thickness: 1
+            }
+        } as SpatialRef);
+        design.addElement(element);
 
-    selector.deselectAll();
-    nextTick(() => selector.select(element));    
+        selector.deselectAll();
+        nextTick(() => selector.select(element));   
+    })
+
+     
 }
 </script>
 

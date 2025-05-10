@@ -4,8 +4,8 @@ import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import axios from "axios";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type ObjectRef, type ObjectType, type ShapeRef, type TextBoxRef } from "@/types/ObjectRef";
-import type { ElementResponseDTO } from "@/types/DTO";
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import type { ElementResponseDTO, SlideResponseDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 
@@ -24,6 +24,8 @@ export const useDesignStore = defineStore('design', () => {
     const selector = useSelectorStore();
     const auth = useAuthStore();
 
+    const designId = ref<number>(-1);
+
     const slides = ref<Slide[]>([]);
 
     const selection = ref<number>(0);
@@ -39,20 +41,29 @@ export const useDesignStore = defineStore('design', () => {
         selection.value = 0;
     }
 
-    async function load(designId: number) {
+    async function load(id: number) {
         if (!auth.isAuthenticated) throw new Error('먼저 로그인해주세요.');
 
         $reset();
         
+        axios.get('/api/slide', {
+            params: {
+                userId: auth.id,
+                designId: id
+            },
+            ...auth.config
+        }).then(res => {
+            const data: SlideResponseDTO = res.data.data;
+            data.slides.forEach(slide => {
+                slides.value.push(_newSlide(slide.id));
+            });
+            designId.value = id;
 
-        slides.value.push(_newSlide(1));
-        slides.value.push(_newSlide(2));
-        slides.value.push(_newSlide(3));
-
-        selectSlide(0);
-
-        // axios.get('/api')
-        // throw new Error('허용되지 않은 접근입니다.');
+            selectSlide(0);
+            notifyChangeListeners();
+        }).catch(err => {
+            throw new Error('허용되지 않은 접근입니다.');
+        });
     }
 
     function loadSlide(slide: Slide) {
@@ -65,20 +76,24 @@ export const useDesignStore = defineStore('design', () => {
                 slideId: slide.id
             },
             ...auth.config
-        }).then(res => {
+        }).then(async (res) => {
             const elements: ElementResponseDTO[] = res.data.data;
-            elements.forEach(elementDto => {
-                const element = parseElement(elementDto);
+
+            const promises = elements.map(async (elementDto) => {
+                const element = await parseElement(elementDto);
                 if (element) {
                     currentSlide.value.elements.push(element);
                 }
             });
+
+            await Promise.all(promises);
+
             slide.hasLoaded = true;
             notifyChangeListeners();
         }).catch(err => auth.handleCommonError(err, () => loadSlide(slide)));
     }
 
-    function parseElement(dto: ElementResponseDTO): ElementRef | null {
+    async function parseElement(dto: ElementResponseDTO): Promise<ElementRef | null> {
         const borderRef: BorderRef = {
             type: dto.borderRef.borderType.toLowerCase() as 'none' | 'solid',
             color: dto.borderRef.color,
@@ -107,11 +122,13 @@ export const useDesignStore = defineStore('design', () => {
                 break;
 
             case 'IMAGE':
+                const url = await loadFile(dto.id);
                 objectRef = {
-                    url: dto.content!,
+                    url: url,
                     borderRef: borderRef
                 } as ImageRef;
                 break;
+                
             default:
                 console.error("Unknown type while parsing element: ", dto.type);
                 return null;
@@ -127,6 +144,15 @@ export const useDesignStore = defineStore('design', () => {
         );
     }
 
+    async function loadFile(id: number) {
+        const res = await fetch(`/api/element/file/${id}`, {
+            method: 'GET',
+            ...Object(auth.config),
+        });
+
+        return URL.createObjectURL(await res.blob());
+    }
+
 
     function selectSlide(index: number) {
         if (index < 0 || index > slides.value.length - 1) return;
@@ -137,8 +163,19 @@ export const useDesignStore = defineStore('design', () => {
     }
 
     function addSlide() {
-        slides.value.push(_newSlide());
-        selectSlide(slides.value.length - 1);
+        if (!auth.isAuthenticated) return;
+
+        axios.post('/api/slide', {
+            userId: auth.id,
+            designId: designId.value,
+            order: slides.value.length,
+        }, auth.config).then(res => {
+            const id = res.data.data.id;
+            slides.value.push(_newSlide(id));
+            selectSlide(slides.value.length - 1);
+        }).catch(err => auth.handleCommonError(err, () => addSlide()));
+
+        notifyChangeListeners();
     }
 
     function insertSlide(index: number) {
@@ -206,6 +243,7 @@ export const useDesignStore = defineStore('design', () => {
         }
 
         if (instanceOfImageRef(objectRef)) {
+            console.log(objectRef.imageFile)
             return {
                 type: 'IMAGE',
                 data: buildFormData({
@@ -220,16 +258,14 @@ export const useDesignStore = defineStore('design', () => {
                 data: buildFormData({
                     ...common,
                     file: objectRef.modelFile,
-                    cameraTransform: {
-                        positionX: objectRef.cameraTransform.position.x,
-                        positionY: objectRef.cameraTransform.position.y,
-                        positionZ: objectRef.cameraTransform.position.z,
-                        rotationX: objectRef.cameraTransform.rotation.x,
-                        rotationY: objectRef.cameraTransform.rotation.y,
-                        rotationZ: objectRef.cameraTransform.rotation.z,
-                    },
+                    'cameraTransform.positionX': objectRef.cameraTransform.position.x,
+                    'cameraTransform.positionY': objectRef.cameraTransform.position.y,
+                    'cameraTransform.positionZ': objectRef.cameraTransform.position.z,
+                    'cameraTransform.rotationX': objectRef.cameraTransform.rotation.x,
+                    'cameraTransform.rotationY': objectRef.cameraTransform.rotation.y,
+                    'cameraTransform.rotationZ': objectRef.cameraTransform.rotation.z,
                     backgroundColor: objectRef.backgroundColor,
-                    cameraMode: objectRef.cameraMode
+                    cameraMode: objectRef.cameraMode.toUpperCase()
                 })
             }   
         } 

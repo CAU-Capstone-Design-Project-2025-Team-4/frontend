@@ -13,6 +13,15 @@ export interface DesignResponseDTO {
     createdAt: string
 }
 
+export interface SlideResponseDTO {
+    size: number,
+    slides: [{
+        id: number,
+        order: number,
+        slideElements: []
+    }]
+}
+
 export interface BorderRefDTO {
     borderType: string,
     color: string,
