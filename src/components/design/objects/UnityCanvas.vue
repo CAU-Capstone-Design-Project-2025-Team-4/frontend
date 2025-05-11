@@ -87,7 +87,7 @@ function requestPointerLock() {
 type Method = 'LoadModel' | 'UnloadModel' | 'SetCameraMode' | 'SetPlayMode' | 'EnableInput' | 'SetCameraPositionAndRotation' | 'SetCameraBackgroundMode' | 'SetCameraBackgroundColor';
 function sendMessage(method: Method, params?: any) {
     context.sendMessage('Web Message Handler', method, params);
-    console.log(`[Unity Canvas] Message sended to unity.\n${method}: ${params}`);
+    console.log(`[Unity Canvas] Message sent to unity.\n${method}: ${params}`);
 }
 
 defineExpose({

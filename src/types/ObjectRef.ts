@@ -33,7 +33,20 @@ export interface SpatialRef extends ObjectRef {
     },
     modelFile: Blob,
     model: string | null,
+    models: Model[],
     backgroundColor: 'skybox' | string,
+}
+
+export interface Model {
+    id: number,
+    name: string,
+    url: string,
+    transform: {
+        position: { x: number, y: number, z: number },
+        rotation: { x: number, y: number, z: number },
+        scale: { x: number, y: number, z: number }
+    },
+    shader: 'none' | 'highlight'
 }
 
 export function instanceOfShapeRef(ref: ObjectRef): ref is ShapeRef {

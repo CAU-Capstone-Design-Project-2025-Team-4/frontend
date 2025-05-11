@@ -18,11 +18,9 @@ function addElement(mode: string) {
 
     fetch('/model.fbx')
     .then(res => {
-        console.log(res)
         return res.blob()
     })
     .then(blob => {
-        console.log(blob)
         const element = new ElementRef(-1, new Vector2(960, 540), 0, new Vector2(968, 541), 0, {
             cameraMode: mode,
             cameraTransform: {
@@ -31,6 +29,7 @@ function addElement(mode: string) {
             }, 
             modelFile: blob,
             model: null,
+            models: [],
             backgroundColor: 'skybox',
             borderRef: {
                 type: 'none',
@@ -38,7 +37,7 @@ function addElement(mode: string) {
                 thickness: 1
             }
         } as SpatialRef);
-        design.addElement(element);
+        design._addElement(element);
 
         selector.deselectAll();
         nextTick(() => selector.select(element));   

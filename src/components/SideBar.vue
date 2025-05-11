@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
+import { ref, shallowRef, watch, type Component, type ShallowRef } from 'vue';
 import SlideMenu from '@/components/menus/SlideMenu.vue';
 import TemplateMenu from '@/components/menus/TemplateMenu.vue';
 import ShapeMenu from '@/components/menus/ShapeMenu.vue';
@@ -46,7 +46,7 @@ const menuList: Menu[] = [
     },
     {
         name: '3D',
-        icon: 'i-mdi:cube-outline',
+        icon: 'i-mdi:unity',
         component: shallowRef(SpatialMenu)
     },
 ];

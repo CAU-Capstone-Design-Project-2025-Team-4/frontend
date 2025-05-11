@@ -8,6 +8,7 @@ import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceO
 import type { ElementResponseDTO, SlideResponseDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
+import { rand } from "@vueuse/core";
 
 export interface Slide {
     id: number,
@@ -311,6 +312,20 @@ export const useDesignStore = defineStore('design', () => {
         }).catch(err => auth.handleCommonError(err, () => addElement(element)));
     }
 
+    function _addElement(element: ElementRef) {
+        element.id = rand(0, 888888);
+        currentSlide.value.elements.push(element);
+
+        notifyChangeListeners();
+    }
+
+    async function uploadModel(element: ElementRef, model: Blob) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        return {
+            id: rand(0, 98999999),
+            url: "http://localhost:5173/UFO_Empty.glb"
+        };
+    }
     
 
     function updateElement(element: ElementRef) {
@@ -386,6 +401,7 @@ export const useDesignStore = defineStore('design', () => {
         slides, selection, currentSlide, 
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
         addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject,
-        addChangeListener, removeChangeListener
+        addChangeListener, removeChangeListener,
+        _addElement, uploadModel
     };
 })
