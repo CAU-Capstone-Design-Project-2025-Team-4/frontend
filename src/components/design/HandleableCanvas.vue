@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch, type Ref } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
@@ -142,8 +142,6 @@ function deleteElement(e: KeyboardEvent) {
 
 const design = useDesignStore();
 const selector = useSelectorStore();
-
-provide<boolean>('handleable', true);
 
 const refresh = ref<number>(0);
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;

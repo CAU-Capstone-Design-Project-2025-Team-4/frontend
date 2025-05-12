@@ -35,53 +35,29 @@ export class ElementRef {
 <script setup lang="ts">
 import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type ObjectRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
-import { computed, inject, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import Shape from '@/components/design/objects/Shape.vue';
 import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
 import { useSelectorStore } from '@/stores/selector';
 import Spatial from './objects/Spatial.vue';
 
-const { element, ratio } = defineProps<{
-    element: ElementRef,
-    ratio: number
+const { element } = defineProps<{
+    element: ElementRef
 }>();
-
-const position = computed<Vector2>(() => Vector2.Mult(element.position, ratio));
-const size = computed<Vector2>(() => Vector2.Mult(element.size, ratio));
-
-const elementDiv = useTemplateRef<HTMLElement>('element');
-const handleable = inject<boolean>('handleable', false);
 
 const selector = useSelectorStore();
 function select(e: PointerEvent) {
-    e.stopPropagation();
-    if (e.button != 0) return
-
     if (!e.ctrlKey) {
         selector.deselectAll();
     }
     selector.select(element);
 }
-
-onMounted(() => {
-    if (handleable) {
-        elementDiv.value?.addEventListener('pointerdown', select);
-    }
-})
-
-onBeforeUnmount(() => {
-    if (handleable) {
-        elementDiv.value?.removeEventListener('pointerdown', select);
-    }
-})
-
 </script>
 
 <template>
-    <div ref="element" class="absolute" :style="{
+    <div class="absolute" @pointerdown.left.stop="select($event)" :style="{
         transformOrigin: 'left top',
-        transform: `translate(${position.x}px, ${position.y}px) rotate(${element.rotation}deg) translate(${-size.x / 2}px, ${-size.y / 2}px) scale(${ratio})`,
+        transform: `translate(${element.position.x}px, ${element.position.y}px) rotate(${element.rotation}deg) translate(${-element.size.x / 2}px, ${-element.size.y / 2}px)`,
         width: `${Math.round(element.size.x)}px`,
         height: `${Math.round(element.size.y)}px`,
         zIndex: `${element.z + 1000}`,

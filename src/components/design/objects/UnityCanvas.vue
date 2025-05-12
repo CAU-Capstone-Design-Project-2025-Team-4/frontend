@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SpatialRef } from '@/types/ObjectRef';
 import UnityWebgl from 'unity-webgl';
-import { ref, useTemplateRef } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 
 const context = new UnityWebgl({
     loaderUrl: "/unity/Build.loader.js",
@@ -49,7 +49,9 @@ function createInstanceManager() {
         return instancePromise;
     }
 
-    return { instantiate };
+    const hasInstance = computed<boolean>(() => instancePromise !== null);
+
+    return { instantiate, hasInstance };
 }
 
 async function render(spatialRef: SpatialRef) {
@@ -86,6 +88,8 @@ function requestPointerLock() {
 
 type Method = 'LoadModel' | 'UnloadModel' | 'SetCameraMode' | 'SetPlayMode' | 'EnableInput' | 'SetCameraPositionAndRotation' | 'SetCameraBackgroundMode' | 'SetCameraBackgroundColor';
 function sendMessage(method: Method, params?: any) {
+    if (!instanceManager.hasInstance.value) return;
+    
     context.sendMessage('Web Message Handler', method, params);
     console.log(`[Unity Canvas] Message sent to unity.\n${method}: ${params}`);
 }

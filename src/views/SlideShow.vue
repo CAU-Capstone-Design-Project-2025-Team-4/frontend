@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDesignStore } from '@/stores/design';
 import Canvas from '@/components/design/Canvas.vue';
-import { inject, onMounted, onUnmounted, provide, ref, type Ref } from 'vue';
+import { inject, onMounted, onUnmounted, ref, type Ref } from 'vue';
 import router from '@/router';
 import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 
@@ -58,9 +58,6 @@ function removeFocus(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-    // if (document.documentElement.requestFullscreen) {
-    //     document.documentElement.requestFullscreen();
-    // }
     document.addEventListener('fullscreenchange', handleFullscreen);
     document.addEventListener('pointerup', nextSlide);
     // space key bidning
@@ -71,7 +68,6 @@ onUnmounted(() => {
     document.removeEventListener('pointerup', nextSlide);
 });
 
-provide('slide-show', true);
 </script>
 <template>
     <Canvas v-if="current < design.slides.length" class="w-full h-full select-none" :slide="design.slides[current]" />

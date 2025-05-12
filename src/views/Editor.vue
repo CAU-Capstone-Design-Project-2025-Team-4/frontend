@@ -69,7 +69,6 @@ onMounted(async () => {
                     <HandleableCanvas v-show="!isLoading" key="1" ref="canvas" />
                     <div v-show="isLoading" key="2" class="absolute left-0 top-0 flex flex-col items-center justify-center w-full h-full bg-black bg-opacity-70">
                         <span class="w-12 h-12 m-2 rounded-full border-4 border-white border-b-teal-400 animate-spin"></span>
-                        <!-- <p class="mt-2 text-white text-2xl">Loading</p> -->
                     </div>
                 </TransitionGroup>
             </div>        
