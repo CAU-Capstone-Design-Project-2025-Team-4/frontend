@@ -1,7 +1,6 @@
-import type { ObjectType } from "./ObjectRef"
-
 export interface LoginResponseDTO {
     jwtToken: string,
+    refreshToken: string,
     id: number,
     name: string,
     email: string
@@ -18,7 +17,7 @@ export interface SlideResponseDTO {
     slides: [{
         id: number,
         order: number,
-        slideElements: []
+        slideElements: ElementResponseDTO[]
     }]
 }
 
@@ -27,6 +26,19 @@ export interface BorderRefDTO {
     color: string,
     thickness: number
 }
+
+export interface ModelDTO {
+    id: number,
+    url: string,
+    name: string,
+    modelTransform: {
+        position: { x: number, y: number, z: number },
+        rotation: { x: number, y: number, z: number },
+        scale: { x: number, y: number, z: number }
+    },
+    shader: string
+}
+
 export interface ElementResponseDTO {
     id: number,
     type: string
@@ -47,5 +59,22 @@ export interface ElementResponseDTO {
     size?: number,
     weight?: number,
     fontFamily: string,
-    textAlign: string
+    textAlign: string,
+
+    cameraMode?: string,
+    cameraTransform?: {
+        positionX: number,
+        positionY: number,
+        positionZ: number,
+        rotationX: number,
+        rotationY: number,
+        rotationZ: number
+    },
+    models?: ModelDTO[],
+    backgroundColor?: string,
+}
+
+export interface AddModelResponseDTO {
+    id: number,
+    url: string
 }

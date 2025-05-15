@@ -18,6 +18,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
     unity.value.unmount();
 })
+
+// TODO: spatial element size with canvas scale... (rounding problem)
 </script>
 
 <template>

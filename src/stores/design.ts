@@ -4,8 +4,8 @@ import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import axios from "axios";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
-import type { ElementResponseDTO, SlideResponseDTO } from "@/types/DTO";
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import type { ElementResponseDTO, ModelDTO, SlideResponseDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 import { rand } from "@vueuse/core";
@@ -53,11 +53,18 @@ export const useDesignStore = defineStore('design', () => {
                 designId: id
             },
             ...auth.config
-        }).then(res => {
+        }).then(async res => {
             const data: SlideResponseDTO = res.data.data;
-            data.slides.forEach(slide => {
-                slides.value.push(_newSlide(slide.id));
-            });
+            for (const slide of data.slides.sort((a, b) => a.order - b.order)) {
+                const _slide: Slide = {
+                    id: slide.id,
+                    hasLoaded: false,
+                    thumbnail: '',
+                    elements: await Promise.all(slide.slideElements.map(element => parseElement(element)))
+                };
+                slides.value.push(_slide);
+            }
+
             designId.value = id;
 
             selectSlide(0);
@@ -94,7 +101,8 @@ export const useDesignStore = defineStore('design', () => {
         }).catch(err => auth.handleCommonError(err, () => loadSlide(slide)));
     }
 
-    async function parseElement(dto: ElementResponseDTO): Promise<ElementRef | null> {
+    async function parseElement(dto: ElementResponseDTO): Promise<ElementRef> {
+        console.log('parse', dto)
         const borderRef: BorderRef = {
             type: dto.borderRef.borderType.toLowerCase() as 'none' | 'solid',
             color: dto.borderRef.color,
@@ -123,16 +131,47 @@ export const useDesignStore = defineStore('design', () => {
                 break;
 
             case 'IMAGE':
-                const url = await loadFile(dto.id);
+                const url = await loadFile(dto.content!); // TODO: when slide selected...
                 objectRef = {
                     url: url,
                     borderRef: borderRef
                 } as ImageRef;
                 break;
+
+            case 'SPATIAL':
+                function buildModel(model: ModelDTO): Model {
+                    return {
+                        id: model.id,
+                        name: model.name,
+                        url: model.url,
+                        transform: model.modelTransform,
+                        shader: model.shader.toLowerCase() as 'none' | 'highlight'
+                    }
+                }
+
+                objectRef = {
+                    cameraMode: dto.cameraMode!.toLowerCase(),
+                    cameraTransform: {
+                        position: {
+                            x: dto.cameraTransform!.positionX,
+                            y: dto.cameraTransform!.positionY,
+                            z: dto.cameraTransform!.positionZ,
+                        },
+                            rotation: {
+                            x: dto.cameraTransform!.rotationX,
+                            y: dto.cameraTransform!.rotationY,
+                            z: dto.cameraTransform!.rotationZ,
+                        }
+                    },
+                    backgroundColor: dto.backgroundColor!,
+                    models: dto.models!.map(model => buildModel(model)),
+                    borderRef: borderRef
+                } as SpatialRef
+                break;
                 
             default:
                 console.error("Unknown type while parsing element: ", dto.type);
-                return null;
+                objectRef = {} as InvalidRef
         }
 
         return new ElementRef(
@@ -145,13 +184,13 @@ export const useDesignStore = defineStore('design', () => {
         );
     }
 
-    async function loadFile(id: number) {
-        const res = await fetch(`/api/element/file/${id}`, {
-            method: 'GET',
-            ...Object(auth.config),
+    async function loadFile(url: string) {
+        console.log('load file')
+        const res = await axios.get(url, {
+            responseType: 'blob'
         });
 
-        return URL.createObjectURL(await res.blob());
+        return URL.createObjectURL(res.data);
     }
 
 
@@ -159,7 +198,7 @@ export const useDesignStore = defineStore('design', () => {
         if (index < 0 || index > slides.value.length - 1) return;
         selection.value = index;
 
-        loadSlide(currentSlide.value);
+        // loadSlide(currentSlide.value);
         selector.deselectAll();
     }
 
@@ -258,7 +297,7 @@ export const useDesignStore = defineStore('design', () => {
                 type: 'SPATIAL',
                 data: buildFormData({
                     ...common,
-                    file: objectRef.modelFile,
+                    // file: objectRef.modelFile,
                     'cameraTransform.positionX': objectRef.cameraTransform.position.x,
                     'cameraTransform.positionY': objectRef.cameraTransform.position.y,
                     'cameraTransform.positionZ': objectRef.cameraTransform.position.z,
@@ -319,12 +358,50 @@ export const useDesignStore = defineStore('design', () => {
         notifyChangeListeners();
     }
 
-    async function uploadModel(element: ElementRef, model: Blob) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        return {
-            id: rand(0, 98999999),
-            url: "http://localhost:5173/UFO_Empty.glb"
-        };
+    async function uploadModel(element: ElementRef, model: File) {
+        if (!auth.isAuthenticated) return;
+
+        const form = new FormData();
+        form.append('userId', auth.id!.toString());
+        form.append('spatialId', element.id.toString());
+        form.append('file', model);
+        form.append('name', model.name);
+
+        form.append('modelTransform.position.x', '0');
+        form.append('modelTransform.position.y', '0');
+        form.append('modelTransform.position.z', '0');
+        form.append('modelTransform.rotation.x', '0');
+        form.append('modelTransform.rotation.y', '0');
+        form.append('modelTransform.rotation.z', '0');
+        form.append('modelTransform.scale.x', '0');
+        form.append('modelTransform.scale.y', '0');
+        form.append('modelTransform.scale.z', '0');
+
+        form.append('shader', 'NONE');
+
+        return axios.post('/api/model', form, auth.config)
+        .then(res => {
+            return {
+                id: res.data.id,
+                url: res.data.url
+            }
+        }).catch(err => auth.handleCommonError(err, () => uploadModel(element, model)));
+    }
+
+    function updateModel(element: ElementRef, model: Model) {
+        if (!auth.isAuthenticated) return;
+
+        axios.patch('/api/model', {
+            modelId: model.id,
+            userId: auth.id,
+            spatialId: element.id,
+            name: model.name,
+            modelTransform: model.transform,
+            shader: model.shader.toUpperCase()
+        }, auth.config)
+        .then(res => {
+            console.log(res);
+        }).catch(err => auth.handleCommonError(err, () => updateModel(element, model)));
     }
     
 
@@ -378,10 +455,13 @@ export const useDesignStore = defineStore('design', () => {
 
     const { debounced: debouncedUpdateElement, flush: flushUpdateElement } = useDebounceFnFlushable((element) => updateElement(element), 1000);
     const { debounced: debouncedUpdateObject, flush: flushUpdateObject } = useDebounceFnFlushable((element) => updateObject(element), 1000);
+    const { debounced: debouncedUpdateModel, flush: flushUpdateModel } = useDebounceFnFlushable((element, model) => updateModel(element, model), 1000);
+
 
     watch(() => selector.idSelection, () => {
         flushUpdateElement();
         flushUpdateObject();
+        flushUpdateModel();
     })
 
 
@@ -400,8 +480,8 @@ export const useDesignStore = defineStore('design', () => {
         load,
         slides, selection, currentSlide, 
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
-        addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject,
+        addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject, debouncedUpdateModel,
         addChangeListener, removeChangeListener,
-        _addElement, uploadModel
+        _addElement, uploadModel, updateModel
     };
 })

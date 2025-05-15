@@ -62,8 +62,8 @@ async function render(spatialRef: SpatialRef) {
     await instanceManager.instantiate();
     isCreatingInstance.value = false;
 
-    if (spatialRef.model !== null) {
-        sendMessage('LoadModel', spatialRef.model);
+    if (spatialRef.models.length > 0) {
+        sendMessage('LoadModel', spatialRef.models[0].url);
     } else {
         sendMessage('UnloadModel');
     }

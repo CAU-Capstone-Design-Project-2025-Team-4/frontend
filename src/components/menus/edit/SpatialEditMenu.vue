@@ -44,6 +44,9 @@ async function uploadModels(e: Event) {
     const input = e.target as HTMLInputElement;
     for (const file of input.files!) {
         const _model = await design.uploadModel(elementRef.value, file);
+        if (!_model) return;
+
+        console.log(_model);
         unity.value.sendMessage('LoadModel', _model.url);
 
         const model: Model = { 
@@ -110,6 +113,8 @@ function removeModel(model: Model) {
 
 function selectShader(shader: 'none' | 'highlight') {
     selectedModel.value!.shader = shader;
+    design.updateModel(elementRef.value, selectedModel.value!);
+
     shaderDropdown.value?.close();
 }
 </script>
@@ -130,19 +135,19 @@ function selectShader(shader: 'none' | 'highlight') {
                     <p class="text-left text-sm px-2 pt-1 leading-7">Z</p>
 
                     <p class="text-left px-2 leading-8">위치</p>
-                    <input v-model.number="selectedModel.transform.position.x" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.position.y" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.position.z" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 leading-8">회전</p>
-                    <input v-model.number="selectedModel.transform.rotation.x" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.rotation.y" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.rotation.z" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 leading-8">크기</p>
-                    <input v-model.number="selectedModel.transform.scale.x" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.scale.y" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.scale.z" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 mt-2 leading-10">셰이더</p>
                     <div class="relative col-span-3">

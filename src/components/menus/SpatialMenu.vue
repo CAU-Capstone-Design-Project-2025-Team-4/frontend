@@ -16,19 +16,19 @@ function addElement(mode: string) {
         return;
     }
 
-    fetch('/model.fbx')
-    .then(res => {
-        return res.blob()
-    })
-    .then(blob => {
-        const element = new ElementRef(-1, new Vector2(960, 540), 0, new Vector2(968, 541), 0, {
+    const element = new ElementRef(
+        -1,
+        new Vector2(960, 540),
+        0,
+        new Vector2(968, 541),
+        0,
+        {
             cameraMode: mode,
             cameraTransform: {
                 position: { x: 0, y: 0, z: -10 },
                 rotation: { x: 0, y: 0, z: 0 }
-            }, 
-            modelFile: blob,
-            model: null,
+            },
+            modelFile: '',
             models: [],
             backgroundColor: 'skybox',
             borderRef: {
@@ -36,12 +36,39 @@ function addElement(mode: string) {
                 color: '#000000',
                 thickness: 1
             }
-        } as SpatialRef);
-        design._addElement(element);
+        } as SpatialRef
+    )
+    design.addElement(element);
 
-        selector.deselectAll();
-        nextTick(() => selector.select(element));   
-    })
+    selector.deselectAll();
+    nextTick(() => selector.select(element)); 
+
+    // fetch('/model.fbx')
+    // .then(res => {
+    //     return res.blob()
+    // })
+    // .then(blob => {
+    //     const element = new ElementRef(-1, new Vector2(960, 540), 0, new Vector2(968, 541), 0, {
+    //         cameraMode: mode,
+    //         cameraTransform: {
+    //             position: { x: 0, y: 0, z: -10 },
+    //             rotation: { x: 0, y: 0, z: 0 }
+    //         }, 
+    //         modelFile: blob,
+    //         model: null,
+    //         models: [],
+    //         backgroundColor: 'skybox',
+    //         borderRef: {
+    //             type: 'none',
+    //             color: '#000000',
+    //             thickness: 1
+    //         }
+    //     } as SpatialRef);
+    //     design._addElement(element);
+
+    //     selector.deselectAll();
+    //     nextTick(() => selector.select(element));   
+    // })
 
      
 }

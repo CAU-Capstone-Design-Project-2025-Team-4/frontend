@@ -24,19 +24,7 @@ function queryDesignList() {
         ...auth.config
     }).then(res => {
         designList.value = res.data.data;
-    }).catch(err => {
-        const statusCode = err.status;
-        switch (statusCode) {
-            case 401:
-            case 403:
-                if (auth.handleTokenExpired()) {
-                    queryDesignList();
-                }
-                break;
-            default:
-                console.error("Unhandled error status:", statusCode);
-        }
-    })
+    }).catch(err => auth.handleCommonError(err, () => queryDesignList()));
 }
 
 function createNewDesign() {

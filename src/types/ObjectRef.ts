@@ -31,11 +31,13 @@ export interface SpatialRef extends ObjectRef {
         position: { x: number, y: number, z: number },
         rotation: { x: number, y: number, z: number }
     },
-    modelFile: Blob,
-    model: string | null,
+    modelFile?: Blob | null | '',
+    model?: string | null,
     models: Model[],
     backgroundColor: 'skybox' | string,
 }
+
+export interface InvalidRef extends ObjectRef {}
 
 export interface Model {
     id: number,
@@ -62,7 +64,7 @@ export function instanceOfImageRef(ref: ObjectRef): ref is ImageRef {
 }
 
 export function instanceOfSpatialRef(ref: ObjectRef): ref is SpatialRef {
-    return 'model' in ref;
+    return 'cameraMode' in ref;
 }
 
 export type ObjectType = 'SHAPE' | 'TEXTBOX' | 'IMAGE' | 'SPATIAL';
