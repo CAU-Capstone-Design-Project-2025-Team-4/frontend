@@ -36,20 +36,27 @@ function createNewDesign() {
         isShared: false,
     }, auth.config).then(res => {
         toEditorView(res.data.data.id);
-    }).catch(err => {
-        const statusCode = err.status;
-        switch (statusCode) {
-            case 401:
-            case 403:
-                if (auth.handleTokenExpired()) {
-                    createNewDesign();
-                }
-                break;
-            default:
-                console.error("Unhandled error status:", statusCode);
-        }
-    })
+    }).catch(err => auth.handleCommonError(err, () => createNewDesign()));
 }
+
+function deleteDesign(id: number) {
+    if (!auth.isAuthenticated) return;
+
+    // TODO: show Confirm Modal
+
+    axios.delete('/api/design', {
+        params: {
+            userId: auth.id,
+            designId: id
+        },
+        ...auth.config
+    }).then(_res => {
+        designDropdown.value?.close();
+        queryDesignList();
+    }).catch(err => auth.handleCommonError(err, () => deleteDesign(id)));
+}
+
+
 
 const designList = ref<DesignResponseDTO[]>([]);
 
@@ -176,7 +183,7 @@ function toEditorView(designId: number) {
                 <div class="w-6 h-6 mr-2 i-mdi:share-variant-outline" />
                 <p class="leading-6">공유하기</p>
             </button>
-            <button @pointerup="" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
+            <button @pointerup="deleteDesign(currentDesign!.id)" class="flex w-80 h-12 p-3 px-6 border-0 hover:bg-gray-200" :style="{ outline: 'none' }">
                 <div class="w-6 h-6 mr-2 i-material-symbols:delete-outline-rounded" />
                 <p class="leading-6">삭제하기</p>
             </button>

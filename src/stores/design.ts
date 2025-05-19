@@ -74,7 +74,7 @@ export const useDesignStore = defineStore('design', () => {
         });
     }
 
-    function loadSlide(slide: Slide) {
+    function _loadSlide(slide: Slide) {
         if (slide.hasLoaded) return;
         if (!auth.isAuthenticated) return;
          
@@ -98,7 +98,7 @@ export const useDesignStore = defineStore('design', () => {
 
             slide.hasLoaded = true;
             notifyChangeListeners();
-        }).catch(err => auth.handleCommonError(err, () => loadSlide(slide)));
+        }).catch(err => auth.handleCommonError(err, () => _loadSlide(slide)));
     }
 
     async function parseElement(dto: ElementResponseDTO): Promise<ElementRef> {
@@ -234,18 +234,26 @@ export const useDesignStore = defineStore('design', () => {
     }
 
     function removeSlide(index: number) {
+        if (!auth.isAuthenticated) return;
+
         if (index < 0 || index > slides.value.length - 1) return;
         if (slides.value.length < 2) {
             window.alert('최소 1 개의 슬라이드는 존재해야 합니다.')
             return;
         }
 
-        slides.value.splice(index, 1);
-        selection.value = Math.min(index, slides.value.length - 1);
+        axios.delete('/api/slide', {
+            params: {
+                userId: auth.id,
+                slideId: slides.value[index].id
+            },
+            ...auth.config
+        }).then(_res => {
+            slides.value.splice(index, 1);
+            selection.value = Math.min(index, slides.value.length - 1);
+        }).catch(err => auth.handleCommonError(err, () => removeSlide(index)));
     }
 
-
-    
 
     function buildParamsFrom(objectRef: ObjectRef, common: object): { type: ObjectType | null, data: object | FormData | undefined } {
         function buildFormData(dto: object): FormData {
@@ -351,13 +359,6 @@ export const useDesignStore = defineStore('design', () => {
         }).catch(err => auth.handleCommonError(err, () => addElement(element)));
     }
 
-    function _addElement(element: ElementRef) {
-        element.id = rand(0, 888888);
-        currentSlide.value.elements.push(element);
-
-        notifyChangeListeners();
-    }
-
     async function uploadModel(element: ElementRef, model: File) {
         if (!auth.isAuthenticated) return;
 
@@ -445,12 +446,22 @@ export const useDesignStore = defineStore('design', () => {
         notifyChangeListeners();
     }
 
-    // TODO
     function removeElement(id: number) {
+        if (!auth.isAuthenticated) return;
+
         const index = currentSlide.value.elements.findIndex(element => element.id === id);
         if (index === -1) return;
 
-        currentSlide.value.elements.splice(index, 1);
+        axios.delete('/api/element', {
+            params: {
+                userId: auth.id,
+                elementId: id
+            },
+            ...auth.config
+        }).then(_res => {
+            currentSlide.value.elements.splice(index, 1);
+        }).catch(err => auth.handleCommonError(err, () => removeElement(index)));
+
     }
 
     const { debounced: debouncedUpdateElement, flush: flushUpdateElement } = useDebounceFnFlushable((element) => updateElement(element), 1000);
@@ -482,6 +493,6 @@ export const useDesignStore = defineStore('design', () => {
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
         addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject, debouncedUpdateModel,
         addChangeListener, removeChangeListener,
-        _addElement, uploadModel, updateModel
+        uploadModel, updateModel
     };
 })

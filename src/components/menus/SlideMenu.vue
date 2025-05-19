@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useDesignStore } from '@/stores/design';
 import draggable from 'vuedraggable';
-import Canvas from '@/components/design/Canvas.vue';
 import { nextTick, ref, useTemplateRef } from 'vue';
 import ContextMenu from '../common/ContextMenu.vue';
 
@@ -46,15 +45,15 @@ const slideSelection = ref<number>(-1);
     </div>
 
     <ContextMenu ref="context-menu">
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.insertSlide(slideSelection)">
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerup="design.insertSlide(slideSelection)">
             <div class="i-mdi-plus w-6 h-10 font-light" />
             <p class="leading-10 px-2">슬라이드 추가</p>
         </li>
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.duplicateSlide(slideSelection)">
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerup="design.duplicateSlide(slideSelection)">
             <div class="i-mdi:plus-box-multiple-outline w-6 h-10 font-light" />
             <p class="leading-10 px-2">슬라이드 복제</p>
         </li>
-        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerdown="design.removeSlide(slideSelection)">
+        <li class="flex h-10 px-2 rounded-md hover:bg-gray-100 cursor-pointer" @pointerup="design.removeSlide(slideSelection)">
             <div class="i-material-symbols:delete-outline-rounded w-6 h-10 font-light" />
             <p class="leading-10 px-2">슬라이드 삭제</p>
         </li>

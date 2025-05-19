@@ -24,6 +24,8 @@ import BorderChevron from '@/components/design/common/BorderChevron.vue';
 import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 import { useDesignStore } from '@/stores/design';
 import Dropdown from '@/components/common/Dropdown.vue';
+import { useAuthStore } from '@/stores/auth';
+import axios from 'axios';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
@@ -102,13 +104,18 @@ const shaderList = {
     }
 };
 
+const auth = useAuthStore();
 function removeModel(model: Model) {
+    if (!auth.isAuthenticated) return;
+    
     const index = spatialRef.value.models.indexOf(model);
     if (index === -1) return;
 
-    spatialRef.value.models.splice(index, 1);
-    selectedModel.value = null;
-    // post
+    axios.delete(`/api/model/${model.id}`, auth.config)
+    .then(_res => {
+        spatialRef.value.models.splice(index, 1);
+        selectedModel.value = null;
+    }).catch(err => auth.handleCommonError(err, () => removeModel(model)));
 }
 
 function selectShader(shader: 'none' | 'highlight') {
