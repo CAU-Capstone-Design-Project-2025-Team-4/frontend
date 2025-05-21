@@ -383,8 +383,8 @@ export const useDesignStore = defineStore('design', () => {
         return axios.post('/api/model', form, auth.config)
         .then(res => {
             return {
-                id: res.data.id,
-                url: res.data.url
+                id: res.data.data.id,
+                url: res.data.data.url
             }
         }).catch(err => auth.handleCommonError(err, () => uploadModel(element, model)));
     }
@@ -400,8 +400,8 @@ export const useDesignStore = defineStore('design', () => {
             modelTransform: model.transform,
             shader: model.shader.toUpperCase()
         }, auth.config)
-        .then(res => {
-            console.log(res);
+        .then(_res => {
+            return true;
         }).catch(err => auth.handleCommonError(err, () => updateModel(element, model)));
     }
     

@@ -48,19 +48,26 @@ async function uploadModels(e: Event) {
         const _model = await design.uploadModel(elementRef.value, file);
         if (!_model) return;
 
-        console.log(_model);
-        unity.value.sendMessage('LoadModel', _model.url);
-
         const model: Model = { 
             ..._model, 
             name: file.name,
             transform: {
                 position: { x: 0, y: 0, z: 0},
                 rotation: { x: 0, y: 0, z: 0},
-                scale: { x: 0, y: 0, z: 0}
+                scale: { x: 1, y: 1, z: 1}
             },
             shader: 'none'
         };
+
+        unity.value.sendMessage('LoadModel', JSON.stringify({
+            ..._model,
+            enable: true,
+            properties: {
+                transform: model.transform,
+                shader: model.shader
+            }
+        }));
+        
         spatialRef.value.models.push(model);
         selectedModel.value = model;
     }
@@ -115,14 +122,33 @@ function removeModel(model: Model) {
     .then(_res => {
         spatialRef.value.models.splice(index, 1);
         selectedModel.value = null;
+        unity.value.sendMessage('UnloadModel', model.id);
     }).catch(err => auth.handleCommonError(err, () => removeModel(model)));
 }
 
 function selectShader(shader: 'none' | 'highlight') {
     selectedModel.value!.shader = shader;
     design.updateModel(elementRef.value, selectedModel.value!);
+    unity.value.sendMessage('SetModelProperties', JSON.stringify({
+        id: selectedModel.value!.id,
+        properties: {
+            transform: selectedModel.value!.transform,
+            shader: selectedModel.value!.shader
+        }
+    }));
 
     shaderDropdown.value?.close();
+}
+
+function updateModel() {
+    design.debouncedUpdateModel(elementRef.value, selectedModel.value);
+    unity.value.sendMessage('SetModelProperties', JSON.stringify({
+        id: selectedModel.value!.id,
+        properties: {
+            transform: selectedModel.value!.transform,
+            shader: selectedModel.value!.shader
+        }
+    }));
 }
 </script>
 
@@ -142,19 +168,19 @@ function selectShader(shader: 'none' | 'highlight') {
                     <p class="text-left text-sm px-2 pt-1 leading-7">Z</p>
 
                     <p class="text-left px-2 leading-8">위치</p>
-                    <input v-model.number="selectedModel.transform.position.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.position.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.position.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.x" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.y" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.position.z" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 leading-8">회전</p>
-                    <input v-model.number="selectedModel.transform.rotation.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.rotation.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.rotation.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.x" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.y" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.rotation.z" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 leading-8">크기</p>
-                    <input v-model.number="selectedModel.transform.scale.x" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.scale.y" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
-                    <input v-model.number="selectedModel.transform.scale.z" @input="design.debouncedUpdateModel(elementRef, selectedModel)" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.x" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.y" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
+                    <input v-model.number="selectedModel.transform.scale.z" @input="updateModel()" class="px-2 text-sm rounded-md border border-gray-400">
 
                     <p class="text-left px-2 mt-2 leading-10">셰이더</p>
                     <div class="relative col-span-3">

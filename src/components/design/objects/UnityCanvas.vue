@@ -54,6 +54,9 @@ function createInstanceManager() {
     return { instantiate, hasInstance };
 }
 
+const inMemoryModels: number[] = [];
+const enabledModels: number[] = [];
+
 async function render(spatialRef: SpatialRef) {
     console.log('unity mounted')
     target.value = '#spatial-element';
@@ -62,11 +65,48 @@ async function render(spatialRef: SpatialRef) {
     await instanceManager.instantiate();
     isCreatingInstance.value = false;
 
-    if (spatialRef.models.length > 0) {
-        sendMessage('LoadModel', spatialRef.models[0].url);
-    } else {
-        sendMessage('UnloadModel');
-    }
+    console.log('start render')
+
+    enabledModels.forEach(modelId => {
+        sendMessage('EnableModel', JSON.stringify({
+            id: modelId,
+            enable: false
+        }));
+    });
+    enabledModels.length = 0;
+
+    spatialRef.models.forEach(model => {
+        if (inMemoryModels.includes(model.id)) {
+            sendMessage('EnableModel', JSON.stringify({
+                id: model.id,
+                enable: true
+            }));
+            enabledModels.push(model.id);
+            return;
+        }
+        
+        sendMessage('LoadModel', JSON.stringify({
+            id: model.id,
+            url: model.url,
+            enable: true,
+            properties: {
+                transform: model.transform,
+                shader: model.shader
+            }
+        }));
+        sendMessage('EnableModel', JSON.stringify({
+                id: model.id,
+                enable: true
+            }));
+        inMemoryModels.push(model.id);
+        enabledModels.push(model.id);
+    });
+
+    // if (spatialRef.models.length > 0) {
+    //     sendMessage('LoadModel', spatialRef.models[0].url);
+    // } else {
+    //     sendMessage('UnloadModel');
+    // }
     sendMessage('SetCameraMode', spatialRef.cameraMode);
     sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.cameraTransform));
 
@@ -86,7 +126,8 @@ function requestPointerLock() {
     context.requestPointerLock();
 }
 
-type Method = 'LoadModel' | 'UnloadModel' | 'SetCameraMode' | 'SetPlayMode' | 'EnableInput' | 'SetCameraPositionAndRotation' | 'SetCameraBackgroundMode' | 'SetCameraBackgroundColor';
+type Method = 'LoadModel' | 'UnloadModel' | 'EnableModel' | 'SetModelProperties' 
+    | 'EnableInput' | 'SetCameraMode'  | 'SetCameraPositionAndRotation' | 'SetCameraBackgroundMode' | 'SetCameraBackgroundColor';
 function sendMessage(method: Method, params?: any) {
     if (!instanceManager.hasInstance.value) return;
     
