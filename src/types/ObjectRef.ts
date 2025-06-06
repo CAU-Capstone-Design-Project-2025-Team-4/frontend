@@ -1,3 +1,5 @@
+import type { Frame } from "./Animation"
+
 export interface ObjectRef {
     borderRef: BorderRef
 }
@@ -27,14 +29,17 @@ export interface ImageRef extends ObjectRef {
 
 export interface SpatialRef extends ObjectRef {
     cameraMode: 'free' | 'orbit',
-    cameraTransform: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number }
-    },
+    cameraTransform: CameraTransform,
     modelFile?: Blob | null | '',
     model?: string | null,
     models: Model[],
     backgroundColor: 'skybox' | string,
+    frames: Frame[]
+}
+
+export interface CameraTransform {
+    position: { x: number, y: number, z: number },
+    rotation: { x: number, y: number, z: number }
 }
 
 export interface InvalidRef extends ObjectRef {}

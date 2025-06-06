@@ -113,3 +113,12 @@ export interface DetailedTemplateDTO {
     creator: string,
     slideThumbnails: string[]
 }
+
+export interface AnimationResponseDTO {
+    id: number,
+    elementId: number,
+    type: string,
+    timing: string,
+    duration: number,
+    cameraTransform?: {}
+}

@@ -185,7 +185,7 @@ function toGalleryView() {
                 <p v-show="emailWarning.length > 0" class="text-sm text-red-700 mt-1">{{ emailWarning }}</p>
             </div>
 
-            <div class="relative w-80 mb-4">
+            <div class="relative w-80 mb-8">
                 <p class="mb-1 select-none">비밀번호</p>
                 <input v-model="password" @input="handlePasswordInput()" :type="viewPassword ? '' : 'password'" placeholder="비밀번호를 입력해주세요."
                 class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300"
@@ -196,7 +196,7 @@ function toGalleryView() {
                 <p v-show="passwordWarning.length > 0" class="text-sm text-red-700 mt-1">{{ passwordWarning }}</p>
             </div>
 
-            <button type="submit" class="btn w-80 h-10 mb-4 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
+            <button type="submit" class="w-80 h-10 mb-4 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
                 <p class="text-sm text-white font-bold leading-10">로그인</p>
             </button>
         </form>       
@@ -247,7 +247,7 @@ function toGalleryView() {
                 <p v-show="passwordWarning.length > 0" class="text-sm text-red-700 mt-1">{{ passwordWarning }}</p>
             </div>
 
-            <button type="submit" :disabled="registerDisabled" class="btn w-80 h-10 mb-4 rounded-md bg-teal-500 
+            <button type="submit" :disabled="registerDisabled" class="w-80 h-10 mb-4 rounded-md bg-teal-500 
             focus:brightness-110 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
                 <p class="text-sm text-white font-bold leading-10">가입하기</p>
             </button>

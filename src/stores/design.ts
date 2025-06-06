@@ -3,21 +3,23 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
-import type { DesignResponseDTO, ElementResponseDTO, ModelDTO } from "@/types/DTO";
+import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, ModelDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 import api from "@/api/api";
 import axios from "axios";
+import type { Animation, Effect, Timing } from "@/types/Animation";
 
 export interface Slide {
     id: number,
     thumbnail?: string,
-    elements: ElementRef[] // must be sorted by z-index
+    elements: ElementRef[], // must be sorted by z-index
+    animations: Animation[]
 }
 
 function _newSlide(_id?: number): Slide {
-    return { id: _id ?? 0, thumbnail: '', elements: [] };
+    return { id: _id ?? 0, thumbnail: '', elements: [], animations: [] };
 }
 
 export const useDesignStore = defineStore('design', () => {
@@ -50,10 +52,12 @@ export const useDesignStore = defineStore('design', () => {
 
             const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
             for (const slide of data.slideList.sort((a, b) => a.order - b.order)) {
+                const elements = await Promise.all(slide.slideElements.map(element => parseElement(element)));
                 const _slide: Slide = {
                     id: slide.id,
                     thumbnail: encode(slide.thumbnail),
-                    elements: await Promise.all(slide.slideElements.map(element => parseElement(element)))
+                    elements: elements,
+                    animations: await loadAnimation(slide.id, elements)
                 };
                 slides.value.push(_slide);
             }
@@ -68,8 +72,26 @@ export const useDesignStore = defineStore('design', () => {
         });
     }
 
-    function getModels() {
+    async function loadAnimation(id: number, elements: ElementRef[]): Promise<Animation[]> {
+        const animations: AnimationResponseDTO[] = await api.get('/animation', {
+            params: {
+                slideId: id
+            }
+        }).then(res => res.data.data);
 
+        return animations.map(anim => {
+            return {
+                id: anim.id,
+                element: elements.find(elem => elem.id === anim.elementId)!,
+                effect: anim.type.toLowerCase() as Effect,
+                duration: anim.duration,
+                timing: anim.timing.toLowerCase() as Timing,
+                frame: {
+                    name: '',
+                    cameraTransform: anim.cameraTransform as CameraTransform
+                }
+            }
+        }).sort((a, b) => a.id - b.id);
     }
 
     async function parseElement(dto: ElementResponseDTO): Promise<ElementRef> {

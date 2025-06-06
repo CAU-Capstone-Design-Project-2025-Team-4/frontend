@@ -37,7 +37,7 @@ function addImage(e: Event) {
         <div class="pl-3">
             <input type="file" id="upload-image" accept="image/png, image/jpeg" hidden @change="addImage($event)" >
             <label for="upload-image">
-                <div class="w-full h-12 rounded-xl bg-teal-500 hover:bg-teal-600">
+                <div class="w-full h-10 rounded-xl bg-teal-500 hover:bg-teal-600">
                     <p class="text-white leading-12">이미지 업로드</p>
                 </div>
             </label>
