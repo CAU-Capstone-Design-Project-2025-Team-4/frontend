@@ -10,10 +10,8 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { useAuthStore } from './stores/auth'
 
-// axios.defaults.baseURL = import.meta.env.VITE_API_URL
-
 const app = createApp(App)
-app.config.globalProperties.axios = axios
+// app.config.globalProperties.axios = axios
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate);
@@ -22,7 +20,7 @@ app.use(router).use(pinia).mount('#app')
 
 const auth = useAuthStore();
 router.beforeEach((to, from) => {
-    if (!auth.isAuthenticated && to.name !== 'Main') {
+    if (!auth.isAuthenticated && !to.matched.some(record => record.name === 'Main')) {
         return { name: 'Main' }
     }
 })

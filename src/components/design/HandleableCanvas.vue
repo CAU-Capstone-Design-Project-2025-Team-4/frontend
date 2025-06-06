@@ -36,7 +36,7 @@ function containPoint(point: Vector2): boolean {
 
 const canvas = useTemplateRef<HTMLElement>('canvas');
 async function capture(): Promise<string> {
-    return toJpeg(canvas.value!, { pixelRatio: 0.5, quality: 0.5 }).then(url => url)
+    return toJpeg(canvas.value!, { pixelRatio: 0.5, quality: 0.5 })
     .catch(err => {
         console.error("Error occured while capturing slide: ", err);
         return ''
@@ -105,11 +105,28 @@ function deselectAll(e: PointerEvent) {
     selector.deselectAll();
 }
 
+function base64UrlToBlob(base64Url: string): Blob {
+  // "data:image/jpeg;base64,..." 구조를 분리
+  const [metadata, base64] = base64Url.split(',');
+  const mimeMatch = metadata.match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: mime });
+}
+
 function onChange() {
     capture().then(url => {
-        design.currentSlide.thumbnail = url;
+        design.updateSlideThumbnail(base64UrlToBlob(url));
     });
 }
+
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     container.value?.addEventListener('wheel', scaleByWheel);
@@ -146,6 +163,8 @@ const selector = useSelectorStore();
 const refresh = ref<number>(0);
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 unity.value.setInstantiatedListener(() => refresh.value++);
+
+
 </script>
 
 <template>
@@ -157,7 +176,7 @@ unity.value.setInstantiatedListener(() => refresh.value++);
             height: `${size.y}px`
         }">
             <div ref="canvas" class="w-full h-full">
-                <Canvas :slide="design.currentSlide" class="w-full h-full" @dragover.prevent="" :key="refresh" />
+                <Canvas :slide="design.currentSlide" :handleable="true" class="w-full h-full" @dragover.prevent="" :key="refresh" />
             </div>
         </div>
         <Handler />

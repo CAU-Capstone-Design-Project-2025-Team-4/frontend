@@ -37,9 +37,9 @@ useEventListener(document, 'keydown', (e) => {
             <div class="flex items-center justify-center w-screen h-screen bg-black bg-opacity-20">
                 <div ref="modal" class="w-fit h-fit p-4 rounded-xl bg-white">
                     <div class="w-full h-8 mb-2">
-                        <div class="float-right p-1.5 rounded-md hover:bg-gray-100" @pointerup="close()">
-                            <div class="i-mdi:window-close text-xl " />
-                        </div>
+                        <button class="float-right p-1.5 rounded-md hover:bg-gray-100" @pointerup.left="close()">
+                            <div class="i-mdi:window-close text-xl" />
+                        </button>
                     </div>
                     <div class="px-6 mb-6">
                         <slot />

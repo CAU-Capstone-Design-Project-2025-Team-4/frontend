@@ -6,19 +6,29 @@ export interface LoginResponseDTO {
     email: string
 }
 
-export interface DesignResponseDTO {
+export interface DesignListResponseDTO {
     id: number,
+    name: string
     shared: boolean,
-    createdAt: string
+    inPost: boolean
+    createdAt: string,
+    updatedAt: string,
+    thumbnail: string
 }
 
 export interface SlideResponseDTO {
-    size: number,
-    slides: [{
-        id: number,
-        order: number,
-        slideElements: ElementResponseDTO[]
-    }]
+    id: number,
+    order: number,
+    thumbnail: string,
+    slideElements: ElementResponseDTO[]
+}
+
+export interface DesignResponseDTO {
+    id: number,
+    name: string
+    shared: boolean,
+    inPost: boolean,
+    slideList: SlideResponseDTO[]
 }
 
 export interface BorderRefDTO {
@@ -77,4 +87,29 @@ export interface ElementResponseDTO {
 export interface AddModelResponseDTO {
     id: number,
     url: string
+}
+
+export interface PostContentDTO {
+    id: number,
+    designId: number,
+    title: string,
+    content: string,
+    thumbnail: string,
+    username: string,
+    createdAt: string,
+    userEmail: string
+}
+
+export interface TemplateDTO {
+    id: number,
+    name: string,
+    thumbnail: string
+}
+
+export interface DetailedTemplateDTO {
+    id: number,
+    name: string,
+    thumbnail: string,
+    creator: string,
+    slideThumbnails: string[]
 }

@@ -4,13 +4,26 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         name: 'Main',
-        component: () => import('@/views/Main.vue')
+        component: () => import('@/views/Main.vue'),
+        children: [
+            {
+                path: '/gallery',
+                name: 'Gallery',
+                component: () => import('@/views/Gallery.vue'),
+            },
+            {
+                path: '/gallery/:id',
+                name: 'Post',
+                component: () => import('@/views/Post.vue'),
+            },
+        ]
     },
     {
         path: '/workspace',
         name: 'Workspace',
         component: () => import('@/views/Workspace.vue')
     },
+    
     {
         path: '/designs/:id',
         name: 'Editor',

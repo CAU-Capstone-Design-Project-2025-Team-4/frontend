@@ -1,6 +1,5 @@
 import router from "@/router";
 import type { LoginResponseDTO } from "@/types/DTO";
-import type { AxiosRequestConfig } from "axios";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -12,16 +11,6 @@ export const useAuthStore = defineStore('auth', () => {
     const email = ref<string | null>(null);
 
     const isAuthenticated = computed<boolean>(() => accessToken.value != null);
-    // const authorization = computed<string>(() => `Bearer ${jwtToken.value}`);
-
-    const config = computed<AxiosRequestConfig>(() => {
-        return {
-            headers: {
-                Authorization: `Bearer ${accessToken.value}`,
-                'Refresh-Token': `${refreshToken.value}`,
-            }
-        }
-    })
 
     function login(loginResponseDTO: LoginResponseDTO) {
         accessToken.value = loginResponseDTO.jwtToken;
@@ -38,34 +27,5 @@ export const useAuthStore = defineStore('auth', () => {
         email.value = null;
     }
 
-    function handleTokenExpired(): boolean {
-        return false;
-    }
-
-    function handleCommonError(err: any, retry: () => void) {
-        if (!err.status) {
-            console.error(err);
-            return;
-        }
-
-        const statusCode = err.status;
-        switch (statusCode) {
-            case 401:
-            case 403:
-                const success = handleTokenExpired()
-                if (success) retry();
-                else {
-                    logout();
-
-                    router.push('/');
-                    window.alert('다시 로그인해주세요.');
-                }
-                break;
-            default:
-                console.error("Unhandled error status:", statusCode);
-                console.error(err.response.data);
-        }
-    }
-
-    return { jwtToken: accessToken, refreshToken, id, name, email, isAuthenticated, login, logout, handleTokenExpired, handleCommonError, config };
+    return { jwtToken: accessToken, refreshToken, id, name, email, isAuthenticated, login, logout };
 }, { persist: true })

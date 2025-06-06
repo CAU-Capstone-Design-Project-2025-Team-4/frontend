@@ -40,6 +40,7 @@ import TextBox from '@/components/design/objects/TextBox.vue';
 import Image from './objects/Image.vue';
 import { useSelectorStore } from '@/stores/selector';
 import Spatial from './objects/Spatial.vue';
+import { inject } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef
@@ -47,11 +48,15 @@ const { element } = defineProps<{
 
 const selector = useSelectorStore();
 function select(e: PointerEvent) {
+    if (!handleable) return;
+    
     if (!e.ctrlKey) {
         selector.deselectAll();
     }
     selector.select(element);
 }
+
+const handleable = inject<boolean>('handleable');
 </script>
 
 <template>

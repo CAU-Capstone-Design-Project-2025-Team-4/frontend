@@ -25,7 +25,7 @@ import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 import { useDesignStore } from '@/stores/design';
 import Dropdown from '@/components/common/Dropdown.vue';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+import api from '@/api/api';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
@@ -118,12 +118,11 @@ function removeModel(model: Model) {
     const index = spatialRef.value.models.indexOf(model);
     if (index === -1) return;
 
-    axios.delete(`/api/model/${model.id}`, auth.config)
-    .then(_res => {
+    api.delete(`/model/${model.id}`).then(_res => {
         spatialRef.value.models.splice(index, 1);
         selectedModel.value = null;
         unity.value.sendMessage('UnloadModel', model.id);
-    }).catch(err => auth.handleCommonError(err, () => removeModel(model)));
+    });
 }
 
 function selectShader(shader: 'none' | 'highlight') {
