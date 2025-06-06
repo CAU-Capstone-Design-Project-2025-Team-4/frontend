@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api/api';
+import { encodeThumbnail } from '@/common/encode';
 import { profileColor } from '@/components/Profile.vue';
 import Canvas from '@/components/design/Canvas.vue';
 import router from '@/router';
@@ -20,9 +21,11 @@ const maxSlide = ref<number>(3);
 const design = useDesignStore();
 const hasLoaded = ref<boolean>(false);
 
+const otherPosts = ref<PostContentDTO[]>([]);
+
 onMounted(async () => {
     const postId = useRoute().params.id;
-    const designId = await api.get(`/post/${postId}`).then(res => {
+    const { designId, userId } = await api.get(`/post/${postId}`).then(res => {
         const data: PostContentDTO = res.data.data;
 
         title.value = data.title;
@@ -31,10 +34,32 @@ onMounted(async () => {
         email.value = data.userEmail;
         createdAt.value = data.createdAt;
 
-        return data.designId;
+        return {
+            designId: data.designId,
+            userId: data.userId
+        }
     });
 
     await design.load(designId);
+    
+    otherPosts.value = await api.get('/post', {
+        params: {
+            userId: userId,
+            pageNumber: 0,
+            pageSize: 10
+        }
+    }).then(res => {
+        const postList: PostContentDTO[] = res.data.data.content;
+        return postList
+            .filter(post => post.id !== Number(postId))
+            .map(post => {
+                return {
+                    ...post,
+                    thumbnail: encodeThumbnail(post.thumbnail)
+                }
+        });
+    });
+
     hasLoaded.value = true;
 
     currentSlide.value = 1;
@@ -123,19 +148,19 @@ function toLast() {
                 <p v-html="description" class="mt-2 text-left" />
             </div>
 
-            <!-- <div class="mt-10">
+            <div class="mt-10" v-if="otherPosts.length > 0">
                 <div class="flex select-none">
                     <p class="text-teal-500 text-left text-xl font-bold">{{ name }}</p>
                     <p class="ml-1 text-xl">님의 다른 포트폴리오</p>
                 </div>
                 <div class="flex flex-nowrap space-x-6 w-full h-54 mt-1 py-2 overflow-x-auto">
-                    <div v-for="_ in 10" class="group aspect-video h-full bg-gray-200 rounded-md cursor-pointer ">
-                        <div class="w-full h-full rounded-md overflow-hidden">
-                            <img src="/thumb.jpg" class="w-full h-full object-fill rounded-md transition-transform duration-300 ease-in-out group-hover:scale-115" />
+                    <div v-for="post in otherPosts" class="group aspect-video h-full bg-gray-200 rounded-md cursor-pointer">
+                        <div class="w-full aspect-video rounded-md border border-gray-300 overflow-hidden">
+                            <img :src="post.thumbnail" class="w-full h-full object-fill rounded-md transition-transform duration-300 ease-in-out group-hover:scale-115" />
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
             <div class="flex justify-end mt-10 pb-20">
                 <div @pointerup.left="router.push('/gallery')" class="flex justify-center w-28 h-10 p-2 rounded-md border-1 border-gray-400 

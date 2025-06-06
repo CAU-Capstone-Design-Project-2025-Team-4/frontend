@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api/api';
+import { encodeThumbnail } from '@/common/encode';
 import { profileColor } from '@/components/Profile.vue';
 import type { PostContentDTO } from '@/types/DTO';
 import { computed, onMounted, ref } from 'vue';
@@ -18,11 +19,9 @@ function loadPage(index: number) {
             pageSize: PAGE_SIZE
         }
     }).then(res => {
-        const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
-
         postList.value = res.data.data.content;
         postList.value.forEach(post => {
-            post.thumbnail = encode(post.thumbnail);
+            post.thumbnail = encodeThumbnail(post.thumbnail);
         });
         maxPage.value = res.data.data.totalPages;
     });

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api/api';
+import { encodeThumbnail } from '@/common/encode';
 import Dropdown from '@/components/common/Dropdown.vue';
 import Modal from '@/components/common/Modal.vue';
 import PageHeader from '@/components/PageHeader.vue';
@@ -23,11 +24,9 @@ function queryDesignList() {
             userId: auth.id,
         }
     }).then(res => {
-        const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
-
         designList.value = res.data.data;
         designList.value.forEach(design => {
-            design.thumbnail = encode(design.thumbnail);
+            design.thumbnail = encodeThumbnail(design.thumbnail);
         });
     });
 }
@@ -97,9 +96,8 @@ async function openCreateDesignDropdown() {
     const res = await api.get('/template');
     templateList.value = res.data.data;
 
-    const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
     templateList.value.forEach(template => {
-        template.thumbnail = encode(template.thumbnail);
+        template.thumbnail = encodeThumbnail(template.thumbnail);
     });
 
     createDesignModal.value?.open();
@@ -113,9 +111,8 @@ async function selectTemplate(template: TemplateDTO) {
     const res = await api.get(`/template/${template.id}`);
     detailedTemplate.value = res.data.data;
 
-    const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
-    detailedTemplate.value!.thumbnail = encode(detailedTemplate.value?.thumbnail!);
-    detailedTemplate.value!.slideThumbnails = Object.values(detailedTemplate.value?.slideThumbnails!).map(thumbnail => encode(thumbnail));
+    detailedTemplate.value!.thumbnail = encodeThumbnail(detailedTemplate.value?.thumbnail!);
+    detailedTemplate.value!.slideThumbnails = Object.values(detailedTemplate.value?.slideThumbnails!).map(thumbnail => encodeThumbnail(thumbnail));
     
     selectedTemplate.value = template;
 }

@@ -91,6 +91,7 @@ export interface AddModelResponseDTO {
 
 export interface PostContentDTO {
     id: number,
+    userId: number,
     designId: number,
     title: string,
     content: string,
