@@ -9,7 +9,7 @@ import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 import api from "@/api/api";
 import axios from "axios";
-import type { Animation, Effect, Timing } from "@/types/Animation";
+import type { Animation, Effect, Frame, Timing } from "@/types/Animation";
 
 export interface Slide {
     id: number,
@@ -52,7 +52,7 @@ export const useDesignStore = defineStore('design', () => {
 
             const encode = (blob: string) => blob ? `data:image/jpeg;base64,${blob}` : '';
             for (const slide of data.slideList.sort((a, b) => a.order - b.order)) {
-                const elements = await Promise.all(slide.slideElements.map(element => parseElement(element)));
+                const elements = (await Promise.all(slide.slideElements.map(element => parseElement(element)))).sort((a, b) => a.z - b.z);
                 const _slide: Slide = {
                     id: slide.id,
                     thumbnail: encode(slide.thumbnail),
@@ -142,6 +142,13 @@ export const useDesignStore = defineStore('design', () => {
                     }
                 }
 
+                const frames: Frame[] = await api.get('/frame/all', {
+                    params: {
+                        userId: auth.id,
+                        spatialId: dto.id
+                    }
+                }).then(res => res.data.data);
+
                 objectRef = {
                     cameraMode: dto.cameraMode!.toLowerCase(),
                     cameraTransform: {
@@ -158,6 +165,7 @@ export const useDesignStore = defineStore('design', () => {
                     },
                     backgroundColor: dto.backgroundColor!,
                     models: dto.models!.map(model => buildModel(model)),
+                    frames: frames,
                     borderRef: borderRef
                 } as SpatialRef
                 break;

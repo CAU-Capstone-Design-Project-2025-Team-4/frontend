@@ -31,6 +31,7 @@ function openAddAnimationModal() {
         if (instanceOfSpatialRef(selector.selection[0].objectRef)) {
             is3dAnimation.value = true;
             frameList.value = selector.selection[0].objectRef.frames;
+            console.log(frameList)
         }
     }
 
@@ -78,7 +79,7 @@ function removeAnimation(animation: Animation) {
 
 const elementName = (element: ElementRef) => {
     if (instanceOfShapeRef(element.objectRef)) return `모양 ${element.id}`;
-    if (instanceOfImageRef(element.objectRef)) return `이미지지 ${element.id}`;
+    if (instanceOfImageRef(element.objectRef)) return `이미지 ${element.id}`;
     if (instanceOfTextBoxRef(element.objectRef)) return `텍스트 ${element.id}`;
     if (instanceOfSpatialRef(element.objectRef)) return `3D ${element.id}`;
     return `요소 ${element.id}`
@@ -126,22 +127,22 @@ function indexedAnimations(animations: Animation[]) {
             <template v-if="!is3dAnimation">
                 <p class="mb-1 select-none">효과</p>
                 <SelectBox v-model="effect" class="w-100 h-10 mb-4">
-                    <li value="appear" icon="i-mdi:star">나타내기</li>
-                    <li value="disappear" icon="i-mdi:star-outline">사라지기</li>
+                    <li option="appear" icon="i-mdi:star">나타내기</li>
+                    <li option="disappear" icon="i-mdi:star-outline">사라지기</li>
                 </SelectBox>
             </template>
 
             <template v-else>
                 <p class="mb-1 select-none">효과</p>
                 <SelectBox v-model="effect" class="w-100 h-10 mb-4">
-                    <li value="appear" icon="i-mdi:star">나타내기</li>
-                    <li value="disappear" icon="i-mdi:star-outline">사라지기</li>
-                    <li value="frame_transition" icon="i-material-symbols:tab-move">프레임 전환</li>
+                    <li option="appear" icon="i-mdi:star">나타내기</li>
+                    <li option="disappear" icon="i-mdi:star-outline">사라지기</li>
+                    <li option="frame_transition" icon="i-material-symbols:tab-move">프레임 전환</li>
                 </SelectBox>
 
                 <p v-if="effect === 'frame_transition'" class="mb-1 select-none">프레임</p>
                 <SelectBox v-if="effect === 'frame_transition'" v-model="frame" none="먼저 프레임을 등록해주세요" class="w-100 h-10 mb-4">
-                    <li v-for="frame in frameList" value="frame">{{ frame.name }}</li>
+                    <li v-for="frame in frameList" :option="frame" icon="i-mdi:movie-outline">{{ frame.name }}</li>
                 </SelectBox>
             </template>
 
@@ -150,16 +151,16 @@ function indexedAnimations(animations: Animation[]) {
                 <p class="mb-1 select-none">재생 시간</p>
 
                 <SelectBox v-model="timing" class="w-48 h-10">
-                    <li value="on_click">클릭할 때</li>
-                    <li value="with_previous">이전 효과와 함께</li>
-                    <!-- <li value="after_previous">이전 효과 다음에</li> -->
+                    <li option="on_click">클릭할 때</li>
+                    <li option="with_previous">이전 효과와 함께</li>
+                    <!-- <li option="after_previous">이전 효과 다음에</li> -->
                 </SelectBox>
                 
                 <SelectBox v-model="duration" class="w-48 h-10">
-                    <li value="0" icon="i-mdi:clock-check-outline">즉시</li>
-                    <li value="1" icon="i-mdi:speedometer">빠르게</li>
-                    <li value="3" icon="i-mdi:speedometer-medium">중간</li>
-                    <li value="5" icon="i-mdi:speedometer-slow">느리게</li>
+                    <li option="0" icon="i-mdi:clock-check-outline">즉시</li>
+                    <li option="1" icon="i-mdi:speedometer">빠르게</li>
+                    <li option="3" icon="i-mdi:speedometer-medium">중간</li>
+                    <li option="5" icon="i-mdi:speedometer-slow">느리게</li>
                 </SelectBox>
             </div>
 

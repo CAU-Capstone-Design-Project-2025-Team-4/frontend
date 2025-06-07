@@ -42,6 +42,26 @@ export interface CameraTransform {
     rotation: { x: number, y: number, z: number }
 }
 
+export interface CameraTransformDTO {
+    positionX: number,
+    positionY: number,
+    positionZ: number,
+    rotationX: number,
+    rotationY: number,
+    rotationZ: number
+}
+
+export function cameraTransformToDTO(transform: CameraTransform) {
+    return {
+        positionX: transform.position.x,
+        positionY: transform.position.y,
+        positionZ: transform.position.z,
+        rotationX: transform.rotation.x,
+        rotationY: transform.rotation.y,
+        rotationZ: transform.rotation.z
+    }
+}
+
 export interface InvalidRef extends ObjectRef {}
 
 export interface Model {

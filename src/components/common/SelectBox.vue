@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core';
-import { computed, getCurrentInstance, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
+import { computed, Fragment, getCurrentInstance, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 
 const selected = defineModel<any>({
     required: true
@@ -19,8 +19,14 @@ const node = computed<VNode>(() => {
 
 const { slots } = getCurrentInstance()!;
 const customSlots = computed(() => {
-    const org: VNode[] = slots.default?.() || [];
-    return org
+    const raw: VNode[] = slots.default?.() || [];
+    return raw
+        .flatMap(vnode => {
+            if (vnode.type === Fragment && Array.isArray(vnode.children)) {
+                return vnode.children as VNode[];
+            }
+            return [vnode];
+        })
         .filter(vnode => vnode.type === 'li')
         .map(vnode => {
             const icon = vnode.props?.icon;
@@ -41,7 +47,7 @@ const customSlots = computed(() => {
     }).map(vnode => {
         return {
             vnode: vnode,
-            value: vnode.props?.value ?? null
+            value: vnode.props?.option ?? null
         }
     });
 })
@@ -49,6 +55,7 @@ const customSlots = computed(() => {
 onMounted(() => {
     if (customSlots.value.length) 
         select(customSlots.value[0]);
+    console.log(customSlots.value, getCurrentInstance()?.slots.default?.())
 })
 
 const selectBox = useTemplateRef<HTMLElement>('select-box');

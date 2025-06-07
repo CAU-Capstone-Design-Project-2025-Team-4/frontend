@@ -17,7 +17,7 @@ import Chevron from '@/components/common/Chevron.vue';
 import TransformChevron from '@/components/design/common/TransformChevron.vue';
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
-import type { Model, SpatialRef } from '@/types/ObjectRef';
+import { cameraTransformToDTO, type CameraTransform, type Model, type SpatialRef } from '@/types/ObjectRef';
 import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import BorderChevron from '@/components/design/common/BorderChevron.vue';
@@ -26,6 +26,7 @@ import { useDesignStore } from '@/stores/design';
 import Dropdown from '@/components/common/Dropdown.vue';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/api/api';
+import Modal from '@/components/common/Modal.vue';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
@@ -82,6 +83,33 @@ onMounted(() => {
 function changeTransform() {
     // debounce?
     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.value.cameraTransform));
+}
+
+const frameName = ref<string>('');
+const captureFrameModal = useTemplateRef<InstanceType<typeof Modal>>('capture-frame-modal');
+
+function openCaptureFrameModal() {
+    frameName.value = '';
+    captureFrameModal.value?.open();
+}
+
+function captureFrame() {
+    if (frameName.value === '') {
+        frameName.value = '이름없는 프레임'
+    }
+
+    api.post('/frame', {
+        userId: auth.id,
+        spatialId: elementRef.value.id,
+        name: frameName.value,
+        cameraTransform: cameraTransformToDTO(spatialRef.value.cameraTransform)
+    }).then(_ => {
+        spatialRef.value.frames.push({
+            name: frameName.value,
+            cameraTransform: spatialRef.value.cameraTransform
+        });
+        captureFrameModal.value?.close();
+    });
 }
 
 watch(() => spatialRef.value.backgroundColor, () => {
@@ -298,6 +326,38 @@ function updateModel() {
                 </Chevron>
                 <BorderChevron class="my-2" :element="elementRef" />
                 <TransformChevron :element="elementRef" />
+
+                <div class="flex justify-between h-10 mt-12">
+                    <p class="text-left text-lg leading-10 font-bold">프레임 목록</p>
+
+                    <button @pointerup.left="openCaptureFrameModal()" class="flex justify-center items-center w-40 h-10 text-white rounded-md bg-teal-500 hover:brightness-110">
+                        <div class="w-5 h-5 mr-1 i-mdi:camera-enhance"/>
+                        <p>캡처</p>
+                    </button>
+
+                    <Modal ref="capture-frame-modal">
+                        <p class="font-bold text-xl mb-8 select-none">프레임 캡처</p>
+                        <form @submit.prevent="captureFrame()">
+                            <div class="relative w-80 mb-4">
+                                <p class="mb-1 select-none">이름</p>
+                                <input v-model="frameName"  placeholder="프레임 이름을 입력해주세요." 
+                                class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300 outline-teal-500 hover:border-teal-500" />
+                            </div>
+
+                            <button type="submit" class="w-80 h-10 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
+                                <p class="text-sm text-white font-bold leading-10">캡처</p>
+                            </button>
+                        </form>
+
+                    </Modal>
+                </div>
+                <ul class="w-full min-h-40 flex-1 mt-2 mb-1 overflow-auto">
+                    <li v-for="frame in spatialRef.frames" class="flex h-10 my-1.5 rounded-md">
+                        <div class="w-6 h-6 m-2 i-mdi:movie-outline" />
+                        <p class="leading-10 font-light">{{ frame.name }}</p>
+                        <!-- <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeAnimation(animation)">X</button>           -->
+                    </li>
+                </ul>
             </div>
             <!-- <p class="text-left">카메라 모드</p>
             <div class="flex items-center w-full h-10 p-2 rounded-lg border border-gray-400 hover:border-teal-400 my-2" @pointerdown.stop="openDropdown()"> 
