@@ -52,7 +52,7 @@ export interface CameraTransformDTO {
 }
 
 export function cameraTransformToDTO(transform: CameraTransform | undefined) {
-    if (!transform) return {};
+    if (!transform) return null;
     return {
         positionX: transform.position.x,
         positionY: transform.position.y,

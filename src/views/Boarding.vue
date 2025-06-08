@@ -5,7 +5,7 @@ import InteractiveCanvas from '@/components/InteractiveCanvas.vue';
 
 <template>
     <div>
-        <InteractiveCanvas></InteractiveCanvas>
+        <!-- <InteractiveCanvas></InteractiveCanvas> -->
     </div>
 
 </template>

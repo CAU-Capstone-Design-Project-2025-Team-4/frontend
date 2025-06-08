@@ -5,6 +5,7 @@ import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } fro
 import type { Animation } from '@/types/Animation';
 import type UnityCanvas from './design/objects/UnityCanvas.vue';
 import { useEventListener } from '@vueuse/core';
+import { instanceOfSpatialRef, type SpatialRef } from '@/types/ObjectRef';
 
 const design = useDesignStore();
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
@@ -38,13 +39,13 @@ function interact(e: PointerEvent) {
 
     if (animationIndex.value < animations.value.length) {        
         do {
-            const element = animatedSlide.value?.elements.find(elem => animation.value.element.id === elem.id);
+            const element = animatedSlide.value?.elements.find(elem => animation.value.element.id === elem.id)!;
             switch (animation.value.effect) {
                 case 'appear':
-                    element!.visiblity = true;
+                    element.visiblity = true;
                     break;
                 case 'disappear':
-                    element!.visiblity = false;
+                    element.visiblity = false;
                     break;
                 case 'frame_transition':
                     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
@@ -78,21 +79,82 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 
 onMounted(() => {
     slideIndex.value = 0;
+    computeAnimatedSlide();
 })
 
 watch(() => slideIndex.value, () => {
     design.selectSlide(slideIndex.value);
+})
+
+
+watch(() => design.currentSlide?.id, () => {
+    computeAnimatedSlide();
+})
+
+function computeAnimatedSlide() {
+    animationIndex.value = 0;
     animatedSlide.value = { ...design.currentSlide };
 
     animatedSlide.value.elements.forEach(elem => {
         const firstAnimation = animations.value.find(anim => anim.element.id === elem.id);
         if (firstAnimation?.effect === 'appear') {
             elem.visiblity = false;
+        } else {
+            elem.visiblity = true;
         }
     });
+
+    const spatial = animatedSlide.value?.elements.find(elem => instanceOfSpatialRef(elem.objectRef));
+    if (spatial) {
+        unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
+            positionAndRotation: (spatial.objectRef as SpatialRef).cameraTransform,
+            interval: 0
+        }));
+    }
+}
+
+function toFirst() {
+    slideIndex.value = 0;
+    animationIndex.value = 0;
+    computeAnimatedSlide();
+}
+
+function toPrevious() {
+    if (slideIndex.value > 0) {
+        slideIndex.value -= 1;
+    }
+
+    animationIndex.value = 0;
+    computeAnimatedSlide();
+}
+
+function toNext() {
+    if (slideIndex.value + 1 < design.slides.length) {
+        slideIndex.value += 1;
+        animationIndex.value = 0;
+    } else {
+        animationIndex.value = animations.value.length - 1;
+    }
+
+    computeAnimatedSlide();
+}
+
+function toLast() {
+    slideIndex.value = design.slides.length - 1;
+    animationIndex.value = animations.value.length - 1;
+    computeAnimatedSlide();
+}
+
+defineExpose({
+    toFirst,
+    toPrevious,
+    toNext,
+    toLast,
+    slideIndex
 })
 
 const isEnded = defineModel<boolean>();
+
 </script>
 
 <template>

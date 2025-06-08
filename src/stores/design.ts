@@ -300,7 +300,7 @@ export const useDesignStore = defineStore('design', () => {
             }
             return formData;
         }
-        console.log(objectRef)
+
         if (instanceOfShapeRef(objectRef)) {
             return {
                 type: 'SHAPE',

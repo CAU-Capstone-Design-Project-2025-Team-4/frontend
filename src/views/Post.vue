@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import api from '@/api/api';
 import { encodeThumbnail } from '@/common/encode';
+import InteractiveCanvas from '@/components/InteractiveCanvas.vue';
 import { profileColor } from '@/components/Profile.vue';
-import Canvas from '@/components/design/Canvas.vue';
 import router from '@/router';
 import { useDesignStore } from '@/stores/design';
 import type { PostContentDTO } from '@/types/DTO';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useRoute } from 'vue-router';
 
 const title = ref<string>('나의 첫 포트폴리오');
@@ -66,30 +66,17 @@ onMounted(async () => {
     maxSlide.value = design.slides.length;
 })
 
-watch(() => currentSlide.value, () => {
-    design.selectSlide(currentSlide.value - 1);
-})
+const interactiveCanvas = useTemplateRef<InstanceType<typeof InteractiveCanvas>>('interactive-canvas');
 
-function toFirst() {
-    currentSlide.value = 1;
-}
-
-function toPrevious() {
-    if (currentSlide.value > 1) currentSlide.value -= 1;
-}
-
-function toNext() {
-    if (currentSlide.value < maxSlide.value) currentSlide.value += 1;
-}
-
-function toLast() {
-    currentSlide.value = maxSlide.value;
+function enterFullscreen() {
+    document.documentElement.requestFullscreen();
+    router.push('/show')
 }
 </script>
 
 <template>
     <div v-if="hasLoaded">
-        <div class="mt-12">
+        <div class="mt-12 select-none">
             <p class="text-left text-5xl font-bold">{{ title }}</p>
 
             <div class="flex mt-5">
@@ -105,7 +92,8 @@ function toLast() {
                 <p class="mt-6 ml-12 leading-6 text-gray-500">{{ createdAt.split('T')[0] }}</p>
             </div>
 
-            <div class="w-full aspect-video overflow-hidden mt-10 select-none">
+            <InteractiveCanvas ref="interactive-canvas" class="w-full aspect-video overflow-hidden mt-10" />
+            <!-- <div class="w-full aspect-video overflow-hidden mt-10 select-none">
                 <div class="relative" :style="{
                     transformOrigin: `left top`,
                     transform: `scale(${2/3})`,
@@ -114,31 +102,31 @@ function toLast() {
                 }">
                     <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
                 </div>
-            </div>
+            </div> -->
             
 
             <div class="relative w-full h-12 p-2 bg-gray-100 select-none">
-                <button @pointerup.left="toFirst()" class="absolute left-[40%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300" >
+                <button @pointerup.left="interactiveCanvas?.toFirst()" class="absolute left-[40%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300" >
                     <div class="w-full h-full i-mdi:skip-previous-outline" />
                 </button>
 
-                <button @pointerup.left="toPrevious()" class="absolute left-[44%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
+                <button @pointerup.left="interactiveCanvas?.toPrevious()" class="absolute left-[44%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
                     <div class="w-full h-full i-mdi:chevron-left" />
                 </button>
 
-                <p class="absolute left-[48%] mr-4 w-8 h-8 text-xl font-bold leading-8">{{ currentSlide }}</p>
+                <p class="absolute left-[48%] mr-4 w-8 h-8 text-xl font-bold leading-8">{{ (interactiveCanvas?.slideIndex ?? 0) + 1}}</p>
                 <p class="absolute left-[50%] mr-4 w-8 h-8 text-xl font-extrabold leading-8">/</p>
                 <p class="absolute left-[52%] mr-4 w-8 h-8 text-xl font-bold leading-8">{{ maxSlide }}</p>
 
-                <button @pointerup.left="toNext()" class="absolute left-[56%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
+                <button @pointerup.left="interactiveCanvas?.toNext()" class="absolute left-[56%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
                     <div class="w-full h-full i-mdi:chevron-right" />
                 </button>
 
-                <button @pointerup.left="toLast()" class="absolute left-[60%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
+                <button @pointerup.left="interactiveCanvas?.toLast()" class="absolute left-[60%] mr-4 w-8 h-8 rounded-md hover:bg-gray-300">
                     <div class="w-full h-full i-mdi:skip-next-outline" />
                 </button>
 
-                <button class="absolute right-2 w-8 h-8 rounded-md hover:bg-gray-300">
+                <button @pointerup.left="enterFullscreen()" class="absolute right-2 w-8 h-8 rounded-md hover:bg-gray-300">
                     <div class="w-full h-full i-mdi:fullscreen" />
                 </button>
             </div>
