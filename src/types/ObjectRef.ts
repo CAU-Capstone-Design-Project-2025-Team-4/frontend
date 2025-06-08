@@ -1,3 +1,5 @@
+import type { Frame } from "./Animation"
+
 export interface ObjectRef {
     borderRef: BorderRef
 }
@@ -27,14 +29,53 @@ export interface ImageRef extends ObjectRef {
 
 export interface SpatialRef extends ObjectRef {
     cameraMode: 'free' | 'orbit',
-    cameraTransform: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number }
-    },
+    cameraTransform: CameraTransform,
     modelFile?: Blob | null | '',
     model?: string | null,
     models: Model[],
     backgroundColor: 'skybox' | string,
+    frames: Frame[]
+}
+
+export interface CameraTransform {
+    position: { x: number, y: number, z: number },
+    rotation: { x: number, y: number, z: number }
+}
+
+export interface CameraTransformDTO {
+    positionX: number,
+    positionY: number,
+    positionZ: number,
+    rotationX: number,
+    rotationY: number,
+    rotationZ: number
+}
+
+export function cameraTransformToDTO(transform: CameraTransform | undefined) {
+    if (!transform) return {};
+    return {
+        positionX: transform.position.x,
+        positionY: transform.position.y,
+        positionZ: transform.position.z,
+        rotationX: transform.rotation.x,
+        rotationY: transform.rotation.y,
+        rotationZ: transform.rotation.z
+    }
+}
+
+export function dtoToCameraTransform(dto: CameraTransformDTO): CameraTransform {
+    return {
+        position: {
+            x: dto.positionX,
+            y: dto.positionY,
+            z: dto.positionZ
+        },
+        rotation: {
+            x: dto.rotationX,
+            y: dto.rotationY,
+            z: dto.rotationZ
+        }
+    };
 }
 
 export interface InvalidRef extends ObjectRef {}

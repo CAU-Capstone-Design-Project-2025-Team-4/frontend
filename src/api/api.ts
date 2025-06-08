@@ -23,7 +23,7 @@ api.interceptors.response.use(
     res => res,
     err => {
         // handle refresh
-        return err;
+        return Promise.reject(err);
     }
 )
 

@@ -50,7 +50,6 @@ function getSelectionStyles() {
     for (const style in styles.value) {
         styles.value[style] = document.queryCommandState(style);
     }
-    console.log('selecion change')
     fontColor.value = document.queryCommandValue('foreColor');
     highlightColor.value = document.queryCommandValue('backColor');
 }

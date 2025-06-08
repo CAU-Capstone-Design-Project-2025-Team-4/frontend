@@ -3,22 +3,24 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
-import type { DesignResponseDTO, ElementResponseDTO, ModelDTO } from "@/types/DTO";
+import { cameraTransformToDTO, dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type CameraTransformDTO, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, FrameResponseDTO, ModelDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 import api from "@/api/api";
 import axios from "axios";
+import type { Animation, Effect, Frame, Timing } from "@/types/Animation";
 import { encodeThumbnail } from "@/common/encode";
 
 export interface Slide {
     id: number,
     thumbnail?: string,
-    elements: ElementRef[] // must be sorted by z-index
+    elements: ElementRef[], // must be sorted by z-index
+    animations: Animation[]
 }
 
 function _newSlide(_id?: number): Slide {
-    return { id: _id ?? 0, thumbnail: '', elements: [] };
+    return { id: _id ?? 0, thumbnail: '', elements: [], animations: [] };
 }
 
 export const useDesignStore = defineStore('design', () => {
@@ -50,10 +52,12 @@ export const useDesignStore = defineStore('design', () => {
             const data: DesignResponseDTO = res.data.data;
 
             for (const slide of data.slideList.sort((a, b) => a.order - b.order)) {
+                const elements = (await Promise.all(slide.slideElements.map(element => parseElement(element)))).sort((a, b) => a.z - b.z);
                 const _slide: Slide = {
                     id: slide.id,
                     thumbnail: encodeThumbnail(slide.thumbnail),
-                    elements: await Promise.all(slide.slideElements.map(element => parseElement(element)))
+                    elements: elements,
+                    animations: await loadAnimation(slide.id, elements)
                 };
                 slides.value.push(_slide);
             }
@@ -62,14 +66,39 @@ export const useDesignStore = defineStore('design', () => {
             designTitle.value = data.name;
 
             selectSlide(0);
-            notifyChangeListeners();
+            // notifyChangeListeners();
 
             return data.name;
         });
     }
 
-    function getModels() {
+    async function loadAnimation(id: number, elements: ElementRef[]): Promise<Animation[]> {
+        const animations: AnimationResponseDTO[] = await api.get('/animation', {
+            params: {
+                slideId: id
+            }
+        }).then(res => res.data.data);
 
+        return animations.map(anim => {
+            let frame = {};
+            if (anim.cameraTransform) {
+                frame = {
+                    frame: {
+                        name: '',
+                        cameraTransform: dtoToCameraTransform(anim.cameraTransform)
+                    }
+                };
+            }
+
+            return {
+                id: anim.id,
+                element: elements.find(elem => elem.id === anim.elementId)!,
+                effect: anim.type.toLowerCase() as Effect,
+                duration: anim.duration,
+                timing: anim.timing.toLowerCase() as Timing,
+                ...frame
+            }
+        }).sort((a, b) => a.id - b.id);
     }
 
     async function parseElement(dto: ElementResponseDTO): Promise<ElementRef> {
@@ -120,6 +149,22 @@ export const useDesignStore = defineStore('design', () => {
                     }
                 }
 
+                const frames: Frame[] = await api.get('/frame/all', {
+                    params: {
+                        userId: auth.id,
+                        spatialId: dto.id
+                    }
+                }).then(res => {
+                    const frames: FrameResponseDTO[] = res.data.data;
+                    return frames.map(frame => {
+                        return {
+                            id: frame.frameId,
+                            name: frame.name,
+                            cameraTransform: dtoToCameraTransform(frame.cameraTransform)
+                        }
+                    });
+                });
+
                 objectRef = {
                     cameraMode: dto.cameraMode!.toLowerCase(),
                     cameraTransform: {
@@ -136,6 +181,7 @@ export const useDesignStore = defineStore('design', () => {
                     },
                     backgroundColor: dto.backgroundColor!,
                     models: dto.models!.map(model => buildModel(model)),
+                    frames: frames,
                     borderRef: borderRef
                 } as SpatialRef
                 break;
@@ -254,7 +300,7 @@ export const useDesignStore = defineStore('design', () => {
             }
             return formData;
         }
-
+        console.log(objectRef)
         if (instanceOfShapeRef(objectRef)) {
             return {
                 type: 'SHAPE',
@@ -365,9 +411,9 @@ export const useDesignStore = defineStore('design', () => {
         form.append('modelTransform.rotation.x', '0');
         form.append('modelTransform.rotation.y', '0');
         form.append('modelTransform.rotation.z', '0');
-        form.append('modelTransform.scale.x', '0');
-        form.append('modelTransform.scale.y', '0');
-        form.append('modelTransform.scale.z', '0');
+        form.append('modelTransform.scale.x', '1');
+        form.append('modelTransform.scale.y', '1');
+        form.append('modelTransform.scale.z', '1');
 
         form.append('shader', 'NONE');
 
@@ -422,8 +468,17 @@ export const useDesignStore = defineStore('design', () => {
             elementId: element.id,
         };
 
-        const { type, data } = buildParamsFrom(objectRef, common);
+        let { type, data } = buildParamsFrom(objectRef, common);
         if (!type) return;
+        if (type === 'SPATIAL' && instanceOfSpatialRef(objectRef)) {
+            data = {
+                userId: auth.id,
+                elementId: element.id,
+                cameraMode: objectRef.cameraMode.toUpperCase(),
+                backgroundColor: objectRef.backgroundColor,
+                cameraTransform: cameraTransformToDTO(objectRef.cameraTransform)
+            }
+        }
 
         api.patch('/element/' + type?.toLowerCase(), data).then(_ => notifyChangeListeners());
     }

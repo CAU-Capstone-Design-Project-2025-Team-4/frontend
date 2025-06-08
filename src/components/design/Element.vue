@@ -5,14 +5,16 @@ export class ElementRef {
     rotation: number;
     size: Vector2;
     z: number;
+    visiblity: boolean;
     objectRef: ObjectRef;
 
-    constructor(id: number, position: Vector2, rotation: number, size: Vector2, z: number, objectRef: ObjectRef) {
+    constructor(id: number, position: Vector2, rotation: number, size: Vector2, z: number, objectRef: ObjectRef, visiblity?: boolean) {
         this.id = id;
         this.position = position;
         this.rotation = rotation;
         this.size = size;
         this.z = z;
+        this.visiblity = visiblity ?? true;
         this.objectRef = objectRef;
     }
 
@@ -60,7 +62,7 @@ const handleable = inject<boolean>('handleable');
 </script>
 
 <template>
-    <div class="absolute" @pointerdown.left.stop="select($event)" :style="{
+    <div class="absolute" v-show="element.visiblity" @pointerdown.left.stop="select($event)" :style="{
         transformOrigin: 'left top',
         transform: `translate(${element.position.x}px, ${element.position.y}px) rotate(${element.rotation}deg) translate(${-element.size.x / 2}px, ${-element.size.y / 2}px)`,
         width: `${Math.round(element.size.x)}px`,

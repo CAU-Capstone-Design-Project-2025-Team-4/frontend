@@ -206,7 +206,7 @@ function openMenu(e: MouseEvent) {
 </script>
 
 <template>
-    <div ref="handler" :class="{ 'invisible': isHandlerMatch(HandlerType.NONE) }" class="absolute pointer-events-none z-10000 outline-2 outline-solid outline-teal-400" :style="{
+    <div ref="handler" :class="{ 'invisible': isHandlerMatch(HandlerType.NONE) }" class="absolute pointer-events-none z-200 outline-2 outline-solid outline-teal-400" :style="{
         transform: `translate(${position.x - size.x / 2}px, ${position.y - size.y / 2}px) rotate(${rotation}deg) scale(${scale})`,
         width: `${size.x}px`,
         height: `${size.y}px`

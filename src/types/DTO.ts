@@ -1,3 +1,5 @@
+import type { CameraTransformDTO } from "./ObjectRef"
+
 export interface LoginResponseDTO {
     jwtToken: string,
     refreshToken: string,
@@ -113,4 +115,19 @@ export interface DetailedTemplateDTO {
     thumbnail: string,
     creator: string,
     slideThumbnails: string[]
+}
+
+export interface AnimationResponseDTO {
+    id: number,
+    elementId: number,
+    type: string,
+    timing: string,
+    duration: number,
+    cameraTransform?: CameraTransformDTO
+}
+
+export interface FrameResponseDTO {
+    frameId: number,
+    name: string,
+    cameraTransform: CameraTransformDTO
 }

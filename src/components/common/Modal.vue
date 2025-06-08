@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onClickOutside, useEventListener } from '@vueuse/core';
+import { useEventListener } from '@vueuse/core';
 import { ref, useTemplateRef } from 'vue';
 
 defineExpose({ open, close });
@@ -9,16 +9,22 @@ const emit = defineEmits<{
 
 const modal = useTemplateRef<HTMLElement>('modal');
 const show = ref<boolean>(false);
-onClickOutside(modal, _e => {
-    close();
-})
+
+function onClickOutside(e: MouseEvent) {
+    if (!modal.value?.contains(e.target as Node)) {
+        close();
+    }
+}
 
 function open() {
     show.value = true;
+    setTimeout(() => document.addEventListener('click', onClickOutside), 1);
+    // document.addEventListener('click', (e) => onClickOutside(e));
 }
 
 function close() {
     show.value = false;
+    document.removeEventListener('click', onClickOutside);
     emit('closed');
 }
 
