@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { type Slide, useDesignStore } from '@/stores/design';
 import Canvas from './design/Canvas.vue';
-import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
+import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import type { Animation } from '@/types/Animation';
 import type UnityCanvas from './design/objects/UnityCanvas.vue';
 import { useEventListener } from '@vueuse/core';
 
 const design = useDesignStore();
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
+
+const container = useTemplateRef<HTMLElement>('container');
+const containerWidth = computed<number | undefined>(() => container.value?.getBoundingClientRect().width);
 
 const slideIndex = ref<number>(-1);
 
@@ -57,7 +60,7 @@ function interact(e: PointerEvent) {
         if (slideIndex.value + 1 < design.slides.length) {
             slideIndex.value += 1;   
         } else {
-
+            isEnded.value = true;
         }
     }
 }
@@ -88,17 +91,22 @@ watch(() => slideIndex.value, () => {
         }
     });
 })
+
+const isEnded = defineModel<boolean>();
 </script>
 
 <template>
-    <div class="relative border border-black mt-10" :style="{
-        transformOrigin: `left top`,
-        transform: `scale(${2/3})`,
-        width: `${1920}px`,
-        height: `${1080}px`
-    }" @pointerup.left="interact($event)">
-        <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
+    <div ref="container">
+        <div class="relative" :style="{
+            transformOrigin: `left top`,
+            transform: `scale(${containerWidth! / 1920})`,
+            width: `${1920}px`,
+            height: `${1080}px`
+        }" @pointerup.left="interact($event)">
+            <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
+        </div>
     </div>
+    
     <!-- <div class="relative">
     <Canvas class="w-full h-full select-none" :slide="design.slides[0]" />
 

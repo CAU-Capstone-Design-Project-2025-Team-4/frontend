@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, type Ref } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
@@ -134,9 +134,9 @@ onMounted(() => {
     nextTick(() => handleResize());
 
     design.addChangeListener(onChange);
-    watch(() => unity.value.isCreatingInstance, () => {
-        setTimeout(() => onChange(), 100);
-    })
+    // watch(() => unity.value.isCreatingInstance, () => {
+    //     setTimeout(() => onChange(), 100);
+    // })
 })
 
 

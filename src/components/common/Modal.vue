@@ -12,7 +12,6 @@ const show = ref<boolean>(false);
 
 function onClickOutside(e: MouseEvent) {
     if (!modal.value?.contains(e.target as Node)) {
-        console.log('close')
         close();
     }
 }

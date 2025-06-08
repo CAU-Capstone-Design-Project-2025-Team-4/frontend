@@ -27,6 +27,7 @@ import Dropdown from '@/components/common/Dropdown.vue';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/api/api';
 import Modal from '@/components/common/Modal.vue';
+import { useEventListener } from '@vueuse/core';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
@@ -80,12 +81,13 @@ onMounted(() => {
     }
 })
 
-function changeTransform() {
+function changeCameraTransform() {
     // debounce?
     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
         positionAndRotation: spatialRef.value.cameraTransform, 
         interval: 0
     }));
+    design.debouncedUpdateObject(elementRef.value);
 }
 
 const frameName = ref<string>('');
@@ -100,7 +102,6 @@ function captureFrame() {
     if (frameName.value === '') {
         frameName.value = '이름없는 프레임'
     }
-    console.log(spatialRef.value)
 
     api.post('/frame', {
         userId: auth.id,
@@ -118,12 +119,13 @@ function captureFrame() {
 }
 
 watch(() => spatialRef.value.backgroundColor, () => {
-    // debounce?
     const cameraBackgroudMode = spatialRef.value.backgroundColor === 'skybox' ? 'skybox' : 'solid';
     unity.value.sendMessage('SetCameraBackgroundMode', cameraBackgroudMode);
     if (cameraBackgroudMode === 'solid') {
         unity.value.sendMessage('SetCameraBackgroundColor', spatialRef.value.backgroundColor);
     }
+
+    design.debouncedUpdateObject(elementRef.value);
 })
 
 const editModel = ref<boolean>(false);
@@ -182,6 +184,27 @@ function updateModel() {
         }
     }));
 }
+
+function updateCameraTransform(json: string) {
+    const transform: CameraTransform = JSON.parse(json);
+    spatialRef.value.cameraTransform = transform;
+    design.debouncedUpdateObject(elementRef.value);
+}
+
+function handleCamera() {
+    unity.value.requestPointerLock();
+    unity.value.sendMessage('EnableInput', 'true');
+
+    unity.value.context.addUnityListener('CameraUpdate', updateCameraTransform);
+}
+
+useEventListener(document, 'pointerlockchange', () => {
+    if (document.pointerLockElement === null) {
+        unity.value.sendMessage('EnableInput', 'false');
+
+        unity.value.context.removeUnityListener('CameraUpdate', updateCameraTransform);
+    }
+})
 </script>
 
 <template>
@@ -276,6 +299,11 @@ function updateModel() {
                         </button>
                     </Dropdown>
                 </div>
+
+                <button @pointerup.left="handleCamera()" class="flex justify-center items-center w-full h-10 rounded-md bg-gray-200 hover:brightness-90">
+                    <div class="w-5 h-5 mr-1 i-mdi:arrow-all"/>
+                    <p>조작</p>
+                </button>
                 
 
                 <Chevron :title="'카메라'" class="my-2">
@@ -287,24 +315,24 @@ function updateModel() {
 
                         <p class="text-left p-1 leading-8">위치</p>
                         <form @submit.prevent="" class="relative mb-2">
-                            <input v-model.number="spatialRef.cameraTransform.position.x" @input="changeTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
+                            <input v-model.number="spatialRef.cameraTransform.position.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.position.y" @input="changeTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef.cameraTransform.position.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.position.z" @input="changeTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef.cameraTransform.position.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
 
                         <p class="text-left p-1 leading-8">회전</p>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.x" @input="changeTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
+                            <input v-model.number="spatialRef.cameraTransform.rotation.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.y" @input="changeTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef.cameraTransform.rotation.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.z" @input="changeTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef.cameraTransform.rotation.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                     </div>
                 </Chevron>

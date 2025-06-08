@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import { useAuthStore } from "./auth";
-import { dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type CameraTransformDTO, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import { cameraTransformToDTO, dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type CameraTransformDTO, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
 import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, FrameResponseDTO, ModelDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
@@ -66,7 +66,7 @@ export const useDesignStore = defineStore('design', () => {
             designTitle.value = data.name;
 
             selectSlide(0);
-            notifyChangeListeners();
+            // notifyChangeListeners();
 
             return data.name;
         });
@@ -300,7 +300,7 @@ export const useDesignStore = defineStore('design', () => {
             }
             return formData;
         }
-
+        console.log(objectRef)
         if (instanceOfShapeRef(objectRef)) {
             return {
                 type: 'SHAPE',
@@ -468,8 +468,17 @@ export const useDesignStore = defineStore('design', () => {
             elementId: element.id,
         };
 
-        const { type, data } = buildParamsFrom(objectRef, common);
+        let { type, data } = buildParamsFrom(objectRef, common);
         if (!type) return;
+        if (type === 'SPATIAL' && instanceOfSpatialRef(objectRef)) {
+            data = {
+                userId: auth.id,
+                elementId: element.id,
+                cameraMode: objectRef.cameraMode.toUpperCase(),
+                backgroundColor: objectRef.backgroundColor,
+                cameraTransform: cameraTransformToDTO(objectRef.cameraTransform)
+            }
+        }
 
         api.patch('/element/' + type?.toLowerCase(), data).then(_ => notifyChangeListeners());
     }

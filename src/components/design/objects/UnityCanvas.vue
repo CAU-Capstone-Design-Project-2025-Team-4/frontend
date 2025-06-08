@@ -118,6 +118,9 @@ async function render(spatialRef: SpatialRef) {
     if (cameraBackgroundMode === 'solid') {
         sendMessage('SetCameraBackgroundColor', spatialRef.backgroundColor);
     }
+
+    width.value = 101;
+    setTimeout(() => width.value -= 1, 1);
 }
 
 function unmount() {
@@ -139,17 +142,22 @@ function sendMessage(method: Method, params?: any) {
 }
 
 defineExpose({
+    context,
     isCreatingInstance,
     render, unmount,
     sendMessage,
     requestPointerLock,
-    setInstantiatedListener
+    setInstantiatedListener,
 })
 
+const width = ref<number>(0);
 </script>
 
 <template>
     <Teleport :to="target">
-        <canvas ref="unity-canvas" id="unity-canvas" v-show="target !== BASE_CONTAINER" class="w-full h-full"></canvas>
+        <canvas ref="unity-canvas" id="unity-canvas" v-show="target !== BASE_CONTAINER" :style="{
+            width: `${width}%`,
+            height: `100%`
+        }"></canvas>
     </Teleport>
 </template>
