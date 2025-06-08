@@ -142,11 +142,11 @@ function enterFullscreen() {
                     <p class="ml-1 text-xl">님의 다른 포트폴리오</p>
                 </div>
                 <div class="flex flex-nowrap space-x-6 w-full h-54 mt-1 py-2 overflow-x-auto">
-                    <div v-for="post in otherPosts" class="group aspect-video h-full bg-gray-200 rounded-md cursor-pointer">
+                    <router-link :to="`/gallery/${post.id}`" v-for="post in otherPosts" class="group aspect-video h-full bg-gray-200 rounded-md cursor-pointer">
                         <div class="w-full aspect-video rounded-md border border-gray-300 overflow-hidden">
                             <img :src="post.thumbnail" class="w-full h-full object-fill rounded-md transition-transform duration-300 ease-in-out group-hover:scale-115" />
                         </div>
-                    </div>
+                    </router-link>
                 </div>
             </div>
 

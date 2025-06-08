@@ -183,6 +183,8 @@ const inMemoryModels = new Map<number, () => Promise<void>>;
 const design = useDesignStore();
 const isLoadingModels = ref<boolean>(false);
 async function loadAll(models: Model[]) {
+    if (models.length <= 0) return;
+    
     isLoadingModels.value = true;
     await instanceManager.instantiate();
 

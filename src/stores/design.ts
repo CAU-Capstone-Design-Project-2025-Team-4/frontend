@@ -66,7 +66,7 @@ export const useDesignStore = defineStore('design', () => {
             designTitle.value = data.name;
 
             selectSlide(0);
-            // notifyChangeListeners();
+            notifyChangeListeners();
 
             return data.name;
         });

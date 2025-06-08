@@ -121,7 +121,6 @@ function base64UrlToBlob(base64Url: string): Blob {
 }
 
 function onChange() {
-    console.log('on change')
     capture().then(url => {
         design.updateSlideThumbnail(base64UrlToBlob(url));
     });

@@ -86,7 +86,7 @@ onMounted(() => {
             .filter(elem => instanceOfSpatialRef(elem.objectRef))
             .map(elem => (elem.objectRef as SpatialRef).models);
     }).flat();
-    console.log('models:',models)
+    
     unity.value.loadAll(models);
 })
 
