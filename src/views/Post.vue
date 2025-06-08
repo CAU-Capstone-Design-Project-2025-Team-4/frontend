@@ -77,7 +77,7 @@ function toLast() {
                     <p class="text-left font-light text-xs text-gray-500">{{ email }}</p>
                 </div>
 
-                <p class="mt-6 ml-12 leading-6 text-gray-500">{{ createdAt.split('T')[0] }}</p> <!-- TODO: change position...-->
+                <p class="mt-6 ml-12 leading-6 text-gray-500">{{ createdAt.split('T')[0] }}</p>
             </div>
 
             <div class="w-full aspect-video overflow-hidden mt-10 select-none">

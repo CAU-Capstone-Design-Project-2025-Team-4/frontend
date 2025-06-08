@@ -108,7 +108,10 @@ async function render(spatialRef: SpatialRef) {
     //     sendMessage('UnloadModel');
     // }
     sendMessage('SetCameraMode', spatialRef.cameraMode);
-    sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.cameraTransform));
+    sendMessage('SetCameraPositionAndRotation', JSON.stringify({
+        positionAndRotation: spatialRef.cameraTransform, 
+        interval: 0
+    }));
 
     const cameraBackgroundMode = spatialRef.backgroundColor === 'skybox' ? 'skybox' : 'solid';
     sendMessage('SetCameraBackgroundMode', cameraBackgroundMode);

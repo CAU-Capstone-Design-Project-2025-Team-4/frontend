@@ -30,6 +30,7 @@ function addElement(mode: string) {
             },
             modelFile: '',
             models: [],
+            frames: [],
             backgroundColor: 'skybox',
             borderRef: {
                 type: 'none',

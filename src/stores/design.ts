@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import { useAuthStore } from "./auth";
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
-import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, ModelDTO } from "@/types/DTO";
+import { dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type CameraTransformDTO, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, FrameResponseDTO, ModelDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
 import api from "@/api/api";
@@ -80,16 +80,23 @@ export const useDesignStore = defineStore('design', () => {
         }).then(res => res.data.data);
 
         return animations.map(anim => {
+            let frame = {};
+            if (anim.cameraTransform) {
+                frame = {
+                    frame: {
+                        name: '',
+                        cameraTransform: dtoToCameraTransform(anim.cameraTransform)
+                    }
+                };
+            }
+
             return {
                 id: anim.id,
                 element: elements.find(elem => elem.id === anim.elementId)!,
                 effect: anim.type.toLowerCase() as Effect,
                 duration: anim.duration,
                 timing: anim.timing.toLowerCase() as Timing,
-                frame: {
-                    name: '',
-                    cameraTransform: anim.cameraTransform as CameraTransform
-                }
+                ...frame
             }
         }).sort((a, b) => a.id - b.id);
     }
@@ -147,7 +154,16 @@ export const useDesignStore = defineStore('design', () => {
                         userId: auth.id,
                         spatialId: dto.id
                     }
-                }).then(res => res.data.data);
+                }).then(res => {
+                    const frames: FrameResponseDTO[] = res.data.data;
+                    return frames.map(frame => {
+                        return {
+                            id: frame.frameId,
+                            name: frame.name,
+                            cameraTransform: dtoToCameraTransform(frame.cameraTransform)
+                        }
+                    });
+                });
 
                 objectRef = {
                     cameraMode: dto.cameraMode!.toLowerCase(),
@@ -395,9 +411,9 @@ export const useDesignStore = defineStore('design', () => {
         form.append('modelTransform.rotation.x', '0');
         form.append('modelTransform.rotation.y', '0');
         form.append('modelTransform.rotation.z', '0');
-        form.append('modelTransform.scale.x', '0');
-        form.append('modelTransform.scale.y', '0');
-        form.append('modelTransform.scale.z', '0');
+        form.append('modelTransform.scale.x', '1');
+        form.append('modelTransform.scale.y', '1');
+        form.append('modelTransform.scale.z', '1');
 
         form.append('shader', 'NONE');
 

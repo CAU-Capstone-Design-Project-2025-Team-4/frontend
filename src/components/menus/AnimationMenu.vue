@@ -4,7 +4,7 @@ import Modal from '../common/Modal.vue';
 import SelectBox from '../common/SelectBox.vue';
 import type { Frame, Effect, Timing, Animation } from '@/types/Animation';
 import { useSelectorStore } from '@/stores/selector';
-import { instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
+import { cameraTransformToDTO, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef } from '@/types/ObjectRef';
 import { useDesignStore } from '@/stores/design';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/api/api';
@@ -31,7 +31,6 @@ function openAddAnimationModal() {
         if (instanceOfSpatialRef(selector.selection[0].objectRef)) {
             is3dAnimation.value = true;
             frameList.value = selector.selection[0].objectRef.frames;
-            console.log(frameList)
         }
     }
 
@@ -49,15 +48,25 @@ async function addAnimation() {
             type: effect.value?.toUpperCase(),
             duration: duration.value,
             timing: _timing,
-            cameraTransform: frame.value?.cameraTransform
+            cameraTransform: cameraTransformToDTO(frame.value?.cameraTransform)
         }).then(res => {
-            design.currentSlide.animations.push({
-                id: res.data.id,
+            const animation = {
+                id: res.data.data.id,
                 element: selector.selection[i],
                 effect: effect.value as Effect,
                 timing: _timing?.toLowerCase() as Timing,
                 duration: duration.value,
-            });
+            };
+
+            if (frame.value) {
+                design.currentSlide.animations.push({
+                    ...animation,
+                    frame: frame.value
+                });
+                return;
+            }
+            
+            design.currentSlide.animations.push(animation);
         });
     }
     
@@ -158,9 +167,9 @@ function indexedAnimations(animations: Animation[]) {
                 
                 <SelectBox v-model="duration" class="w-48 h-10">
                     <li option="0" icon="i-mdi:clock-check-outline">즉시</li>
-                    <li option="1" icon="i-mdi:speedometer">빠르게</li>
-                    <li option="3" icon="i-mdi:speedometer-medium">중간</li>
-                    <li option="5" icon="i-mdi:speedometer-slow">느리게</li>
+                    <li option="1" v-if="effect === 'frame_transition'" icon="i-mdi:speedometer">빠르게</li>
+                    <li option="3" v-if="effect === 'frame_transition'" icon="i-mdi:speedometer-medium">중간</li>
+                    <li option="5" v-if="effect === 'frame_transition'" icon="i-mdi:speedometer-slow">느리게</li>
                 </SelectBox>
             </div>
 

@@ -55,7 +55,6 @@ const customSlots = computed(() => {
 onMounted(() => {
     if (customSlots.value.length) 
         select(customSlots.value[0]);
-    console.log(customSlots.value, getCurrentInstance()?.slots.default?.())
 })
 
 const selectBox = useTemplateRef<HTMLElement>('select-box');

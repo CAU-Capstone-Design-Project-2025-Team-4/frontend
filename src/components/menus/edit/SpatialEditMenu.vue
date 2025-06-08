@@ -82,7 +82,10 @@ onMounted(() => {
 
 function changeTransform() {
     // debounce?
-    unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify(spatialRef.value.cameraTransform));
+    unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
+        positionAndRotation: spatialRef.value.cameraTransform, 
+        interval: 0
+    }));
 }
 
 const frameName = ref<string>('');
@@ -97,14 +100,16 @@ function captureFrame() {
     if (frameName.value === '') {
         frameName.value = '이름없는 프레임'
     }
+    console.log(spatialRef.value)
 
     api.post('/frame', {
         userId: auth.id,
         spatialId: elementRef.value.id,
         name: frameName.value,
         cameraTransform: cameraTransformToDTO(spatialRef.value.cameraTransform)
-    }).then(_ => {
+    }).then(res => {
         spatialRef.value.frames.push({
+            id: res.data.data.id,
             name: frameName.value,
             cameraTransform: spatialRef.value.cameraTransform
         });

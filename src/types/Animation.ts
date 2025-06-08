@@ -5,6 +5,7 @@ export type Effect = 'appear' | 'disappear' | 'frame_transition';
 export type Timing = 'on_click' | 'with_previous' | 'after_previous';
 
 export interface Frame {
+    id: number,
     name: string,
     cameraTransform: CameraTransform
 }
