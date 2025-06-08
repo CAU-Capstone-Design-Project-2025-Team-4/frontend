@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { useDraggable } from '@/common/draggable';
 import Vector2 from '@/types/Vector2';
-import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, type Ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import Canvas from '@/components/design/Canvas.vue';
 import Handler from '@/components/design/Handler.vue';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
 import DragBox from '@/components/design/DragBox.vue';
 import { toJpeg } from 'html-to-image';
-import type UnityCanvas from './objects/UnityCanvas.vue';
 
 const position = ref<Vector2>(Vector2.Zero());
 const scale = ref<number>(1);
@@ -122,6 +121,7 @@ function base64UrlToBlob(base64Url: string): Blob {
 }
 
 function onChange() {
+    console.log('on change')
     capture().then(url => {
         design.updateSlideThumbnail(base64UrlToBlob(url));
     });
@@ -159,12 +159,6 @@ function deleteElement(e: KeyboardEvent) {
 
 const design = useDesignStore();
 const selector = useSelectorStore();
-
-const refresh = ref<number>(0);
-const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
-unity.value.setInstantiatedListener(() => refresh.value++);
-
-
 </script>
 
 <template>
@@ -176,7 +170,7 @@ unity.value.setInstantiatedListener(() => refresh.value++);
             height: `${size.y}px`
         }">
             <div ref="canvas" class="w-full h-full">
-                <Canvas :slide="design.currentSlide" :handleable="true" class="w-full h-full" @dragover.prevent="" :key="refresh" />
+                <Canvas :slide="design.currentSlide" :handleable="true" class="w-full h-full" @dragover.prevent="" />
             </div>
         </div>
         <Handler />

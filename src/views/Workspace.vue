@@ -51,7 +51,7 @@ function deleteDesign(id: number) {
 
     // TODO: show Confirm Modal
 
-    api.delete('/api/design', {
+    api.delete('/design', {
         params: {
             userId: auth.id,
             designId: id

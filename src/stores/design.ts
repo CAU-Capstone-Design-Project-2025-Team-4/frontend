@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSelectorStore } from "./selector";
 import { useAuthStore } from "./auth";
-import { cameraTransformToDTO, dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type CameraTransform, type CameraTransformDTO, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
+import { cameraTransformToDTO, dtoToCameraTransform, instanceOfImageRef, instanceOfShapeRef, instanceOfSpatialRef, instanceOfTextBoxRef, type BorderRef, type ImageRef, type InvalidRef, type Model, type ObjectRef, type ObjectType, type ShapeRef, type SpatialRef, type TextBoxRef } from "@/types/ObjectRef";
 import type { AnimationResponseDTO, DesignResponseDTO, ElementResponseDTO, FrameResponseDTO, ModelDTO } from "@/types/DTO";
 import Vector2 from "@/types/Vector2";
 import { useDebounceFnFlushable } from "@/common/debounce";
@@ -559,7 +559,7 @@ export const useDesignStore = defineStore('design', () => {
         slides, selection, currentSlide, 
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
         addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject, debouncedUpdateModel,
-        addChangeListener, removeChangeListener,
+        addChangeListener, removeChangeListener, notifyChangeListeners,
         uploadModel, updateModel,
         share, shareTemplate, updateTitle, updateSlideThumbnail
     };

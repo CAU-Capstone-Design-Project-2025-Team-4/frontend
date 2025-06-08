@@ -80,6 +80,14 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 onMounted(() => {
     slideIndex.value = 0;
     computeAnimatedSlide();
+
+    const models = design.slides.flatMap(slide => {
+        return slide.elements
+            .filter(elem => instanceOfSpatialRef(elem.objectRef))
+            .map(elem => (elem.objectRef as SpatialRef).models);
+    }).flat();
+    console.log('models:',models)
+    unity.value.loadAll(models);
 })
 
 watch(() => slideIndex.value, () => {
@@ -158,7 +166,7 @@ const isEnded = defineModel<boolean>();
 </script>
 
 <template>
-    <div ref="container">
+    <div ref="container" class="w-full h-full relative">
         <div class="relative" :style="{
             transformOrigin: `left top`,
             transform: `scale(${containerWidth! / 1920})`,
@@ -167,11 +175,9 @@ const isEnded = defineModel<boolean>();
         }" @pointerup.left="interact($event)">
             <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
         </div>
+
+        <div v-if="unity.isLoadingModels" class="absolute left-0 top-0 flex flex-col items-center justify-center w-full h-full bg-black bg-opacity-70">
+            <span class="w-12 h-12 m-2 rounded-full border-4 border-white border-b-teal-400 animate-spin"></span>
+        </div>
     </div>
-    
-    <!-- <div class="relative">
-    <Canvas class="w-full h-full select-none" :slide="design.slides[0]" />
-
-    </div> -->
-
 </template>

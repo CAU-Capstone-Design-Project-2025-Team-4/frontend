@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type BorderRef, type SpatialRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { computed, inject, onBeforeUnmount, onMounted, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, watch, type Ref } from 'vue';
 import type UnityCanvas from './UnityCanvas.vue';
 
 const { element } = defineProps<{
@@ -12,6 +12,10 @@ const borderRef = computed<BorderRef>(() => spatialRef.value.borderRef);
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 onMounted(() => {
+    unity.value.render(spatialRef.value);
+})
+
+watch(() => element.id, () => {
     unity.value.render(spatialRef.value);
 })
 
