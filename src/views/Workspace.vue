@@ -121,6 +121,28 @@ const searchedTemplateList = computed<TemplateDTO[]>(() => {
     if (templateKeyword.value === '') return templateList.value;
     return templateList.value.filter(template => template.name.match(templateKeyword.value));
 })
+
+const orderBy = ref<string>('updatedAt');
+const sortDirection = ref<number>(1);
+
+function compareDate(a: string, b: string) {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+
+    if (dateA < dateB) return -1;
+    if (dateA > dateB) return 1;
+    return 0;
+}
+const sortedDesignList = computed<DesignListResponseDTO[]>(() => {
+    return [...designList.value].sort((a, b) => {
+        if (orderBy.value === 'updatedAt') {
+            return sortDirection.value * compareDate(a.updatedAt, b.updatedAt);
+        } else if (orderBy.value === 'name') {
+            return sortDirection.value * a.name.localeCompare(b.name);
+        }
+        return a.id - b.id;
+    });
+})
 </script>
 
 <template>
@@ -139,7 +161,7 @@ const searchedTemplateList = computed<TemplateDTO[]>(() => {
                 <li class="flex w-full h-12 p-2 rounded-md hover:bg-gray-100 select-none cursor-pointer" @pointerup="menuSelection = 1"
                 :class="{ 'bg-gray-200 hover:bg-gray-200': menuSelection === 1 }">
                     <div class="i-mdi:database-cog-outline mr-2 w-8 h-8" />
-                    <div class="leading-8">저장소</div>
+                    <div class="leading-8 line-through">저장소</div>
                 </li>
             </ul>
 
@@ -155,19 +177,23 @@ const searchedTemplateList = computed<TemplateDTO[]>(() => {
                         <div class="relative">
                             <div class="flex items-center w-36 h-10 p-2 rounded-md border border-gray-400"
                             :class="{ 'border-teal-400': orderDropdown?.show }" @pointerup="orderDropdown?.open()">
-                                <p class="text-sm">수정일</p>
-                                <div class="i-mdi-chevron-down ml-auto text-2xl" />
+                                <p class="text-sm">{{ orderBy === 'updatedAt' ? '수정일' : '이름' }}</p>
+                                <div class="ml-auto text-2xl" :class="[ sortDirection === 1 ? 'i-mdi-chevron-down' : 'i-mdi-chevron-up' ]" />
                             </div>
 
                             <Dropdown ref="order-dropdown" class="w-36">
-                                <ul class="">
-                                    <li class="h-8 leading-8 px-2 text-left text-sm text-teal-500 cursor-pointer hover:bg-gray-200">수정일</li>
-                                    <li class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200">이름</li>
+                                <ul>
+                                    <li @pointerup.left="orderBy = `updatedAt`; orderDropdown?.close()" class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200"
+                                    :class="{ 'text-teal-500': orderBy === 'updatedAt' }">수정일</li>
+                                    <li @pointerup.left="orderBy = `name`; orderDropdown?.close()" class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200"
+                                    :class="{ 'text-teal-500': orderBy === 'name' }">이름</li>
                                 </ul>
                                 <div class="my-1.5 border-b border-gray-200" />
-                                <ul class="">
-                                    <li class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200">오름차순</li>
-                                    <li class="h-8 leading-8 px-2 text-left text-sm text-teal-500 cursor-pointer hover:bg-gray-200">내림차순</li>
+                                <ul>
+                                    <li @pointerup.left="sortDirection = -1; orderDropdown?.close()" class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200"
+                                    :class="{ 'text-teal-500': sortDirection === -1 }">오름차순</li>
+                                    <li @pointerup.left="sortDirection = 1; orderDropdown?.close()" class="h-8 leading-8 px-2 text-left text-sm cursor-pointer hover:bg-gray-200"
+                                    :class="{ 'text-teal-500': sortDirection === 1 }">내림차순</li>
                                 </ul>
                             </Dropdown>
                         </div>
@@ -182,7 +208,7 @@ const searchedTemplateList = computed<TemplateDTO[]>(() => {
                             <li class="w-10 mr-4"></li>
                         </ul>
                         <ol class="flex-1 min-h-0 text-left overflow-auto [scrollbar-gutter:stable]">
-                            <li v-for="design in designList" class="flex items-center w-full h-20 cursor-pointer hover:bg-gray-100"
+                            <li v-for="design in sortedDesignList" class="flex items-center w-full h-20 cursor-pointer hover:bg-gray-100"
                             @pointerup.left="toEditorView(design.id)">
                                 <div class="grow flex min-w-0 items-center px-4">
                                     <!-- <button class="i-mdi:checkbox-blank-outline w-5 h-5 p-0 mr-4" /> -->

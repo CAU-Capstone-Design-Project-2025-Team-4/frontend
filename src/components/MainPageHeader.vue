@@ -139,10 +139,6 @@ function resetRegisterModal() {
     viewPassword.value = false;
 }
 
-function toEditorView() {
-    // router.push('/editor');
-}
-
 function toGalleryView() {
     router.push('/gallery');
 }
@@ -164,9 +160,9 @@ function toGalleryView() {
                 </div>
 
                 <div v-else class="flex">
-                    <button @click="toEditorView()" class="w-40 h-12 p-2 mr-2 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
-                        <p class="text-white">디자인 만들기</p>
-                    </button>
+                    <router-link to="/workspace" class="w-40 h-12 p-2 mr-2 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
+                        <p class="text-white leading-8">디자인 시작하기</p>
+                    </router-link>
                     <Profile />
                 </div>
             </div> 
