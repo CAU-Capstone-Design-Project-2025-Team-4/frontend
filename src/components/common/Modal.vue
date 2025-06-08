@@ -39,7 +39,7 @@ useEventListener(document, 'keydown', (e) => {
 
 <template>
     <Teleport to="body">
-        <div v-if="show" class="absolute z-999">
+        <div v-if="show" class="absolute z-9999">
             <div class="flex items-center justify-center w-screen h-screen bg-black bg-opacity-20">
                 <div ref="modal" class="w-fit h-fit p-4 rounded-xl bg-white">
                     <div class="w-full h-8 mb-2">

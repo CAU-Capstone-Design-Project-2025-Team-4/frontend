@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import Profile, { profileColor } from '@/components/Profile.vue';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
+import { useDesignStore } from '@/stores/design';
 import type { DetailedTemplateDTO, DesignListResponseDTO, TemplateDTO } from '@/types/DTO';
 import Vector2 from '@/types/Vector2';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
@@ -129,8 +130,8 @@ function compareDate(a: string, b: string) {
     const dateA = new Date(a);
     const dateB = new Date(b);
 
-    if (dateA < dateB) return -1;
-    if (dateA > dateB) return 1;
+    if (dateA < dateB) return 1;
+    if (dateA > dateB) return -1;
     return 0;
 }
 const sortedDesignList = computed<DesignListResponseDTO[]>(() => {
@@ -142,7 +143,22 @@ const sortedDesignList = computed<DesignListResponseDTO[]>(() => {
         }
         return a.id - b.id;
     });
-})
+});
+
+const name = ref<string>('');
+const renameModal = useTemplateRef<InstanceType<typeof Modal>>('rename-modal');
+function rename() {
+    currentDesign.value!.name = name.value;
+
+    api.patch('/design/name', {
+        userId: auth.id,
+        designId: currentDesign.value!.id,
+        name: name.value
+    }).then(_ => {
+        queryDesignList();
+        renameModal.value?.close();
+    });
+}
 </script>
 
 <template>
@@ -309,26 +325,41 @@ const sortedDesignList = computed<DesignListResponseDTO[]>(() => {
                 <div class="flex flex-col justify-center w-auto h-12">
                     <p class="mb-1 text-left text-xl font-bold">{{ currentDesign?.name }}</p>
                     <p class="text-left text-xs text-gray-500">수정일: {{ currentDesign?.updatedAt.split('.')[0].replace('T', ' ') }}</p>
-                    <p class="text-left text-xs text-gray-500">{{ currentDesign?.shared ? '공개됨' : '비공개' }}</p>
+                    <p class="text-left text-xs text-gray-500">{{ currentDesign?.inPost ? '게시됨' : '비공개' }}</p>
                 </div>
             </div>
-            <button @pointerup="" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
+            <!-- <button @pointerup="" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
                 <div class="w-6 h-6 mr-2 i-mdi:content-copy" />
                 <p class="leading-6">사본 만들기</p>
-            </button>
-            <button @pointerup="" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
+            </button> -->
+            <button @pointerup.left="name = currentDesign!.name; renameModal?.open()" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
                 <div class="w-6 h-6 mr-2 i-mdi:rename" />
                 <p class="leading-6">이름 바꾸기</p>
             </button>
-            <button @pointerup="" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
+            <!-- <button @pointerup.left="" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
                 <div class="w-6 h-6 mr-2 i-mdi:share-variant-outline" />
                 <p class="leading-6">공유하기</p>
-            </button>
-            <button @pointerup="deleteDesign(currentDesign!.id)" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
+            </button> -->
+            <button @pointerup.left="deleteDesign(currentDesign!.id)" class="flex w-80 h-12 p-3 px-6 hover:bg-gray-200">
                 <div class="w-6 h-6 mr-2 i-material-symbols:delete-outline-rounded" />
                 <p class="leading-6">삭제하기</p>
             </button>
         </Dropdown>
+
+        <Modal ref="rename-modal">
+            <p class="font-bold text-xl mb-8 select-none">이름 바꾸기</p>
+            <form @submit.prevent="rename()">
+                <div class="relative w-80 mb-4">
+                    <p class="mb-1 select-none">이름</p>
+                    <input v-model="name"
+                    class="block w-full h-10 px-2 text-sm rounded-md border border-gray-300 outline-teal-500 hover:border-teal-500" />
+                </div>
+
+                <button type="submit" class="w-80 h-10 rounded-md bg-teal-500 focus:brightness-110 hover:brightness-110">
+                    <p class="text-sm text-white font-bold leading-10">변경</p>
+                </button>
+            </form>
+        </Modal>
     </div>
 </template>
 

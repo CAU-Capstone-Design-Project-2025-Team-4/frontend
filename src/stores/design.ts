@@ -555,7 +555,7 @@ export const useDesignStore = defineStore('design', () => {
     }
 
     return { 
-        load,
+        load, designId,
         slides, selection, currentSlide, 
         selectSlide, addSlide, removeSlide, insertSlide, duplicateSlide, 
         addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject, debouncedUpdateModel,

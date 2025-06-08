@@ -381,7 +381,6 @@ useEventListener(document, 'pointerlockchange', () => {
                                 <p class="text-sm text-white font-bold leading-10">캡처</p>
                             </button>
                         </form>
-
                     </Modal>
                 </div>
                 <ul class="w-full min-h-40 flex-1 mt-2 mb-1 overflow-auto">
