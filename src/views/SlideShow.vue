@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, type Ref } from 'vue';
+import { inject, ref, watch, type Ref } from 'vue';
 import router from '@/router';
 import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
 import InteractiveCanvas from '@/components/InteractiveCanvas.vue';
@@ -17,6 +17,19 @@ function handleFullscreen() {
 
 function exitFullscreen() {
     document.exitFullscreen();
+    document.removeEventListener('keydown', onSpace);
+}
+
+watch(() => isSlideShowEnded.value, () => {
+    if (isSlideShowEnded.value) {
+        document.addEventListener('keydown', onSpace);
+    }
+})
+
+function onSpace(e: KeyboardEvent) {
+    if (e.code === 'Space') {
+        exitFullscreen();
+    }
 }
 
 useEventListener(document, 'fullscreenchange', handleFullscreen);

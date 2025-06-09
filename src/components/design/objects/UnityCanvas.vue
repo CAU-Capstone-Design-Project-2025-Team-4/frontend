@@ -88,7 +88,7 @@ async function render(spatialRef: SpatialRef) {
     }
 
     width.value = 99;
-    setTimeout(() => width.value = 100, 1);
+    setTimeout(() => width.value = 100, 50);
 
     if (!flag) return;
 

@@ -31,7 +31,6 @@ export function useSuspendableWait() {
     }
 
     function suspend() {
-        console.log('suspend')
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
             timeoutId = null;
@@ -46,7 +45,6 @@ export function useSuspendableWait() {
     }
 
     function resume() {
-        console.log('resume')
         isSuspended = false;
     }
     

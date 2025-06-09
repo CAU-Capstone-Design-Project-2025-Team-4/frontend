@@ -49,10 +49,10 @@ const { wait, suspend, resume } = useSuspendableWait();
 const isAnimating = ref<boolean>(false);
 const transitionTo = ref<CameraTransform | null>(null);
 
-async function interact(e: PointerEvent) {
+async function interact(e?: PointerEvent) {
     if (hasFocusOnUnity.value) return;
 
-    focus.value = e.target as HTMLElement;
+    focus.value = e?.target as HTMLElement ?? null;
     if (hasFocusOnUnity.value) {
         unity.value.requestPointerLock();
         unity.value.sendMessage('EnableInput', 'true');
@@ -141,6 +141,13 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
             clearTimeout(alertTimeout);
             alertTimeout = null;
         }
+        return;
+    }
+
+    if(e.code === 'Space') {
+        e.preventDefault();
+
+        interact();
     }
 })
 
