@@ -41,6 +41,9 @@ watch(() => onHover.value, () => {
 
 const focus = ref<HTMLElement | null>(null);
 const hasFocusOnUnity = computed<boolean>(() => focus.value?.id === 'unity-canvas');
+const showUnityAlert = ref<boolean>(false);
+const unityAlertTransition = ref<string>('fade');
+let alertTimeout: number | null = null;
 
 const { wait, suspend, resume } = useSuspendableWait();
 const isAnimating = ref<boolean>(false);
@@ -53,7 +56,19 @@ async function interact(e: PointerEvent) {
     if (hasFocusOnUnity.value) {
         unity.value.requestPointerLock();
         unity.value.sendMessage('EnableInput', 'true');
+
+        unityAlertTransition.value = 'fade';
+        showUnityAlert.value = true;
+        alertTimeout = setTimeout(() => showUnityAlert.value = false, 3700);
         return;
+    } 
+
+    if (alertTimeout) {
+        unityAlertTransition.value = 'fase-fade';
+        showUnityAlert.value = false;
+
+        clearTimeout(alertTimeout);
+        alertTimeout = null;
     }
 
     if (isAnimating.value) {
@@ -118,6 +133,14 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 
         document.exitPointerLock();
         unity.value.sendMessage('EnableInput', 'false');
+
+        if (alertTimeout) {
+            unityAlertTransition.value = 'fase-fade';
+            showUnityAlert.value = false;
+
+            clearTimeout(alertTimeout);
+            alertTimeout = null;
+        }
     }
 })
 
@@ -206,11 +229,20 @@ defineExpose({
 })
 
 const isEnded = defineModel<boolean>();
-
 </script>
 
 <template>
     <div ref="container" class="w-full h-full relative select-none">
+        <Teleport to="body">
+            <Transition :name="unityAlertTransition">
+                <div v-if="showUnityAlert" class="flex justify-center items-center flex-row fixed top-12 left-[50%] translate-x-[-50%] w-[16.5%] min-w-90 h-12 select-none bg-gray-950 bg-opacity-68">
+                    <p class="text-white text-center">3D 조작을 종료하려면</p>
+                    <span class="block w-8 h-8 mx-2 text-white text-center leading-8 border border-white">Q</span>
+                    <p class="text-white text-center">키를 길게 누르세요.</p>
+                </div>
+            </Transition>
+        </Teleport>
+        
         <div class="relative" :style="{
             transformOrigin: `left top`,
             transform: `scale(${containerWidth! / 1920})`,
@@ -225,3 +257,27 @@ const isEnded = defineModel<boolean>();
         </div>
     </div>
 </template>
+
+<style lang="css">
+.fast-fade-enter-active,
+.fade-enter-active {
+    transition: opacity 1.0s ease-out;
+}
+.fade-leave-active {
+  transition: opacity 1.2s ease;
+}
+
+.fast-fade-enter-from,
+.fade-enter-from {
+    opacity: 68;
+}
+.fast-fade-leave-to,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fast-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+</style>

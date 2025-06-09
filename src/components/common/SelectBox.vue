@@ -90,7 +90,7 @@ function select(slot: { vnode: VNode, value: any }) {
             <div class="i-mdi-chevron-down text-2xl" :class="{ 'bg-gray-500': customSlots.length === 0 }" />
         </div>
 
-        <Transition to="body">
+        <Transition>
             <ul ref="dropdown" v-if="show" class="absolute z-999 py-1.5 rounded-lg bg-white shadow-md"
             :style="{ width: `${width}px`}">
                 <component v-for="slot in customSlots" :is="slot.vnode" @pointerup.left="select(slot); close()"
