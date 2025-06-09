@@ -23,6 +23,8 @@ export function useStackingUtils() {
             [currentSlide.elements[index].z, currentSlide.elements[index + 1].z] = [currentSlide.elements[index + 1].z, currentSlide.elements[index].z];
             [currentSlide.elements[index], currentSlide.elements[index + 1]] = [currentSlide.elements[index + 1], currentSlide.elements[index]];
         });
+
+        elements.forEach(elem => design.updateElement(elem));
     }
 
     function bringFront(elements: ElementRef[]) {
@@ -33,6 +35,8 @@ export function useStackingUtils() {
             currentSlide.elements.splice(index, 1);
             currentSlide.elements.push(element);  
         });
+
+        elements.forEach(elem => design.updateElement(elem));
     }
 
     function sendBackward(elements: ElementRef[]) {
@@ -43,6 +47,8 @@ export function useStackingUtils() {
             [currentSlide.elements[index].z, currentSlide.elements[index - 1].z] = [currentSlide.elements[index - 1].z, currentSlide.elements[index].z];
             [currentSlide.elements[index], currentSlide.elements[index - 1]] = [currentSlide.elements[index - 1], currentSlide.elements[index]];
         });
+
+        elements.forEach(elem => design.updateElement(elem));
     }
 
     function sendBack(elements: ElementRef[]) {
@@ -53,6 +59,8 @@ export function useStackingUtils() {
             currentSlide.elements.splice(index, 1);
             currentSlide.elements.splice(0, 0, element);
         });
+
+        elements.forEach(elem => design.updateElement(elem));
     }
 
     return { bringForward, bringFront, sendBackward, sendBack };

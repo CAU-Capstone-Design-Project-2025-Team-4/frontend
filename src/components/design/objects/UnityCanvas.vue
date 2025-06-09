@@ -110,7 +110,7 @@ async function render(spatialRef: SpatialRef) {
             continue;
         }
 
-        loadModel(model);
+        await loadModel(model);
 
         sendMessage('EnableModel', JSON.stringify({
             id: model.id,

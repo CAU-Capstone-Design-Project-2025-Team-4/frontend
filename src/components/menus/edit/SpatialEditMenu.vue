@@ -42,12 +42,8 @@ function selectMode(mode: 'free' | 'orbit') {
     // TODO
     spatialRef.value.cameraMode = mode;
     unity.value.sendMessage('SetCameraMode', mode);
-    unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
-        positionAndRotation: spatialRef.value.cameraTransform, 
-        interval: 0
-    }));
 
-    design.debouncedUpdateObject(elementRef.value);
+    design.updateObject(elementRef.value);
     cameraModeDropdown.value?.close();
 }
 
