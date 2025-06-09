@@ -28,6 +28,7 @@ import { useAuthStore } from '@/stores/auth';
 import api from '@/api/api';
 import Modal from '@/components/common/Modal.vue';
 import { useEventListener } from '@vueuse/core';
+import type { Frame } from '@/types/Animation';
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
@@ -38,8 +39,13 @@ const spatialRef = computed<SpatialRef>(() => elementRef.value.objectRef as Spat
 
 const cameraModeDropdown = useTemplateRef<InstanceType<typeof Dropdown>>('camera-mode-dropdown');
 function selectMode(mode: 'free' | 'orbit') {
+    // TODO
     spatialRef.value.cameraMode = mode;
     unity.value.sendMessage('SetCameraMode', mode);
+    unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
+        positionAndRotation: spatialRef.value.cameraTransform, 
+        interval: 0
+    }));
     cameraModeDropdown.value?.close();
 }
 
@@ -61,14 +67,15 @@ async function uploadModels(e: Event) {
             shader: 'none'
         };
 
-        unity.value.sendMessage('LoadModel', JSON.stringify({
-            ..._model,
-            enable: true,
-            properties: {
-                transform: model.transform,
-                shader: model.shader
-            }
-        }));
+        unity.value.loadModel(model);
+        // unity.value.sendMessage('LoadModel', JSON.stringify({
+        //     ..._model,
+        //     enable: true,
+        //     properties: {
+        //         transform: model.transform,
+        //         shader: model.shader
+        //     }
+        // }));
         
         spatialRef.value.models.push(model);
         selectedModel.value = model;
@@ -205,6 +212,23 @@ useEventListener(document, 'pointerlockchange', () => {
         unity.value.context.removeUnityListener('CameraUpdate', updateCameraTransform);
     }
 })
+
+function removeFrame(frame: Frame) {
+    if (!auth.isAuthenticated) return;
+
+    const index = spatialRef.value.frames.indexOf(frame);
+    if (index === -1) return;
+
+    api.delete('/frame', {
+        params: {
+            userId: auth.id,
+            spatialId: elementRef.value.id,
+            frameId: frame.id
+        }  
+    }).then(_ => {
+        spatialRef.value.frames.splice(index, 1);
+    })
+}
 </script>
 
 <template>
@@ -387,34 +411,10 @@ useEventListener(document, 'pointerlockchange', () => {
                     <li v-for="frame in spatialRef.frames" class="flex h-10 my-1.5 rounded-md">
                         <div class="w-6 h-6 m-2 i-mdi:movie-outline" />
                         <p class="leading-10 font-light">{{ frame.name }}</p>
-                        <!-- <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeAnimation(animation)">X</button>           -->
+                        <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeFrame(frame)">X</button>          
                     </li>
                 </ul>
             </div>
-            <!-- <p class="text-left">카메라 모드</p>
-            <div class="flex items-center w-full h-10 p-2 rounded-lg border border-gray-400 hover:border-teal-400 my-2" @pointerdown.stop="openDropdown()"> 
-                <div class="mr-2" :class="cameraModeList[spatialRef.cameraMode].icon" />
-                <p ckass="text-left text-xs">{{ cameraModeList[spatialRef.cameraMode].text }}</p>
-                <div class="i-mdi-chevron-down ml-auto text-2xl" />
-            </div>
-
-            <div class="relative">
-                <div ref="dropdown" v-if="showDropdown" class="absolute w-full h-fit z-10000 my-1 py-1 rounded-lg bg-white shadow-lg">
-                    <div v-for="(value, mode) in cameraModeList" class="flex items-center w-full h-10 p-2 hover:bg-gray-100" 
-                    :class="{ 'bg-gray-100': spatialRef.cameraMode === mode }" @pointerdown="selectMode(mode)">
-                        <div class="mr-2" :class="value.icon" />
-                        <p ckass="text-left text-xs">{{ value.text }}</p>
-                    </div>
-                </div>
-            </div> -->
-            
-            <!-- <Dropdown ref="dropdown" v-if="show" class="w-full h-fit z-100 my-1 py-1">
-                <div v-for="(value, mode) in cameraModeList" class="flex items-center w-full h-10 p-2 hover:bg-gray-100" 
-                :class="{ 'bg-gray-100': spatialRef.cameraMode === mode }" @pointerdown="selectMode(mode)">
-                    <div class="mr-2" :class="value.icon" />
-                    <p ckass="text-left text-xs">{{ value.text }}</p>
-                </div>
-            </Dropdown>  -->
 
             <!-- <Chevron :title="'3D 모델'" class="my-2">
                 <input type="file" id="upload-image" accept=".glb" hidden multiple @change="uploadModels($event)" >

@@ -4,8 +4,9 @@ import Canvas from './design/Canvas.vue';
 import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import type { Animation } from '@/types/Animation';
 import type UnityCanvas from './design/objects/UnityCanvas.vue';
-import { useEventListener } from '@vueuse/core';
-import { instanceOfSpatialRef, type SpatialRef } from '@/types/ObjectRef';
+import { useEventListener, useMouseInElement } from '@vueuse/core';
+import { type CameraTransform, instanceOfSpatialRef, type SpatialRef } from '@/types/ObjectRef';
+import { useSuspendableWait as useSuspendableWait } from '@/common/async';
 
 const design = useDesignStore();
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
@@ -25,9 +26,27 @@ const animation = computed<Animation>(() => {
 
 const animatedSlide = ref<Slide>();
 
+const unityCanvas = ref<HTMLElement | null>(unity.value.canvas);
+const { x, y, isOutside } = useMouseInElement(unityCanvas);
+
+const onHover = computed<boolean>(() => {
+    if (!isOutside.value && document.elementFromPoint(x.value, y.value)?.contains(unityCanvas.value)) return true;
+    return false;
+})
+
+watch(() => onHover.value, () => {
+    unity.value.highlightOnHover(onHover.value);
+    unityCanvas.value!.style.cursor = onHover.value ? 'pointer' : 'auto';
+})
+
 const focus = ref<HTMLElement | null>(null);
 const hasFocusOnUnity = computed<boolean>(() => focus.value?.id === 'unity-canvas');
-function interact(e: PointerEvent) {
+
+const { wait, suspend, resume } = useSuspendableWait();
+const isAnimating = ref<boolean>(false);
+const transitionTo = ref<CameraTransform | null>(null);
+
+async function interact(e: PointerEvent) {
     if (hasFocusOnUnity.value) return;
 
     focus.value = e.target as HTMLElement;
@@ -37,8 +56,29 @@ function interact(e: PointerEvent) {
         return;
     }
 
+    if (isAnimating.value) {
+        console.log(transitionTo.value)
+        if (transitionTo.value !== null) {
+            unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
+                positionAndRotation: transitionTo.value,
+                interval: 0
+            }));
+            transitionTo.value = null
+        }
+        suspend();
+        return;
+    }
+
+    let duration: number = 0;
+
     if (animationIndex.value < animations.value.length) {        
+        isAnimating.value = true;
+        resume();
         do {
+            if (animation.value.timing === 'after_previous') {
+                await wait(duration * 1000);
+            }
+
             const element = animatedSlide.value?.elements.find(elem => animation.value.element.id === elem.id)!;
             switch (animation.value.effect) {
                 case 'appear':
@@ -48,6 +88,7 @@ function interact(e: PointerEvent) {
                     element.visiblity = false;
                     break;
                 case 'frame_transition':
+                    transitionTo.value = animation.value.frame!.cameraTransform;
                     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
                         positionAndRotation: animation.value.frame?.cameraTransform,
                         interval: animation.value.duration
@@ -55,8 +96,11 @@ function interact(e: PointerEvent) {
                     break;
             }
 
+            duration = animation.value.duration;
             animationIndex.value += 1;
-        } while (animationIndex.value < animations.value.length && animation.value.timing === 'with_previous');
+        } while (animationIndex.value < animations.value.length && animation.value.timing !== 'on_click');
+
+        isAnimating.value = false;
     } else {
         if (slideIndex.value + 1 < design.slides.length) {
             slideIndex.value += 1;   
@@ -86,7 +130,7 @@ onMounted(() => {
             .filter(elem => instanceOfSpatialRef(elem.objectRef))
             .map(elem => (elem.objectRef as SpatialRef).models);
     }).flat();
-    
+
     unity.value.loadAll(models);
 })
 
@@ -166,7 +210,7 @@ const isEnded = defineModel<boolean>();
 </script>
 
 <template>
-    <div ref="container" class="w-full h-full relative">
+    <div ref="container" class="w-full h-full relative select-none">
         <div class="relative" :style="{
             transformOrigin: `left top`,
             transform: `scale(${containerWidth! / 1920})`,
@@ -176,7 +220,7 @@ const isEnded = defineModel<boolean>();
             <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
         </div>
 
-        <div v-if="unity.isLoadingModels" class="absolute left-0 top-0 flex flex-col items-center justify-center w-full h-full bg-black bg-opacity-70">
+        <div id="spatial-element" v-if="unity.isLoadingModels" class="absolute left-0 top-0 flex flex-col items-center justify-center w-full h-full bg-black bg-opacity-70">
             <span class="w-12 h-12 m-2 rounded-full border-4 border-white border-b-teal-400 animate-spin"></span>
         </div>
     </div>

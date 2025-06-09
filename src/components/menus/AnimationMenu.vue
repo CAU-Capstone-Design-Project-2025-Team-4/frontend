@@ -41,20 +41,19 @@ async function addAnimation() {
     if (!auth.isAuthenticated) return;
 
     for (let i = 0; i < selector.selection.length; i++) {
-        const _timing = i === 0 ? timing.value?.toUpperCase() : 'WITH_PREVIOUS';
         await api.post('/animation', {
             userId: auth.id,
             elementId: selector.selection[i].id,
             type: effect.value?.toUpperCase(),
             duration: duration.value,
-            timing: _timing,
+            timing: timing.value?.toUpperCase(),
             cameraTransform: cameraTransformToDTO(frame.value?.cameraTransform)
         }).then(res => {
             const animation = {
                 id: res.data.data.id,
                 element: selector.selection[i],
                 effect: effect.value as Effect,
-                timing: _timing?.toLowerCase() as Timing,
+                timing: timing.value!,
                 duration: duration.value,
             };
 
@@ -106,7 +105,7 @@ function indexedAnimations(animations: Animation[]) {
     return animations.map(anim => {
         if (anim.timing === 'on_click') index += 1;
         return {
-            index: anim.timing === 'on_click' ? index : -1,
+            index: index,
             animation: anim
         };
     });
@@ -121,7 +120,7 @@ function indexedAnimations(animations: Animation[]) {
             
             <ul class="w-full min-h-0 flex-1 mt-2 mb-1 overflow-auto">
                 <li v-for="{ index, animation } in indexedAnimations(design.currentSlide.animations)" class="flex h-10 my-1.5 rounded-md">
-                    <p class="w-6 h-6 leading-10">{{ index === -1 ? '' : index }}</p>
+                    <p class="w-6 h-10 leading-10" :class="{ 'i-mdi:chevron-right': animation.timing === 'after_previous' }">{{ animation.timing === 'with_previous' ? '' : index }}</p>
                     <div class="w-6 h-6 m-2" :class="effectIcon(animation.effect)" />
                     <p class="leading-10 font-light">{{ elementName(animation.element) }}</p>
                     <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeAnimation(animation)">X</button>          
@@ -162,7 +161,7 @@ function indexedAnimations(animations: Animation[]) {
                 <SelectBox v-model="timing" class="w-48 h-10">
                     <li option="on_click">클릭할 때</li>
                     <li option="with_previous">이전 효과와 함께</li>
-                    <!-- <li option="after_previous">이전 효과 다음에</li> -->
+                    <li option="after_previous">이전 효과 다음에</li>
                 </SelectBox>
                 
                 <SelectBox v-model="duration" class="w-48 h-10">

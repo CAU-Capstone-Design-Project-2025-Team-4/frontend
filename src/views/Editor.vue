@@ -18,7 +18,7 @@ const selector = useSelectorStore();
 selector.deselectAll();
 
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
-const isLoading = computed<boolean>(() => unity.value.isCreatingInstance);
+const isLoading = computed<boolean>(() => unity.value.isCreatingInstance ?? false);
 
 function enterSlideShow() {
     selector.deselectAll();

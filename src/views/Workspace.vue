@@ -7,7 +7,6 @@ import PageHeader from '@/components/PageHeader.vue';
 import Profile, { profileColor } from '@/components/Profile.vue';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
-import { useDesignStore } from '@/stores/design';
 import type { DetailedTemplateDTO, DesignListResponseDTO, TemplateDTO } from '@/types/DTO';
 import Vector2 from '@/types/Vector2';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';

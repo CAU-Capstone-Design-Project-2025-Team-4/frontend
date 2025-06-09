@@ -3,7 +3,7 @@ import { onceAsync } from '@/common/async';
 import { useDesignStore } from '@/stores/design';
 import type { Model, SpatialRef } from '@/types/ObjectRef';
 import UnityWebgl from 'unity-webgl';
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, nextTick, ref, useTemplateRef } from 'vue';
 
 const context = new UnityWebgl({
     loaderUrl: "/unity/Build.loader.js",
@@ -60,6 +60,7 @@ function createInstanceManager() {
     return { instantiate, hasInstance };
 }
 
+const inMemoryModels = new Map<number, () => Promise<void>>;
 const enabledModels: number[] = [];
 
 async function render(spatialRef: SpatialRef) {
@@ -86,8 +87,8 @@ async function render(spatialRef: SpatialRef) {
         sendMessage('SetCameraBackgroundColor', spatialRef.backgroundColor);
     }
 
-    width.value = 101;
-    setTimeout(() => width.value -= 1, 1);
+    width.value = 99;
+    setTimeout(() => width.value = 100, 1);
 
     if (!flag) return;
 
@@ -109,8 +110,7 @@ async function render(spatialRef: SpatialRef) {
             continue;
         }
 
-        inMemoryModels.set(model.id, onceAsync(() => loadModel(model)));
-        await inMemoryModels.get(model.id)!();
+        loadModel(model);
 
         sendMessage('EnableModel', JSON.stringify({
             id: model.id,
@@ -143,7 +143,7 @@ function sendMessage(method: Method, params?: any) {
     console.log(`[Unity Canvas] Message sent to unity.\n${method}: ${params}`);
 }
 
-async function loadModel(model: Model) {
+async function _loadModel(model: Model) {
     sendMessage('LoadModel', JSON.stringify({
         id: model.id,
         url: model.url,
@@ -175,10 +175,8 @@ function waitForModelLoading(modelId: number) {
         }, 10000);
 
         context.addUnityListener('ModelLoad', listener);
-    })
+    });
 }
-
-const inMemoryModels = new Map<number, () => Promise<void>>;
 
 const design = useDesignStore();
 const isLoadingModels = ref<boolean>(false);
@@ -186,11 +184,15 @@ async function loadAll(models: Model[]) {
     if (models.length <= 0) return;
     
     isLoadingModels.value = true;
+
+    // await nextTick();
+    target.value = '#spatial-element';
+
     await instanceManager.instantiate();
 
     for (const model of models) {
         if (inMemoryModels.has(model.id)) continue;
-        inMemoryModels.set(model.id, onceAsync(() => loadModel(model)));
+        inMemoryModels.set(model.id, onceAsync(() => _loadModel(model)));
     }
     
     for (const [ key, task ] of inMemoryModels) {
@@ -200,7 +202,27 @@ async function loadAll(models: Model[]) {
     }
 
     isLoadingModels.value = false;
+
+    await nextTick();
+    if (document.getElementById('spatial-element') === null) {
+        target.value = BASE_CONTAINER;
+    }
+
     design.notifyChangeListeners();
+}
+
+const hover = ref<boolean>(false);
+function highlightOnHover(_hover: boolean) {
+    hover.value = _hover;
+}
+
+async function loadModel(model: Model) {
+    if (inMemoryModels.has(model.id)) return;
+
+    inMemoryModels.set(model.id, onceAsync(() => _loadModel(model)));
+    await inMemoryModels.get(model.id)!().catch(_ => {
+        inMemoryModels.delete(model.id);
+    });
 }
 
 
@@ -211,16 +233,18 @@ defineExpose({
     sendMessage,
     requestPointerLock,
     setInstantiatedListener,
-    loadAll,
-    isLoadingModels
+    loadAll, loadModel,
+    isLoadingModels,
+    canvas,
+    highlightOnHover
 })
 
-const width = ref<number>(0);
+const width = ref<number>(100);
 </script>
 
 <template>
     <Teleport :to="target">
-        <canvas ref="unity-canvas" id="unity-canvas" v-show="target !== BASE_CONTAINER" :style="{
+        <canvas ref="unity-canvas" id="unity-canvas" v-show="target !== BASE_CONTAINER" class="hover:cursor-move" :class="{ 'outline-size-8 outline-solid outline-[rgba(45,212,191,0.5)]': hover }" :style="{
             width: `${width}%`,
             height: `100%`
         }"></canvas>
