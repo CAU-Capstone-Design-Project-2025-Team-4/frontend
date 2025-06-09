@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type BorderRef, type ShapeRef } from '@/types/ObjectRef';
 import type { ElementRef } from '@/components/design/Element.vue';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 
 const { element } = defineProps<{
     element: ElementRef

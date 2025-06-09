@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Vector2 from '@/types/Vector2';
-import { ref, useTemplateRef } from 'vue';
+import { ref } from 'vue';
 
 defineExpose({ open });
 

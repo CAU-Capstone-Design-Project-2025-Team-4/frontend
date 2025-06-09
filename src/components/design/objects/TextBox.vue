@@ -2,7 +2,7 @@
 import type { ElementRef } from '@/components/design/Element.vue';
 import { useDesignStore } from '@/stores/design';
 import { useSelectorStore } from '@/stores/selector';
-import type { BorderRef, TextBoxRef } from '@/types/ObjectRef';
+import type { TextBoxRef } from '@/types/ObjectRef';
 import Vector2 from '@/types/Vector2';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
@@ -10,7 +10,7 @@ const { element } = defineProps<{
     element: ElementRef
 }>();
 const textBoxRef = computed<TextBoxRef>(() => element.objectRef as TextBoxRef);
-const borderRef = computed<BorderRef>(() => textBoxRef.value.borderRef);
+// const borderRef = computed<BorderRef>(() => textBoxRef.value.borderRef);
 
 const textBox = useTemplateRef<HTMLElement>('text-box');
 

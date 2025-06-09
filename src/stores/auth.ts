@@ -1,4 +1,3 @@
-import router from "@/router";
 import type { LoginResponseDTO } from "@/types/DTO";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";

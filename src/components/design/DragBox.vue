@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Vector2 from '@/types/Vector2';
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect, type Ref } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, watchEffect, type Ref } from 'vue';
 import type { ElementRef } from './Element.vue';
 import type HandleableCanvas from './HandleableCanvas.vue';
 import { useDesignStore } from '@/stores/design';
