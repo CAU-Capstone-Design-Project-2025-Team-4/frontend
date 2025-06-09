@@ -483,21 +483,29 @@ export const useDesignStore = defineStore('design', () => {
         api.patch('/element/' + type?.toLowerCase(), data).then(_ => notifyChangeListeners());
     }
 
-    function removeElement(id: number) {
+    async function removeElement(id: number) {
         if (!auth.isAuthenticated) return;
 
         const index = currentSlide.value.elements.findIndex(element => element.id === id);
         if (index === -1) return;
 
-        api.delete('/element', {
+        await api.delete('/element', {
             params: {
                 userId: auth.id,
                 elementId: id
             }
-        }).then(_res => {
-            currentSlide.value.elements.splice(index, 1);
-            notifyChangeListeners();
         });
+
+        currentSlide.value.elements.splice(index, 1);
+        notifyChangeListeners();
+            
+        const currentSlideId = currentSlide.value.id;
+        const animations = await loadAnimation(currentSlideId, currentSlide.value.elements);
+        
+        const slide = slides.value.find(slide => slide.id === currentSlideId);
+        if (slide) {
+            slide.animations = animations;
+        }
     }
 
     function share(title: string, description: string) {
