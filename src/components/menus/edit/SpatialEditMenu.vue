@@ -46,6 +46,8 @@ function selectMode(mode: 'free' | 'orbit') {
         positionAndRotation: spatialRef.value.cameraTransform, 
         interval: 0
     }));
+
+    design.debouncedUpdateObject(elementRef.value);
     cameraModeDropdown.value?.close();
 }
 
@@ -68,14 +70,6 @@ async function uploadModels(e: Event) {
         };
 
         unity.value.loadModel(model);
-        // unity.value.sendMessage('LoadModel', JSON.stringify({
-        //     ..._model,
-        //     enable: true,
-        //     properties: {
-        //         transform: model.transform,
-        //         shader: model.shader
-        //     }
-        // }));
         
         spatialRef.value.models.push(model);
         selectedModel.value = model;
@@ -89,7 +83,6 @@ onMounted(() => {
 })
 
 function changeCameraTransform() {
-    // debounce?
     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
         positionAndRotation: spatialRef.value.cameraTransform, 
         interval: 0
@@ -213,6 +206,11 @@ useEventListener(document, 'pointerlockchange', () => {
     }
 })
 
+function adjustFrame(frame: Frame) {
+    spatialRef.value.cameraTransform = frame.cameraTransform;
+    changeCameraTransform();
+}
+
 function removeFrame(frame: Frame) {
     if (!auth.isAuthenticated) return;
 
@@ -239,7 +237,7 @@ function removeFrame(frame: Frame) {
                 <p class="text-white leading-10">{{ editModel ? '장면 편집' : '모델 편집' }}</p>
             </button>
 
-            <div v-if="editModel" class="flex-1 min-h-0 flex flex-col">
+            <div v-if="editModel" class="flex-2/3 min-h-0 flex flex-col">
                 <div v-if="selectedModel" class="grid grid-rows-[32px_32px_32px_32px_48px] grid-cols-4 gap-x-2 gap-y-1 w-full h-48 my-2">
                     <span />
                     <p class="text-left text-sm px-2 pt-1 leading-7">X</p>
@@ -306,7 +304,7 @@ function removeFrame(frame: Frame) {
 
             </div>
             
-            <div v-else>
+            <div v-else class="flex-2/3">
                 <p class="text-left mr-4 mt-3">조작 모드</p>
                 <div class="relative">
                     <div class="flex items-center h-10 p-2 my-2 rounded-lg border border-gray-400 hover:border-teal-400" :class="{ 'border-teal-400': cameraModeDropdown?.show }" 
@@ -329,7 +327,6 @@ function removeFrame(frame: Frame) {
                     <p>조작</p>
                 </button>
                 
-
                 <Chevron :title="'카메라'" class="my-2">
                     <div class="grid grid-rows-3 grid-cols-4 gap-x-2 py-2">
                         <span />
@@ -383,8 +380,11 @@ function removeFrame(frame: Frame) {
                 </Chevron>
                 <BorderChevron class="my-2" :element="elementRef" />
                 <TransformChevron :element="elementRef" />
+            </div>
 
-                <div class="flex justify-between h-10 mt-12">
+            
+            <div class="flex-1/3 mt-10">
+                <div class="flex justify-between h-10">
                     <p class="text-left text-lg leading-10 font-bold">프레임 목록</p>
 
                     <button @pointerup.left="openCaptureFrameModal()" class="flex justify-center items-center w-40 h-10 text-white rounded-md bg-teal-500 hover:brightness-110">
@@ -411,10 +411,14 @@ function removeFrame(frame: Frame) {
                     <li v-for="frame in spatialRef.frames" class="flex h-10 my-1.5 rounded-md">
                         <div class="w-6 h-6 m-2 i-mdi:movie-outline" />
                         <p class="leading-10 font-light">{{ frame.name }}</p>
-                        <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeFrame(frame)">X</button>          
+                        <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="adjustFrame(frame)">
+                            <div class="w-5 h-5 m-0.5 rounded-md i-mdi:camera-flip-outline" />        
+                        </button>   
+                        <button class="w-6 h-6 m-2 font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeFrame(frame)">X</button>   
                     </li>
                 </ul>
             </div>
+            
 
             <!-- <Chevron :title="'3D 모델'" class="my-2">
                 <input type="file" id="upload-image" accept=".glb" hidden multiple @change="uploadModels($event)" >
