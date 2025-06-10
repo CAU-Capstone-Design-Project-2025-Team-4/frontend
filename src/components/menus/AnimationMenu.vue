@@ -123,7 +123,9 @@ function indexedAnimations(animations: Animation[]) {
                     <p class="w-6 h-10 leading-10" :class="{ 'i-mdi:chevron-right': animation.timing === 'after_previous' }">{{ animation.timing === 'with_previous' ? '' : index }}</p>
                     <div class="w-6 h-6 m-2" :class="effectIcon(animation.effect)" />
                     <p class="leading-10 font-light">{{ elementName(animation.element) }}</p>
-                    <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeAnimation(animation)">X</button>          
+                    <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeAnimation(animation)">
+                        <div class="m-1 i-mdi:window-close" />
+                    </button>          
                 </li>
             </ul>
         

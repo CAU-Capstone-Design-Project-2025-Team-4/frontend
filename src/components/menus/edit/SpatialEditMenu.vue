@@ -293,8 +293,9 @@ function removeFrame(frame: Frame) {
                     :class="{ 'bg-gray-200 hover:bg-gray-200': selectedModel?.id === model.id }" @pointerup.left="selectedModel = model">
                         <div class="w-6 h-6 m-2 i-mdi:cube-outline"/>
                         <p class="leading-10 font-light">{{ model.name }}</p>
-                        <button class="w-6 h-6 m-2 p-0 ml-auto font-thin rounded-md border-0 hover:border-1 hover:border-gray-400" 
-                        :style="{ outline: 'none' }" @pointerup.left.stop="removeModel(model)">X</button>          
+                        <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-300" @pointerup.left.stop="removeModel(model)">
+                            <div class="m-1 i-mdi:window-close" />
+                        </button>          
                     </li>
                 </ul>
 
@@ -408,9 +409,11 @@ function removeFrame(frame: Frame) {
                         <div class="w-6 h-6 m-2 i-mdi:movie-outline" />
                         <p class="leading-10 font-light">{{ frame.name }}</p>
                         <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="adjustFrame(frame)">
-                            <div class="w-5 h-5 m-0.5 rounded-md i-mdi:camera-flip-outline" />        
+                            <div class="m-1 i-mdi:camera-flip-outline" />        
                         </button>   
-                        <button class="w-6 h-6 m-2 font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeFrame(frame)">X</button>   
+                        <button class="w-6 h-6 m-2 font-thin rounded-md hover:bg-gray-200"  @pointerup.left="removeFrame(frame)">
+                            <div class="m-1 i-mdi:window-close" />
+                        </button>   
                     </li>
                 </ul>
             </div>

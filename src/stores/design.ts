@@ -35,6 +35,9 @@ export const useDesignStore = defineStore('design', () => {
     const selection = ref<number>(0);
     const currentSlide = computed<Slide>(() => slides.value[selection.value]);
 
+    const shared = ref<boolean>(false);
+    const inPost = ref<boolean>(false);
+
     const maxZ = computed<number>(() => {
         if (currentSlide.value.elements.length === 0) return 0;
         return currentSlide.value.elements[currentSlide.value.elements.length - 1].z;
@@ -64,6 +67,9 @@ export const useDesignStore = defineStore('design', () => {
 
             designId.value = id;
             designTitle.value = data.name;
+
+            shared.value = data.shared;
+            inPost.value = data.inPost;
 
             selectSlide(0);
             notifyChangeListeners();
@@ -516,6 +522,9 @@ export const useDesignStore = defineStore('design', () => {
             designId: designId.value,
             title: title,
             content: description.replace(/\n/g, '<br>')
+        }).then(_ => {
+            inPost.value = true;
+            window.alert("게시글을 작성했습니다.");
         });
     }
 
@@ -526,6 +535,9 @@ export const useDesignStore = defineStore('design', () => {
             userId: auth.id,
             designId: designId.value,
             flag: true
+        }).then(_ => {
+            shared.value = true;
+            window.alert("템플릿이 공유되었습니다.");
         });
     }
 
@@ -569,6 +581,7 @@ export const useDesignStore = defineStore('design', () => {
         addElement, updateElement, removeElement, updateObject, debouncedUpdateElement, debouncedUpdateObject, debouncedUpdateModel,
         addChangeListener, removeChangeListener, notifyChangeListeners,
         uploadModel, updateModel,
-        share, shareTemplate, updateTitle, updateSlideThumbnail
+        share, shareTemplate, updateTitle, updateSlideThumbnail,
+        shared, inPost
     };
 })

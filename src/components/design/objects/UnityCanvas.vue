@@ -88,7 +88,10 @@ async function render(spatialRef: SpatialRef) {
     }
 
     width.value = 99;
-    setTimeout(() => width.value = 100, 50);
+    setTimeout(() => {
+        width.value = 100;
+        design.notifyChangeListeners();
+    }, 50);
 
     if (!flag) return;
 
@@ -118,8 +121,6 @@ async function render(spatialRef: SpatialRef) {
         }));
         enabledModels.push(model.id);
     }
-
-    setTimeout(() => design.notifyChangeListeners(), 50);
 }
 
 function unmount() {
@@ -223,6 +224,8 @@ async function loadModel(model: Model) {
     await inMemoryModels.get(model.id)!().catch(_ => {
         inMemoryModels.delete(model.id);
     });
+
+    setTimeout(() => design.notifyChangeListeners(), 200);
 }
 
 
