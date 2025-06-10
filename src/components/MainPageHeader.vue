@@ -4,13 +4,19 @@ import Modal from '@/components/common/Modal.vue';
 import Profile from '@/components/Profile.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { LoginResponseDTO } from '@/types/DTO';
-import { computed, ref, useTemplateRef } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import api from '@/api/api';
+import { useModalStore } from '@/stores/modal';
 
 const auth = useAuthStore();
 
 const loginModal = useTemplateRef<InstanceType<typeof Modal>>('login-modal');
 const registerModal = useTemplateRef<InstanceType<typeof Modal>>('register-modal');
+
+const modal = useModalStore();
+onMounted(() => {
+    modal.registerModal = registerModal;
+})
 
 const name = ref<string>("");
 const nameWarning = ref<string>("");

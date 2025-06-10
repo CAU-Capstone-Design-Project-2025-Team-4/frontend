@@ -361,13 +361,3 @@ function rename() {
         </Modal>
     </div>
 </template>
-
-<style lang="css">
-button {
-    border: 0;
-    padding: 0;
-}
-button:focus {
-    outline: none;
-}
-</style>

@@ -185,12 +185,4 @@ const shareModal = useTemplateRef<InstanceType<typeof Modal>>('share-modal');
 .fade-leave-to {
   opacity: 0;
 }
-
-button {
-    border: 0;
-    padding: 0;
-}
-button:focus {
-    outline: none;
-}
 </style>

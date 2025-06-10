@@ -81,12 +81,4 @@ onMounted(() => loadPage(currentPage.value))
     line-height: 40px;
     border-radius: 6px;
 }
-
-button {
-    border: 0;
-    padding: 0;
-}
-button:focus {
-    outline: none;
-}
 </style>
