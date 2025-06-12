@@ -65,6 +65,8 @@ const enabledModels: number[] = [];
 
 async function render(spatialRef: SpatialRef) {
     console.log('unity mounted')
+    console.log('inMemory', inMemoryModels)
+    console.log('enabled', enabledModels)
     target.value = '#spatial-element';
 
     const flag = instanceManager.hasInstance.value;
@@ -93,8 +95,6 @@ async function render(spatialRef: SpatialRef) {
         design.notifyChangeListeners();
     }, 50);
 
-    if (!flag) return;
-
     enabledModels.forEach(modelId => {
         sendMessage('EnableModel', JSON.stringify({
             id: modelId,
@@ -103,13 +103,16 @@ async function render(spatialRef: SpatialRef) {
     });
     enabledModels.length = 0;
 
+    if (!flag) return;
+
+    console.log(spatialRef.models);
     for (const model of spatialRef.models) {
         if (inMemoryModels.has(model.id)) {
             sendMessage('EnableModel', JSON.stringify({
                 id: model.id,
                 enable: true
             }));
-            enabledModels.push(model.id);
+            if (!enabledModels.includes(model.id)) enabledModels.push(model.id);
             continue;
         }
 
@@ -119,7 +122,8 @@ async function render(spatialRef: SpatialRef) {
             id: model.id,
             enable: true
         }));
-        enabledModels.push(model.id);
+        if (!enabledModels.includes(model.id)) enabledModels.push(model.id);
+        console.log(enabledModels);
     }
 }
 
@@ -144,11 +148,11 @@ function sendMessage(method: Method, params?: any) {
     console.log(`[Unity Canvas] Message sent to unity.\n${method}: ${params}`);
 }
 
-async function _loadModel(model: Model) {
+async function _loadModel(model: Model, enabled: boolean = true) {
     sendMessage('LoadModel', JSON.stringify({
         id: model.id,
         url: model.url,
-        enable: true,
+        enable: enabled,
         properties: {
             transform: model.transform,
             shader: model.shader
@@ -193,7 +197,7 @@ async function loadAll(models: Model[]) {
 
     for (const model of models) {
         if (inMemoryModels.has(model.id)) continue;
-        inMemoryModels.set(model.id, onceAsync(() => _loadModel(model)));
+        inMemoryModels.set(model.id, onceAsync(() => _loadModel(model, false)));
     }
     
     for (const [ key, task ] of inMemoryModels) {
@@ -224,6 +228,8 @@ async function loadModel(model: Model) {
     await inMemoryModels.get(model.id)!().catch(_ => {
         inMemoryModels.delete(model.id);
     });
+    if (!enabledModels.includes(model.id)) enabledModels.push(model.id);
+    console.log('load', inMemoryModels, enabledModels);
 
     setTimeout(() => design.notifyChangeListeners(), 200);
 }

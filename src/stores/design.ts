@@ -157,7 +157,6 @@ export const useDesignStore = defineStore('design', () => {
 
                 const frames: Frame[] = await api.get('/frame/all', {
                     params: {
-                        userId: auth.id,
                         spatialId: dto.id
                     }
                 }).then(res => {

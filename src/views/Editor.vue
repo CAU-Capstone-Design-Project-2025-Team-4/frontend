@@ -82,7 +82,7 @@ const shareModal = useTemplateRef<InstanceType<typeof Modal>>('share-modal');
             <Modal ref="post-modal">
                 <p class="font-bold text-xl mb-8 select-none">게시글 작성하기</p>
 
-                <form @submit.prevent="design.share(title, description); postModal?.close()">
+                <form @submit.prevent="design.share(modalTitle, description); postModal?.close()">
                     <div class="relative w-160 mb-4">
                         <p class="mb-1 select-none">제목</p>
                         <input v-model="modalTitle"  :placeholder="title" 

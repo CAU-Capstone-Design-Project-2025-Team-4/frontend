@@ -35,8 +35,9 @@ function onSpace(e: KeyboardEvent) {
 useEventListener(document, 'fullscreenchange', handleFullscreen);
 </script>
 <template>
-    <div v-if="!isSlideShowEnded" class="w-full h-full">
-        <InteractiveCanvas v-if="!isSlideShowEnded" v-model="isSlideShowEnded" />
+    <div v-if="!isSlideShowEnded" class="flex items-center w-full h-full bg-black">
+        <!-- <div class="w-full aspect-video bg-white"></div> -->
+        <InteractiveCanvas v-if="!isSlideShowEnded" v-model="isSlideShowEnded" class="w-full" />
     </div>
     <div v-else class="w-full h-full bg-black select-none" @pointerup.left="exitFullscreen()">
         <p class="pt-5 text-white text-lg">슬라이드 쇼가 종료되었습니다.</p>

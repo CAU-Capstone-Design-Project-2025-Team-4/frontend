@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Slide, useDesignStore } from '@/stores/design';
 import Canvas from './design/Canvas.vue';
-import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import type { Animation } from '@/types/Animation';
 import type UnityCanvas from './design/objects/UnityCanvas.vue';
 import { useEventListener, useMouseInElement } from '@vueuse/core';
@@ -12,7 +12,8 @@ const design = useDesignStore();
 const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
 const container = useTemplateRef<HTMLElement>('container');
-const containerWidth = computed<number | undefined>(() => container.value?.getBoundingClientRect().width);
+const containerWidth = ref<number>(0);
+const containerHeight = ref<number>(0);
 
 const slideIndex = ref<number>(-1);
 
@@ -151,7 +152,8 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
     }
 })
 
-onMounted(() => {
+let resizeObserver: ResizeObserver;
+onMounted(async () => {
     slideIndex.value = 0;
     computeAnimatedSlide();
 
@@ -162,12 +164,21 @@ onMounted(() => {
     }).flat();
 
     unity.value.loadAll(models);
+
+    resizeObserver = new ResizeObserver(() => {
+        containerWidth.value = container.value!.getBoundingClientRect().width;
+        containerHeight.value = containerWidth.value / 16 * 9;
+    });
+    resizeObserver.observe(container.value!);
 })
+
+onBeforeUnmount(() => {
+    resizeObserver.disconnect();
+});
 
 watch(() => slideIndex.value, () => {
     design.selectSlide(slideIndex.value);
 })
-
 
 watch(() => design.currentSlide?.id, () => {
     computeAnimatedSlide();
@@ -235,11 +246,15 @@ defineExpose({
     slideIndex
 })
 
+onBeforeUnmount(() => {
+    unity.value.highlightOnHover(false);
+})
+
 const isEnded = defineModel<boolean>();
 </script>
 
 <template>
-    <div ref="container" class="w-full h-full relative select-none">
+    <div ref="container" class="select-none" :style="{ height: `${containerHeight}px`}">
         <Teleport to="body">
             <Transition :name="unityAlertTransition">
                 <div v-if="showUnityAlert" class="flex justify-center items-center flex-row fixed top-12 left-[50%] translate-x-[-50%] w-[16.5%] min-w-90 h-12 select-none bg-gray-950 bg-opacity-68">
@@ -252,9 +267,9 @@ const isEnded = defineModel<boolean>();
         
         <div class="relative" :style="{
             transformOrigin: `left top`,
-            transform: `scale(${containerWidth! / 1920})`,
+            transform: `scale(${containerWidth / 1920})`,
             width: `${1920}px`,
-            height: `${1080}px`
+            height: `${1080}px`,
         }" @pointerup.left="interact($event)">
             <Canvas :slide="design.currentSlide" class="w-full aspect-video" />
         </div>

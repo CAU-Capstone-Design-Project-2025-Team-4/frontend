@@ -11,3 +11,13 @@ provide('unity', unity);
   <UnityCanvas ref="unity" />
   <router-view class="absolute left-0 top-0" :key="$route.fullPath" />
 </template>
+
+<style>
+button {
+    border: 0;
+    padding: 0;
+}
+button:focus {
+    outline: none;
+}
+</style>

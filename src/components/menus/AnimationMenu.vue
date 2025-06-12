@@ -27,6 +27,7 @@ const isDisabled = computed<boolean>(() => selector.selection.length === 0)
 
 function openAddAnimationModal() {
     is3dAnimation.value = false;
+    frame.value = undefined;
     if (selector.selection.length === 1) {
         if (instanceOfSpatialRef(selector.selection[0].objectRef)) {
             is3dAnimation.value = true;

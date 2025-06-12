@@ -262,13 +262,3 @@ function toGalleryView() {
         </form>       
     </Modal>
 </template>
-
-<style>
-button {
-    border: 0;
-    padding: 0;
-}
-button:focus {
-    outline: none;
-}
-</style>

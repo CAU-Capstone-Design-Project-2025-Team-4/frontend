@@ -13,12 +13,11 @@ export const cameraModeList = {
 
 <script setup lang="ts">
 import Chevron from '@/components/common/Chevron.vue';
-// import Dropdown from '@/components/common/Dropdown.vue';
 import TransformChevron from '@/components/design/common/TransformChevron.vue';
-import type { ElementRef } from '@/components/design/Element.vue';
+import { ElementRef } from '@/components/design/Element.vue';
 import { useSelectorStore } from '@/stores/selector';
 import { cameraTransformToDTO, type CameraTransform, type Model, type SpatialRef } from '@/types/ObjectRef';
-import { computed, inject, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
+import { inject, onBeforeMount, onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import ColorPicker from '@/components/common/ColorPicker.vue';
 import BorderChevron from '@/components/design/common/BorderChevron.vue';
 import type UnityCanvas from '@/components/design/objects/UnityCanvas.vue';
@@ -34,16 +33,18 @@ const unity = inject('unity') as Ref<InstanceType<typeof UnityCanvas>>;
 
 const selector = useSelectorStore();
 
-const elementRef = computed<ElementRef>(() => selector.selection[0]);
-const spatialRef = computed<SpatialRef>(() => elementRef.value.objectRef as SpatialRef);
+const elementRef = ref<ElementRef>();
+const spatialRef = ref<SpatialRef>();
+// const spatialRef = computed<SpatialRef>(() => elementRef.value.objectRef as SpatialRef);
+// setInterval(() => console.log(elementRef.value.objectRef as SpatialRef), 2000);
 
 const cameraModeDropdown = useTemplateRef<InstanceType<typeof Dropdown>>('camera-mode-dropdown');
 function selectMode(mode: 'free' | 'orbit') {
     // TODO
-    spatialRef.value.cameraMode = mode;
+    spatialRef.value!!.cameraMode = mode;
     unity.value.sendMessage('SetCameraMode', mode);
 
-    design.updateObject(elementRef.value);
+    design.updateObject(elementRef.value!);
     cameraModeDropdown.value?.close();
 }
 
@@ -51,7 +52,7 @@ const design = useDesignStore();
 async function uploadModels(e: Event) {
     const input = e.target as HTMLInputElement;
     for (const file of input.files!) {
-        const _model = await design.uploadModel(elementRef.value, file);
+         const _model = await design.uploadModel(elementRef.value!, file);
         if (!_model) return;
 
         const model: Model = { 
@@ -65,22 +66,22 @@ async function uploadModels(e: Event) {
             shader: 'none'
         };
 
-        unity.value.loadModel(model);
+        await unity.value.loadModel(model);
         
-        spatialRef.value.models.push(model);
+        spatialRef.value!.models.push(model);
         selectedModel.value = model;
     }
 }
 
 onMounted(() => {
-    if (spatialRef.value.models.length > 0) {
-        selectedModel.value = spatialRef.value.models[0];
+    if (spatialRef.value!.models.length > 0) {
+        selectedModel.value = spatialRef.value!.models[0];
     }
 })
 
 function changeCameraTransform() {
     unity.value.sendMessage('SetCameraPositionAndRotation', JSON.stringify({
-        positionAndRotation: spatialRef.value.cameraTransform, 
+        positionAndRotation: spatialRef.value!.cameraTransform, 
         interval: 0
     }));
     design.debouncedUpdateObject(elementRef.value);
@@ -101,24 +102,24 @@ function captureFrame() {
 
     api.post('/frame', {
         userId: auth.id,
-        spatialId: elementRef.value.id,
+        spatialId: elementRef.value!.id,
         name: frameName.value,
-        cameraTransform: cameraTransformToDTO(spatialRef.value.cameraTransform)
+        cameraTransform: cameraTransformToDTO(spatialRef.value!.cameraTransform)
     }).then(res => {
-        spatialRef.value.frames.push({
+        spatialRef.value!.frames.push({
             id: res.data.data.id,
             name: frameName.value,
-            cameraTransform: spatialRef.value.cameraTransform
+            cameraTransform: spatialRef.value!.cameraTransform
         });
         captureFrameModal.value?.close();
     });
 }
 
-watch(() => spatialRef.value.backgroundColor, () => {
-    const cameraBackgroudMode = spatialRef.value.backgroundColor === 'skybox' ? 'skybox' : 'solid';
+watch(() => spatialRef.value?.backgroundColor, () => {
+    const cameraBackgroudMode = spatialRef.value!.backgroundColor === 'skybox' ? 'skybox' : 'solid';
     unity.value.sendMessage('SetCameraBackgroundMode', cameraBackgroudMode);
     if (cameraBackgroudMode === 'solid') {
-        unity.value.sendMessage('SetCameraBackgroundColor', spatialRef.value.backgroundColor);
+        unity.value.sendMessage('SetCameraBackgroundColor', spatialRef.value!.backgroundColor);
     }
 
     design.debouncedUpdateObject(elementRef.value);
@@ -146,19 +147,19 @@ const auth = useAuthStore();
 function removeModel(model: Model) {
     if (!auth.isAuthenticated) return;
     
-    const index = spatialRef.value.models.indexOf(model);
+    const index = spatialRef.value!.models.indexOf(model);
     if (index === -1) return;
 
     api.delete(`/model/${model.id}`).then(_res => {
-        spatialRef.value.models.splice(index, 1);
+        spatialRef.value!.models.splice(index, 1);
         selectedModel.value = null;
-        unity.value.sendMessage('UnloadModel', model.id);
+        unity.value.sendMessage('UnloadModel', model.id.toString());
     });
 }
 
 function selectShader(shader: 'none' | 'highlight') {
     selectedModel.value!.shader = shader;
-    design.updateModel(elementRef.value, selectedModel.value!);
+    design.updateModel(elementRef.value!, selectedModel.value!);
     unity.value.sendMessage('SetModelProperties', JSON.stringify({
         id: selectedModel.value!.id,
         properties: {
@@ -183,7 +184,18 @@ function updateModel() {
 
 function updateCameraTransform(json: string) {
     const transform: CameraTransform = JSON.parse(json);
-    spatialRef.value.cameraTransform = transform;
+    spatialRef.value!.cameraTransform = {
+        position: {
+            x: Number(transform.position.x.toFixed(2)),
+            y: Number(transform.position.y.toFixed(2)),
+            z: Number(transform.position.z.toFixed(2)),
+        },
+        rotation: {
+            x: Number(transform.rotation.x.toFixed(2)),
+            y: Number(transform.rotation.y.toFixed(2)),
+            z: Number(transform.rotation.z.toFixed(2)),
+        }
+    };
     design.debouncedUpdateObject(elementRef.value);
 }
 
@@ -203,26 +215,31 @@ useEventListener(document, 'pointerlockchange', () => {
 })
 
 function adjustFrame(frame: Frame) {
-    spatialRef.value.cameraTransform = frame.cameraTransform;
+    spatialRef.value!.cameraTransform = frame.cameraTransform;
     changeCameraTransform();
 }
 
 function removeFrame(frame: Frame) {
     if (!auth.isAuthenticated) return;
 
-    const index = spatialRef.value.frames.indexOf(frame);
+    const index = spatialRef.value!.frames.indexOf(frame);
     if (index === -1) return;
 
     api.delete('/frame', {
         params: {
             userId: auth.id,
-            spatialId: elementRef.value.id,
+            spatialId: elementRef.value!.id,
             frameId: frame.id
         }  
     }).then(_ => {
-        spatialRef.value.frames.splice(index, 1);
+        spatialRef.value!.frames.splice(index, 1);
     })
 }
+
+onBeforeMount(() => {
+    elementRef.value = selector.selection[0];
+    spatialRef.value = selector.selection[0].objectRef as SpatialRef;
+})
 </script>
 
 <template>
@@ -273,7 +290,7 @@ function removeFrame(frame: Frame) {
                 </div>
 
                 <p v-else class="h-48 leading-48 my-2">
-                    {{ spatialRef.models.length > 0 ? '먼저 모델을 선택해주세요.' : '먼저 모델을 업로드해주세요.' }}
+                    {{ spatialRef!.models.length ?? 0 > 0 ? '먼저 모델을 선택해주세요.' : '먼저 모델을 업로드해주세요.' }}
                 </p>
 
 
@@ -289,7 +306,7 @@ function removeFrame(frame: Frame) {
                     </label>
                 </div>
                 <ul class="w-full min-h-0 flex-1 mt-2 mb-1 overflow-auto">
-                    <li v-for="model in spatialRef.models" class="flex h-10 my-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
+                    <li v-for="model in spatialRef!.models" class="flex h-10 my-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
                     :class="{ 'bg-gray-200 hover:bg-gray-200': selectedModel?.id === model.id }" @pointerup.left="selectedModel = model">
                         <div class="w-6 h-6 m-2 i-mdi:cube-outline"/>
                         <p class="leading-10 font-light">{{ model.name }}</p>
@@ -306,8 +323,8 @@ function removeFrame(frame: Frame) {
                 <div class="relative">
                     <div class="flex items-center h-10 p-2 my-2 rounded-lg border border-gray-400 hover:border-teal-400" :class="{ 'border-teal-400': cameraModeDropdown?.show }" 
                     @pointerup.left="cameraModeDropdown?.open()"> 
-                        <div class="mr-2" :class="cameraModeList[spatialRef.cameraMode].icon" />
-                        <p ckass="text-left text-xs">{{ cameraModeList[spatialRef.cameraMode].text }}</p>
+                        <div class="mr-2" :class="cameraModeList[spatialRef!.cameraMode].icon" />
+                        <p ckass="text-left text-xs">{{ cameraModeList[spatialRef!.cameraMode].text }}</p>
                         <div class="i-mdi-chevron-down ml-auto text-2xl" />
                     </div>
 
@@ -333,50 +350,50 @@ function removeFrame(frame: Frame) {
 
                         <p class="text-left p-1 leading-8">위치</p>
                         <form @submit.prevent="" class="relative mb-2">
-                            <input v-model.number="spatialRef.cameraTransform.position.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
+                            <input v-model.number="spatialRef!.cameraTransform.position.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.position.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef!.cameraTransform.position.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.position.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef!.cameraTransform.position.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
 
                         <p class="text-left p-1 leading-8">회전</p>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
+                            <input v-model.number="spatialRef!.cameraTransform.rotation.x" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" />
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef!.cameraTransform.rotation.y" @input="changeCameraTransform()" class="block w-full h-10 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                         <form @submit.prevent="" class="relative">
-                            <input v-model.number="spatialRef.cameraTransform.rotation.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
+                            <input v-model.number="spatialRef!.cameraTransform.rotation.z" @input="changeCameraTransform()" class="block w-full h-10 pr-6 px-2 text-sm border border-slate-400 rounded-md" /> 
                         </form>
                     </div>
                 </Chevron>
                 <Chevron :title="'배경 색'" class="my-2">
                     <div>
-                        <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef.backgroundColor = 'skybox'">
+                        <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef!.backgroundColor = 'skybox'">
                             <div class="w-4 h-4 mr-2 rounded-full border border-slate-400"
-                            :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor === 'skybox' }"></div>
+                            :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef!.backgroundColor === 'skybox' }"></div>
                             <p>기본</p>
                         </div>
-                        <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef.backgroundColor = '#000000'">
+                        <div class="flex items-center w-full h-8 rounded-md hover:bg-slate-50" @pointerdown="spatialRef!.backgroundColor = '#000000'">
                             <div class="w-4 h-4 mr-2 rounded-full border border-slate-400"
-                            :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef.backgroundColor !== 'skybox' }"></div>
+                            :class="{ 'border-3 border-teal-400 outline outline-solid outline-teal-400' : spatialRef!.backgroundColor !== 'skybox' }"></div>
                             <p>단색</p>
                         </div>
-                        <div v-if="spatialRef.backgroundColor !== 'skybox'" class="mt-2 border-t border-slate-200">
+                        <div v-if="spatialRef!.backgroundColor !== 'skybox'" class="mt-2 border-t border-slate-200">
                             <div class="flex items-center justify-between w-full h-8 mt-2">
                                 <p class="text-left">색</p>
-                                <ColorPicker v-model="spatialRef.backgroundColor" class="w-8 h-8 mr-1 rounded-lg border border-slate-400"
-                                :style="{ backgroundColor: spatialRef.backgroundColor }" />
+                                <ColorPicker v-model="spatialRef!.backgroundColor" class="w-8 h-8 mr-1 rounded-lg border border-slate-400"
+                                :style="{ backgroundColor: spatialRef!.backgroundColor }" />
                             </div>
                         </div>
                     </div>
                 </Chevron>
-                <BorderChevron class="my-2" :element="elementRef" />
-                <TransformChevron :element="elementRef" />
+                <BorderChevron class="my-2" :element="elementRef!" />
+                <TransformChevron :element="elementRef!" />
             </div>
 
             
@@ -405,7 +422,7 @@ function removeFrame(frame: Frame) {
                     </Modal>
                 </div>
                 <ul class="w-full min-h-40 flex-1 mt-2 mb-1 overflow-auto">
-                    <li v-for="frame in spatialRef.frames" class="flex h-10 my-1.5 rounded-md">
+                    <li v-for="frame in spatialRef!.frames" class="flex h-10 my-1.5 rounded-md">
                         <div class="w-6 h-6 m-2 i-mdi:movie-outline" />
                         <p class="leading-10 font-light">{{ frame.name }}</p>
                         <button class="w-6 h-6 m-2 ml-auto font-thin rounded-md hover:bg-gray-200"  @pointerup.left="adjustFrame(frame)">
