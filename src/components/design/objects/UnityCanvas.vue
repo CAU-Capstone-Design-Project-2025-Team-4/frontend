@@ -77,6 +77,8 @@ async function render(spatialRef: SpatialRef) {
 
     console.log('start render')
 
+    sendMessage('EnableInput', 'false');
+
     sendMessage('SetCameraMode', spatialRef.cameraMode);
     sendMessage('SetCameraPositionAndRotation', JSON.stringify({
         positionAndRotation: spatialRef.cameraTransform, 
